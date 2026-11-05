@@ -1,4 +1,4 @@
-# Sailor Wheel Calculator – Emerald v4.9.1 BÉTA
+# Sailor Wheel Calculator – Emerald v4.9.2 BÉTA
 
 A Sailor Online felszerelés / Wheel-sor kalkulátora, kipróbálásra szánt **béta verzió**.
 
@@ -79,3 +79,10 @@ A karakter **felszerelés nélküli** STR/INT értékeit külön meg kell adni. 
 - A 120%-os **célérték nem ruházat nélküli karakterstat**. Egy karakter alap STR/INT értéke az elosztott pontjaitól függ, így nem állítható elő kizárólag a CAP/level alapján.
 - A saját alap STR/INT megadása után külön megjelenik a **ruha nélküli Balance** és az aktív felszerelt SET + egyéb bónuszok alapján számolt Balance.
 - A régi SET-adatok és JSON formátum változatlanok; az adattárolási séma továbbra is 4.9, mert nem kerül be új mező.
+
+## Emerald v4.9.2 – Parry Rate a teljes SET áttekintésében
+
+- A legalsó **Teljes szett – célértékek és állapotok** táblázat most külön **„Parry Rate (Wheel)”** oszlopot mutat minden itemhez.
+- Az adott item **legmagasabb érvényes Parry Wheel-sorát** jeleníti meg a sor saját, akár kézzel szerkesztett modellmaximumával és minőségi százalékával. Több sor esetén a legjobb értéket mutatja, nem az összegüket; hibás sorra figyelmeztet.
+- Az eddigi, az itemhez kézzel megadott **„Parry külön (kézi) / max”** megmarad külön oszlopban. A két adat nem adódik össze, így nem kerül tévesen duplán beszámításra.
+- A meglévő mentések és a 4.9-es adattárolási séma nem változnak; csak a megjelenítés bővült.
