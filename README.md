@@ -1,8 +1,10 @@
-# Sailor Wheel Calculator – Emerald v4.6.1 BÉTA
+# Sailor Wheel Calculator – Emerald v4.6.2 BÉTA
 
 A Sailor Online felszerelés / Wheel-sor kalkulátora, kipróbálásra szánt **béta verzió**.
 
 ## Jellemzők
+- Mobilon jól kezelhető, zöld keretes, ténylegesen szerkeszthető soronkénti 100%-os modellmaximum
+- CAP + Degree szerint külön menthető STR / INT / HP / MP / Parry / Rate / Critical / Freezing statreferenciák; a meglévő SET-adatok megőrződnek
 - 90 / 100 / 110 / 120 / 125 / 130 / 140 CAP
 - Normal / SoS / SoM / Sun, CAP- és itemenként külön állítható maximális sorszám (1–30)
 - Sorként külön megadható, feltételezett 100%-os modellmaximum; STR/INT értékválasztó követi a beállított sormaximumot (30 felett számmező)
