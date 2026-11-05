@@ -1,4 +1,4 @@
-# Sailor Wheel Calculator – Emerald v4.9.3 BÉTA
+# Sailor Wheel Calculator – Emerald v4.9.4 BÉTA
 
 A Sailor Online felszerelés / Wheel-sor kalkulátora, kipróbálásra szánt **béta verzió**.
 
@@ -90,3 +90,14 @@ A karakter **felszerelés nélküli** STR/INT értékeit külön meg kell adni. 
 ## Emerald v4.9.3 – egyetlen Parry Rate oszlop
 
 A teljes SET-táblázatban a korábbi két Parry-oszlop helyett **egyetlen „Parry Rate / max” oszlop** jelenik meg. A Wheel-ről kiolvasott legjobb érvényes Parry-sor **Wheel** jelöléssel látszik (például `+20 / +40 (50%)`). Ha ugyanahhoz az itemhez külön **kézi Parry** értéket is megadtak, az ugyanebben a cellában egy másik sorban jelenik meg. Az értékeket nem adjuk össze és egyik forrást sem töröljük. Hiányzó és hibás sorok kezelése megmaradt.
+
+## Emerald v4.9.4 – áttekinthető SET-összesítő
+
+- A „Teljes SET – átlátható statisztika” **9 főoszlopos** asztali táblázatot és **mobilon külön itemkártyákat** használ (920 px alatt); a részletes STR/INT minőség, egyedi grade, Wheel HP/MP, Attack/Block/Critical, Freezing, cél és hibák lenyithatók.
+- Az öt SET-összesítő panel mutatja a **csak felszerelt itemekből** ellenőrzötten számított STR/INT értékeket, az érvényes Attack Rate/Blocking Rate Wheel-sorok összegeit, Critical/Parry sorszámokat, és a **Wheel vs. kézzel rögzített HP/MP** értékeket külön. Ezek **nem mind karakterstatok**; az Attack/Block és Critical/Parry sorösszeg itt leltárstatisztika, nem becsült karakterharci képlet.
+- A Parry továbbra is **egyetlen oszlopban**, Wheel: és Kézi: megkülönböztetéssel jelenik meg; nincs duplázás vagy kéretlen összeadás.
+- Hibás vagy a saját sormaximumot meghaladó Rate/STR/INT sort nem számol a végösszegbe. A kézzel megadott HP/MP referencia feletti érték látszik figyelmeztetéssel, de nem növeli az összesített kézi bónuszt.
+- Hiányzó HP/MP és Attack/Block adatoknál **„—”** jelzi, hogy nincs rögzített adat: ez nem tévesztendő össze a tényleges +0 értékkel.
+- Meglévő Wheel-adatok, SET-ek, CAP/DG modellek és JSON-exportok változatlan adattárolási formátumban megmaradnak. A vizuális változások nem jelentenek igazolt Sailor szerveresélyeket.
+
+**Tesztek:** `node --test tests/wheel.test.cjs` (24 regressziós teszt); a fizikai Android/iOS böngészős ellenőrzés ettől külön feladat.
