@@ -1406,6 +1406,12 @@ function keepOrRerollAdvice(id=S.active){
  const e=penOneBlueEstimate(id);
  if(!e.ready)return {ready:false,decision:"Hiányos adatok",tone:"review",reason:e.reason,estimate:e};
  let decision,tone,reason;
+ const requirements=check(id);
+ if(!requirements.targetOk||requirements.extra.length){
+  return {ready:true,decision:'Blue-összetétel ellenőrzése',tone:'review',
+   reason:'A megadott kötelező STR/INT sorok vagy Weapon/Shield Rate-feltételek még nem teljesülnek. A Feather Pen a Blue típusait nem cseréli, ezért ezt értékújradobással nem tudja kijavítani. A Wheel of Fortune működését és valódi esélyeit külön kell vizsgálni.',
+   estimate:e};
+ }
  if(e.goalMet){decision="Inkább megtartás";tone="keep";reason="A jelenlegi item már eléri a beállított Wheel-minőségi célt.";}
  else if(e.better<=20){decision="Inkább megtartás";tone="keep";reason="Ebben a feltételes modellben a jobb eredmény aránya alacsony.";}
  else if(e.better>=60){decision="Újrapörgetés mérlegelhető";tone="reroll";reason="A beállított cél még nem teljesült, és a modellben viszonylag magas a javulás aránya.";}
