@@ -9,6 +9,7 @@ const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
 const script=html.match(/<script[^>]*>([\s\S]*?)<\/script>/i)?.[1];
 assert.ok(script,'The application must have an inline JavaScript module');
 
+const plain=html=>html.replace(/<[^>]*>/g,'');
 function boot(){
  const elements={},store={},inputs={};
  const el=(selector)=>elements[selector]??={
@@ -54,7 +55,7 @@ function boot(){
  state:()=>S,html:()=>document.querySelector('#root').innerHTML,
  save,paint,createSet,selectSet,recordWheelSnapshot,
  wheelHistoryStats,wheelComparison,optimizedLinePlan,balanceTargetAdvice,
- getSetComparison,balanceThreshold,balanceMetrics,qualifiedWheelStats,parryWheelOverview,parryWheelOverviewCell,overviewValidWheelStats,overviewItemView,overviewSummary,overviewTable,check,total,noteBackupExport,backupReminderState
+ getSetComparison,balanceThreshold,balanceMetrics,qualifiedWheelStats,uiIcon,itemLabel,statLabel,itemList,editPanel,shellCards,parryWheelOverview,parryWheelOverviewCell,overviewValidWheelStats,overviewItemView,overviewSummary,overviewTable,check,total,noteBackupExport,backupReminderState
 };`,sandbox,{timeout:5000});
  return {hooks:sandbox.hooks,document,store,inputs};
 }
@@ -301,7 +302,7 @@ test('v4.9.2: Parry from Wheel rows is shown in final SET overview',()=>{
  assert.equal(p.quality,80);
  assert.equal(p.count,1);
  const table=hooks.overviewTable();
- assert.match(table,/<th>Parry Rate<\/th>/);
+ assert.match(plain(table.match(/<thead>[\s\S]*?<\/thead>/)?.[0]??''),/Parry Rate/);
  assert.doesNotMatch(table,/<th>Parry külön/);
  const row=table.match(/data-overview-row="shoulder"[\s\S]*?<\/tr>/)?.[0];
  assert.ok(row,'shoulder row missing');
@@ -349,7 +350,7 @@ test('v4.9.4: 9 headers align with row cells and Parry does not duplicate',()=>{
  const thead=html.match(/<thead>([\s\S]*?)<\/thead>/)?.[1]??'';
  const headerCount=(thead.match(/<th>/g)||[]).length;
  assert.equal(headerCount,9);
- assert.equal((thead.match(/Parry Rate/g)||[]).length,1);
+ assert.equal([...thead.matchAll(/<th>[\s\S]*?<\/th>/g)].filter(m=>plain(m[0]).trim()==='Parry Rate').length,1,'one visible Parry header');
  for(const name of ['shoulder','hands','weapon']){
   const row=html.match(new RegExp('data-overview-row="'+name+'"[\\s\\S]*?<\\/tr>'))?.[0];
   assert.ok(row,name+' row must exist');
@@ -385,9 +386,9 @@ test('v4.9.4: desktop table and mobile cards cover the same 12 items',()=>{
  const mobile=(html.match(/data-overview-card="/g)||[]).length;
  assert.equal(desktop,12);
  assert.equal(mobile,12);
- assert.match(html,/<th>STR \/ INT<\/th>/);
- assert.match(html,/<th>Parry Rate<\/th>/);
- assert.match(html,/<th>Rate: AR \/ BR \/ Crit<\/th>/);
+ assert.match(plain(html.match(/<thead>[\s\S]*?<\/thead>/)?.[0]??''),/STR \/ INT/);
+ assert.match(plain(html.match(/<thead>[\s\S]*?<\/thead>/)?.[0]??''),/Parry Rate/);
+ assert.match(plain(html.match(/<thead>[\s\S]*?<\/thead>/)?.[0]??''),/Rate: AR \/ BR \/ Crit/);
  assert.match(html,/class="overview-cards"/);
  assert.match(html,/Mutasd a többi statot/);
  assert.match(html,/SET statösszesítés/);
@@ -429,7 +430,7 @@ test('v4.9.4: separate validated Wheel and manual stat totals without duplicate 
  assert.ok(row);
  assert.match(row,/Wheel:<\/b> \+20 \/ \+40 \(50%\)/);
  assert.match(row,/Kézi:<\/b> \+30 \/ \+40 \(75%\)/);
- assert.match(row,/HP \+300 \/ \+600 \(50%\)/);
+ assert.match(plain(row),/HP \+300 \/ \+600 \(50%\)/);
  assert.doesNotMatch(row,/\+800 \/ /);
 });
 
@@ -447,7 +448,7 @@ test('v4.9.4: custom row ceilings and CAP reference change remain consistent',()
  assert.ok(first);
  assert.match(first,/\+33 \/ \+50 \(66%\)/);
  assert.match(first,/\+38 \/ \+40 \(95%\)/);
- assert.match(first,/AR: \+45/);
+ assert.match(plain(first),/AR: \+45/);
  s.cfg[90].maxPARRY=60;
  hooks.paint();
  const second=hooks.overviewTable().match(/data-overview-row="shoulder"[\s\S]*?<\/tr>/)?.[0];
@@ -473,7 +474,70 @@ test('v4.9.4: missing HP/MP/Rate data show a dash instead of pretend +0',()=>{
  assert.equal(summary.hpManualCount,0);
  assert.equal(summary.arCount,0);
  const overview=hooks.overviewTable();
- assert.match(overview,/HP \/ MP Wheel<\/small><strong>— \/ —<\/strong>/);
- assert.match(overview,/HP \/ MP kézi<\/small><strong>— \/ —<\/strong>/);
- assert.match(overview,/Attack \/ Block<\/small><strong>— \/ —<\/strong>/);
+ assert.match(plain(overview),/HP \/ MP Wheel— \/ —/);
+ assert.match(plain(overview),/HP \/ MP kézi— \/ —/);
+ assert.match(plain(overview),/Attack \/ Block— \/ —/);
+});
+
+test('v4.9.5: all six armor slots use 9DG Garment-inspired original icons and retain text',()=>{
+ const {hooks}=boot();
+ const cases=[
+  ['shoulder','Shoulder','Mad Sky Storm Talisman'],
+  ['hands','Hands','Mad Sky Storm Wristlet'],
+  ['foot','Foot','Mad Sky Storm Shoes'],
+  ['head','Head','Mad Sky Storm Hat'],
+  ['chest','Chest','Mad Sky Storm Suit'],
+  ['legs','Legs','Mad Sky Storm Trousers']
+ ];
+ const html=hooks.itemList();
+ for(const [key,label,reference] of cases){
+  const block=hooks.itemLabel(key);
+  assert.match(block,/class="sro-item-label"/);
+  assert.match(block,/<svg/);
+  assert.match(block,new RegExp(reference));
+  assert.ok(plain(block).includes(label));
+  assert.ok(html.includes(block),'The item list must show the item icon + readable name');
+ }
+ for(const key of ['necklace','earring','ring1','ring2','weapon','shield']){
+  assert.match(hooks.itemLabel(key),/<svg/);
+  assert.match(hooks.itemLabel(key),/sro-ornament/);
+  assert.doesNotMatch(hooks.itemLabel(key),/Mad Sky Storm/,'accessories and weapons are not Garment armor');
+ }
+ assert.equal((html.match(/data-item="/g)||[]).length,12);
+});
+
+test('v4.9.5: STR is red force and INT is blue mana, with text labels intact',()=>{
+ const {hooks}=boot();
+ const str=hooks.statLabel('STR','STR'),int=hooks.statLabel('INT','INT');
+ assert.match(str,/stat-str/);
+ assert.match(int,/stat-int/);
+ assert.match(str,/<svg/);
+ assert.match(int,/<svg/);
+ assert.equal(plain(str),'STR');
+ assert.equal(plain(int),'INT');
+ assert.match(html, /\.sro-icon--stat\.stat-str\{color:#ff6675/);
+ assert.match(html, /\.sro-icon--stat\.stat-int,\.sro-icon--stat\.stat-mp\{color:#66baff/);
+ assert.match(hooks.shellCards(),/stat-str/);
+ assert.match(hooks.shellCards(),/stat-int/);
+});
+
+test('v4.9.5: icon and text in desktop/mob SET overview; data are unchanged',()=>{
+ const {hooks}=boot(),s=hooks.state(),o=s.sets[90].shoulder;
+ o.count=2;o.rows=[{type:'STR',value:6,modelMax:11},{type:'INT',value:5,modelMax:11}];
+ hooks.save();hooks.paint();
+ const before=JSON.stringify(hooks.total());
+ const table=hooks.overviewTable();
+ const desktop=table.match(/data-overview-row="shoulder"[\s\S]*?<\/tr>/)?.[0];
+ const mobile=table.match(/data-overview-card="shoulder"[\s\S]*?<\/article>/)?.[0];
+ assert.ok(desktop&&mobile);
+ for(const section of [desktop,mobile]){
+  assert.match(section,/sro-icon--item/);
+  assert.match(section,/Mad Sky Storm Talisman/);
+  assert.match(section,/stat-str/);
+  assert.match(section,/stat-int/);
+ }
+ assert.match(hooks.editPanel(),/class="item-editor-head"/);
+ assert.match(hooks.editPanel(),/sro-icon--item/);
+ assert.equal(JSON.stringify(hooks.total()),before);
+ assert.equal(hooks.state().sets[90].shoulder.rows[0].value,6);
 });
