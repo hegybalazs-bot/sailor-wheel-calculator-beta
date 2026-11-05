@@ -1,4 +1,4 @@
-# Sailor Wheel Calculator – Emerald v4.8 BÉTA
+# Sailor Wheel Calculator – Emerald v4.9 BÉTA
 
 A Sailor Online felszerelés / Wheel-sor kalkulátora, kipróbálásra szánt **béta verzió**.
 
@@ -43,9 +43,9 @@ A `noindex,nofollow` jelzés nem hozzáférésvédelem: aki megkapja a linket, m
 | 130 | 713 STR | 658 INT | Képen látható |
 | 140 | 765 STR | 706 INT | Képen látható |
 
-A képen megadott képlet szerint `MaxStat = 28 + CAP×4`, `Magical Balance = min(120,100×INT/MaxStat)`, `Physical Balance = min(120,100−(100×2/3)×(MaxStat−STR)/MaxStat)`. A szimuláció a CAP-et veszi karakterszintnek. A tényleges játékmechanika ettől eltérhet, ezért a Balance százalék **számított érték**, nem a szerverből kiolvasott mutató.
+A képen megadott képlet szerint `MaxStat = 28 + karakter szint×4`, `Magical Balance = min(120,100×INT/MaxStat)`, `Physical Balance = min(120,100−(100×2/3)×(MaxStat−STR)/MaxStat)`. A kalkulátor alapértelmezésként a CAP-et veszi karakterszintnek, de a karakter tényleges szintje külön beírható. A tényleges játékmechanika ettől eltérhet, ezért a Balance százalék **számított érték**, nem a szerverből kiolvasott mutató.
 
-A karakter **felszerelés nélküli** STR/INT értékeit külön meg kell adni. A kalkulátor ehhez csak a kiválasztott, felszerelt SET **Wheel-soraiból** származó STR/INT pontokat adja hozzá; egyéb bónuszokat nem talál ki. Hiányzó alapérték esetén a százalék helyén „—” látszik. Az adatok SET-enként megmaradnak, és a JSON mentésbe is bekerülnek.
+A karakter **felszerelés nélküli** STR/INT értékeit külön meg kell adni. A kalkulátor a kiválasztott, felszerelt SET **érvényes Wheel-soraiból** származó STR/INT pontokat adja hozzá. A Wheel-en kívüli bónuszokat külön megadhatod, automatikusan nem talál ki más statokat. Hiányzó alapérték esetén a százalék helyén „—” látszik. Az adatok SET-enként megmaradnak, és a JSON mentésbe is bekerülnek.
 
 ## Emerald v4.8 – hat új funkció
 
@@ -59,3 +59,15 @@ A karakter **felszerelés nélküli** STR/INT értékeit külön meg kell adni. 
 **Adatmegőrzés:** a `sailor-wheel-calculator-v4` localStorage-kulcs változatlan. A meglévő SET-ekhez és Wheel-előzményekhez kompatibilis mezők kerültek. A korábbi előzmények összehasonlíthatók, de a régi modellezési maximumok nem mindig rekonstruálhatók pontosan.
 
 **Tesztfuttatás** (Node.js 20+; nincs külső csomag): `node --test tests/wheel.test.cjs`. A GitHub Actions PR-ellenőrzés is ezt futtatja. A fizikai Android-böngészős vizsgálat ettől külön teszt.
+
+## Emerald v4.9 – statpont-pontosság, mért Balance, mobilos használat
+
+- A **CAP és a karakter tényleges szintje különbözhet**. A `MaxStat=28+szint×4` képlet és a 120%-os STR/INT határ a karakter szintjéből számol, az alapértelmezett szint a választott CAP.
+- A karakter felszerelés és bónusz nélküli STR/INT értékéhez hozzáadódnak az **érvényes**, felszerelt Wheel-statpontok és a külön megadott **egyéb STR/INT bónuszok**. A többszörös beszámítás elkerülése érdekében a bónuszokat ne írd bele újra az alapstatokhoz.
+- A hiányos, nem egész vagy **beállított sormaximumot meghaladó STR/INT** értékek nem javítják a SET összpontját és Balance százalékát. Az érték a sor szerkesztőjében megmarad, a hibára figyelmeztetés jelenik meg.
+- A Wheel-naplóba csak hibamentes, kitöltött állapotok rögzíthetők. A csak nem pontozható `DUR/OTHER` sorokat tartalmazó érvényes állapotok is naplózhatók.
+- A játékban ténylegesen látott **Physical/Magical Balance%** külön megadható és a kalkulált százalékkal összevethető. A ±0,5 százalékpontos eltérést közel egyezőnek jelöljük. A mért számok nem kalibrálják automatikusan a képletet.
+- A „Wheel-sorok”, „Balance”, „Célsegéd”, „Optimalizáló”, „SET-ek” részhez mobilon vízszintesen görgethető gyorsnavigáció került. A Wheel-szerkesztő előrébb került.
+- Az új mezők SET-enként tárolódnak; a régi JSON-mentések továbbra is használhatók. A `localStorage` kulcsa változatlan.
+
+**Ellenőrzés:** `node --test tests/wheel.test.cjs` futtatja az automatikus regressziós teszteket. Az eredmények matematikai modellek, nem igazolt Sailor Online szerverparaméterek. A tényleges játékkal való eltérés dokumentálható, de a teljes egyezés még közösségi tesztelést igényel.

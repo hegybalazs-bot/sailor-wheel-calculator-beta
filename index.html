@@ -2,7 +2,7 @@
 <html lang="hu">
 <head><meta name="robots" content="noindex,nofollow">
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Sailor Wheel Calculator – Emerald v4.8 BÉTA</title>
+<title>Sailor Wheel Calculator – Emerald v4.9 BÉTA</title>
 <style>
 :root{--bg:#070e12;--surface:#101c21;--surface2:#14272b;--border:#294044;--text:#eff8f5;--muted:#8eaeac;--green:#43ff9a;--teal:#14cfa0;--blue:#4eb8fc;--red:#ff777d;--amber:#f6c36b}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 16% 0%,#102c26,transparent 42%),linear-gradient(165deg,#070e12,#090e18);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif;min-height:100vh}button,input,select{font:inherit}button{cursor:pointer;border:1px solid #35665e;background:#15342d;color:#e8fff6;border-radius:10px;padding:10px 13px;transition:.12s}button:hover{border-color:var(--green);background:#1c5140}button.primary{background:linear-gradient(100deg,#0c956a,#116e70);font-weight:800;color:white}button.alt{background:transparent;border-color:#33545b}button.danger{background:#351f26;border-color:#71323f;color:#ffd4d6}input,select{width:100%;border:1px solid #34555a;border-radius:8px;padding:9px 10px;color:var(--text);background:#0a1a1d;outline:0}input:focus,select:focus{border-color:var(--green);box-shadow:0 0 0 2px #27e6a326}input[type=number]{font-variant-numeric:tabular-nums}label{font-size:12px;font-weight:700;color:var(--muted);display:grid;gap:6px}h1,h2,h3,p{margin-top:0}h1{font-size:24px;margin-bottom:5px;letter-spacing:.4px}h2{font-size:19px;margin-bottom:13px}h3{font-size:15px;margin-bottom:9px}header{padding:23px 25px 18px;border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;align-items:center;background:#081416ad}.brand small{display:block;color:var(--muted);font-size:12px}.emblem{display:inline-flex;align-items:center;justify-content:center;background:#17402e;color:#63ffc4;border-radius:11px;width:39px;height:39px;margin-right:8px;box-shadow:0 0 25px #00e6882f}.head-actions{display:flex;gap:9px;flex-wrap:wrap}.shell{max-width:1600px;margin:auto}.controls{display:flex;gap:12px;flex-wrap:wrap;align-items:end;padding:15px 25px;border-bottom:1px solid var(--border)}.controls label{min-width:135px}.controls .grow{flex:1}.tabs{display:flex;gap:5px;padding:11px 25px;border-bottom:1px solid var(--border);overflow:auto}.tabs button{background:transparent;border:0;border-radius:6px 6px 0 0;color:var(--muted);white-space:nowrap}.tabs button.active{border-bottom:3px solid var(--green);color:var(--green);font-weight:800}.page{padding:20px 25px 36px}.cards{display:grid;grid-template-columns:repeat(5,minmax(130px,1fr));gap:12px;margin-bottom:18px}.card,.panel{background:linear-gradient(165deg,#122328,#0c181d);border:1px solid var(--border);border-radius:14px;padding:16px}.card .label{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);font-weight:700}.card .num{font-size:26px;font-weight:900;margin:8px 0 2px;color:#f8fffe;font-variant-numeric:tabular-nums}.card .sub{color:var(--muted);font-size:11px}.content{display:grid;grid-template-columns:minmax(225px,295px) minmax(520px,1fr);gap:16px}.itemlist{display:grid;gap:6px}.item{width:100%;display:flex;justify-content:space-between;align-items:center;text-align:left;gap:8px;background:#0c1c20;border:1px solid #274047}.item.active{background:#184035;border-color:#2fec9e}.item .nm{font-weight:760;font-size:13px}.item .tiny{display:block;color:var(--muted);font-size:11px;margin-top:4px}.pill{font-size:11px;padding:5px 7px;border-radius:99px;background:#1b3135;color:var(--muted);white-space:nowrap;border:1px solid #31505a}.pill.good{color:#a0ffcf;background:#143b2c;border-color:#298663}.pill.great{color:#eaffbb;background:#31502c;border-color:#8bc557}.pill.bad{color:#ffa1a8;background:#3d242b;border-color:#984650}.pill.warn{color:#ffd59a;background:#453421;border-color:#a57733}.formrow{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:12px}.formrow.two{grid-template-columns:repeat(2,minmax(120px,1fr))}.info{font-size:12px;color:var(--muted);line-height:1.55}.rulehint{border-left:3px solid var(--teal);padding:9px 11px;background:#0b3025a8;color:#c7f9e5;margin:13px 0;border-radius:4px;font-size:13px}.warnbox{background:#352815;border:1px solid #765729;border-radius:9px;padding:10px;color:#ffe5bd;font-size:12px;line-height:1.5;margin:12px 0}.rowtable{width:100%;border-collapse:collapse;margin:16px 0;font-size:13px}.rowtable th{text-align:left;color:var(--muted);font-size:11px;letter-spacing:.7px;text-transform:uppercase;background:#0b1a1e;padding:10px}.rowtable td{padding:8px 6px;border-bottom:1px solid #22363a}.rowtable td:first-child{width:40px;color:var(--muted);text-align:center}.rowtable select,.rowtable input{padding:7px 8px}.splitmetrics{display:grid;grid-template-columns:repeat(2,minmax(140px,1fr));gap:12px;margin-top:12px;padding:11px;background:#071a1c;border:1px solid #2a4b46;border-radius:10px;font-size:12px}.stats{display:grid;grid-template-columns:repeat(4,minmax(100px,1fr));gap:8px;margin-top:14px}.stat{padding:11px;background:#081a1b;border-radius:9px;border:1px solid #26423e}.stat strong{display:block;color:#e9fff8;font-size:20px}.stat small{color:var(--muted)}.progress{height:8px;border-radius:99px;background:#203d3a;overflow:hidden;margin-top:8px}.progress>div{height:100%;background:linear-gradient(90deg,#008a61,#50ffaf)}.actions{display:flex;flex-wrap:wrap;gap:8px;margin:13px 0}.history{max-height:140px;overflow:auto}.history div{font-size:12px;padding:6px;border-bottom:1px solid #254047;color:#a8c3c1}.layout2{display:grid;grid-template-columns:1.1fr 1fr;gap:15px}.tinytable{width:100%;border-collapse:collapse}.tinytable th,.tinytable td{border-bottom:1px solid var(--border);padding:9px;text-align:left;font-size:13px}.tinytable th{color:var(--muted)}.notice{margin-top:14px;background:#142925;border:1px solid #2b6451;padding:12px;border-radius:9px;font-size:12px;color:#a5dfce}.foot{padding:12px 25px;border-top:1px solid var(--border);color:var(--muted);font-size:11px}.toast{position:fixed;right:20px;bottom:22px;z-index:5;padding:12px 17px;color:#d6fff1;background:#144d3f;border:1px solid #69e3b4;border-radius:11px;box-shadow:0 4px 30px #0006}.hide{display:none}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.mb{margin-bottom:14px}.muted{color:var(--muted)}.feature{font-size:13px;line-height:1.7}.badgebox{display:inline-block;color:#8af7be;border:1px solid #326953;border-radius:7px;font-size:11px;padding:4px 7px;margin-left:7px}@media(max-width:1100px){.cards{grid-template-columns:repeat(3,1fr)}.content{grid-template-columns:220px minmax(400px,1fr)}.formrow{grid-template-columns:repeat(2,1fr)}}@media(max-width:780px){header,.controls,.tabs,.page{padding-left:12px;padding-right:12px}.cards{grid-template-columns:repeat(2,1fr)}.content,.layout2{grid-template-columns:1fr}.itemlist{grid-template-columns:repeat(2,1fr)}.formrow,.stats,.grid3{grid-template-columns:repeat(2,1fr)}.rowtable{font-size:11px}.rowtable td{padding:5px 3px}}
 
@@ -53,6 +53,14 @@
 .rowtable td select,.rowtable td input{width:100%;min-width:0;min-height:44px;font-size:15px}}
 @media(min-width:781px) and (max-width:1150px){.maxima-grid{grid-template-columns:repeat(3,minmax(100px,1fr))}}
 
+/* v4.9 – Gyors mobil navigáció, könnyen elérhető Wheel-szerkesztő */
+.wheel-jumps{display:flex;gap:8px;overflow-x:auto;padding:2px 0 12px;scrollbar-width:thin}
+.wheel-jumps a{flex:none;display:inline-block;padding:9px 12px;color:#b4ffe2;background:#102a29;border:1px solid #2c755f;border-radius:9px;text-decoration:none;font-size:12px;font-weight:750}
+.wheel-jumps a:focus-visible,.wheel-jumps a:hover{outline:2px solid #43ff9a}
+[id^="wheel-"]{scroll-margin-top:14px}
+.balance-panel .balance-inputs{max-width:none;grid-template-columns:repeat(3,minmax(0,1fr))}
+.balance-panel .balance-inputs label{min-width:0}
+@media(max-width:780px){.balance-panel .balance-inputs{grid-template-columns:repeat(2,minmax(0,1fr))}}
 /* v4.7 – Karakter Physical/Magical Balance kijelzés */
 .balance-panel{border-color:#356958;background:linear-gradient(130deg,#112e2e,#101f2a);margin-bottom:16px}
 .balance-panel h2{color:#acffdb}
@@ -81,7 +89,7 @@
 </style>
 </head>
 <body><div class="shell">
-<header><div class="brand"><h1><span class="emblem">⚔</span>SAILOR WHEEL CALCULATOR <span class="badgebox">EMERALD v4.8 BÉTA</span></h1><small>Szettkezelő · Wheel-sorok · STR/INT · Fegyver & Shield · Pörgetési esélymodell</small></div><div class="head-actions"><a href="visszajelzes.html" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;justify-content:center;border:1px solid #3c846f;border-radius:10px;padding:8px 12px;color:#afffdf;font-weight:700;text-decoration:none">📝 Hibajelentés / ötlet</a><button id="exportBtn">↓ Mentés JSON-ba</button><button id="importBtn">↑ Betöltés</button><button class="alt" id="printBtn">⎙ Nyomtatás</button><input type="file" id="importFile" accept=".json,application/json" class="hide"></div></header>
+<header><div class="brand"><h1><span class="emblem">⚔</span>SAILOR WHEEL CALCULATOR <span class="badgebox">EMERALD v4.9 BÉTA</span></h1><small>Szettkezelő · Wheel-sorok · STR/INT · Fegyver & Shield · Pörgetési esélymodell</small></div><div class="head-actions"><a href="visszajelzes.html" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;justify-content:center;border:1px solid #3c846f;border-radius:10px;padding:8px 12px;color:#afffdf;font-weight:700;text-decoration:none">📝 Hibajelentés / ötlet</a><button id="exportBtn">↓ Mentés JSON-ba</button><button id="importBtn">↑ Betöltés</button><button class="alt" id="printBtn">⎙ Nyomtatás</button><input type="file" id="importFile" accept=".json,application/json" class="hide"></div></header>
 <div style="margin:12px 25px 0;padding:10px 15px;border:1px solid #997e35;border-radius:10px;background:#2c2514;color:#ffe4a5;font-size:12px"><b>NYILVÁNOS TESZTVÁLTOZAT:</b> a CAP / SoS / SoM / Sun maximumok ellenőrzendő becslések. A program nem kapcsolódik a Sailor szerveréhez. A beírt adatok csak a böngésződben tárolódnak; készíts rendszeresen JSON mentést.</div><section class="setbar" aria-label="Szettkezelés">
   <div class="setbar-title"><strong>🗂 Mentett SET-ek</strong><span id="setCount" class="muted"></span></div>
   <label class="setbar-picker">Aktív szett neve<select id="setPicker" aria-label="Mentett szettek"></select></label>
@@ -132,7 +140,7 @@ const BONUS_PARRY_REF={90:40,100:60,110:60,120:60,125:60,130:60,140:60};
 const STR_INT_CHOICE_MAX=11; // Ideiglenes kezelési tartomány; nem igazolt Sailor-szervermaximum.
 const STORAGE='sailor-wheel-calculator-v4';
 const LEGACY_STORAGE='sailor-wheel-calculator-v1';
-const SCHEMA_VERSION=4.8;
+const SCHEMA_VERSION=4.9;
 const $=s=>document.querySelector(s);const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const num=x=>{let n=Number(x);return Number.isFinite(n)?n:0};
 const r2=x=>(Math.round(x*10)/10).toLocaleString('hu-HU');
@@ -240,7 +248,7 @@ initializeDegreeModels();
 // The v1 localStorage value is never overwritten. Working fields S.sets/S.weaponInventory
 // stay compatible with v3 rendering; the active bank snapshot is updated by save().
 const copyJSON=x=>JSON.parse(JSON.stringify(x));
-function freshBalanceBase(){return {str:'',int:''};}
+function freshBalanceBase(){return {str:'',int:'',level:'',extraStr:'',extraInt:'',observedPhy:'',observedMag:''};}
 function safeSetName(input){return String(input??'').trim().slice(0,60);}
 function nextSetId(cap){return 'set_'+cap+'_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8);}
 function captureSet(cap){return {
@@ -313,7 +321,7 @@ function refreshSetPicker(){let bank=activeBank();let picker=$('#setPicker');if(
 }
 
 let lastSim=null;let toastTimer;
-function save(){try{syncActiveSet();snapshotDegreeModel(currentCfg());S.schemaVersion=SCHEMA_VERSION;localStorage.setItem(STORAGE,JSON.stringify(S));$('#saveStatus').textContent='✓ V4.8 BÉTA SET mentve';}catch(_){$('#saveStatus').textContent='⚠ A böngésző nem engedi a tárolást – exportálj JSON-t!';}}
+function save(){try{syncActiveSet();snapshotDegreeModel(currentCfg());S.schemaVersion=SCHEMA_VERSION;localStorage.setItem(STORAGE,JSON.stringify(S));$('#saveStatus').textContent='✓ V4.9 BÉTA SET mentve';}catch(_){$('#saveStatus').textContent='⚠ A böngésző nem engedi a tárolást – exportálj JSON-t!';}}
 function currentCfg(){return S.cfg[S.cap];}function items(){return S.sets[S.cap];}
 function weaponId(cap=S.cap){return normalizeWeapon(S.weaponByCap?.[cap]||S.weapon);}
 function critRequired(id=weaponId(),cap=S.cap){return S.critOverrides?.[cap]?.[id]===undefined?WEAPONS[id].crit:Boolean(S.critOverrides[cap][id]);}
@@ -340,9 +348,10 @@ function check(id,obj=itm(id),cfg=currentCfg(),weapon=weaponId()){
    if(typ==='FREEZE'&&!isJewelry(id))issues.push(`${i+1}. sor: Freezing csak ékszeren lehet.`);
    if(typ && v<0)issues.push(`${i+1}. sor: negatív érték.`);
    if(['STR','INT','AR','BR','CRIT','FREEZE'].includes(typ) && row.value!=='' && row.value!=null && v<1)issues.push(`${i+1}. sor: ${typ} minimum +1.`);
+   if((typ==='STR'||typ==='INT')&&row.value!==''&&row.value!=null&&!Number.isInteger(Number(row.value)))issues.push(`${i+1}. sor: ${typ} csak egész szám lehet.`);
    if(m!=null && v>m)issues.push(`${i+1}. sor: ${typ} maximum ${m}.`);
-   if(typ==='STR'){str+=v;stats+=v;statRows++;strRows++;strPotential+=(m||0);}
-   if(typ==='INT'){int+=v;stats+=v;statRows++;intRows++;intPotential+=(m||0);}
+   if(typ==='STR'&&row.value!==''&&row.value!=null&&Number.isInteger(v)&&v>=1&&m!=null&&m>=v){str+=v;stats+=v;statRows++;strRows++;strPotential+=m;}
+   if(typ==='INT'&&row.value!==''&&row.value!=null&&Number.isInteger(v)&&v>=1&&m!=null&&m>=v){int+=v;stats+=v;statRows++;intRows++;intPotential+=m;}
    if(typ==='AR'){arSum+=v;arRows++;if(Number(cfg.maxAR)>0&&v>=Number(m))arPerfect++;}
    if(typ==='BR'){brSum+=v;brRows++;if(v>=Math.min(Number(m)||Infinity,Number(id==='shield'?cfg.maxBR:cfg.weaponMinBlockValue)||Infinity))brPerfect++;}
    if(typ==='CRIT')critRows++;
@@ -401,7 +410,7 @@ function check(id,obj=itm(id),cfg=currentCfg(),weapon=weaponId()){
 // 4.8/cycle 1 – manually saved Wheel observations, not server-detected spins.
 function recordWheelSnapshot(id,obj=itm(id),at=new Date()){
  const result=check(id,obj),cfg=currentCfg();
- if(result.count===0)return null;
+ if(result.count===0||!result.complete||result.issues.length||(result.qualityRows>0&&!result.wheelComplete))return null;
  const rows=copyJSON((obj.rows||[]).slice(0,result.count)).map(row=>({
   ...row,...(row.modelMax==null&&effectiveRowMax(row,cfg)!=null?{modelMax:effectiveRowMax(row,cfg)}:{})
  }));
@@ -484,7 +493,25 @@ function wheelComparePanel(id,obj=itm(id)){
 function percent(x){return x==null?'—':r2(x)+'%';}
 function pill(text,style=''){return `<span class="pill ${style}">${esc(text)}</span>`;}
 function statusP(v){return pill(v.status,v.color==='green'?'good':v.color==='yellow'?'warn':v.color==='red'?'bad':'');}
-function total(){let t={str:0,int:0,stats:0,ar:0,br:0,rows:0,filled:0,green:0,yellow:0,red:0,active:0,ready:0,qualitySum:0,qualityCount:0};for(const id of IDS){if(!isEquipped(id))continue;let v=check(id);t.active++;t.str+=v.str;t.int+=v.int;t.stats+=v.stats;t.ar+=v.arSum;t.br+=v.brSum;t.rows+=v.count;if(v.complete&&!v.issues.length)t.filled++;if(v.color==='green')t.green++;if(v.color==='yellow')t.yellow++;if(v.color==='red')t.red++;if(v.ready)t.ready++;if(v.complete&&v.wheelComplete&&!v.issues.length&&v.itemPct!=null){t.qualitySum+=v.itemPct;t.qualityCount++;}}t.qualityAvg=t.qualityCount?t.qualitySum/t.qualityCount:null;return t;}
+// v4.9: only valid, populated STR/INT lines contribute to SET and Balance totals.
+function qualifiedWheelStats(obj,cfg=currentCfg()){
+ const rows=Array.isArray(obj?.rows)?obj.rows:[];
+ const count=Math.max(0,Math.min(30,Math.floor(num(obj?.count))));
+ let str=0,int=0,excluded=0,accepted=0;
+ for(let i=0;i<count;i++){
+  const row=rows[i];
+  if(row?.type!=='STR'&&row?.type!=='INT')continue;
+  if(row.value==null||row.value==='')continue;
+  const value=Number(row.value),max=effectiveRowMax(row,cfg);
+  if(!Number.isInteger(value)||value<1||!Number.isFinite(Number(max))||Number(max)<1||value>Number(max)){
+   excluded++;continue;
+  }
+  if(row.type==='STR')str+=value;else int+=value;
+  accepted++;
+ }
+ return {str,int,stats:str+int,accepted,excluded};
+}
+function total(){let t={str:0,int:0,stats:0,ar:0,br:0,rows:0,filled:0,green:0,yellow:0,red:0,active:0,ready:0,qualitySum:0,qualityCount:0};for(const id of IDS){if(!isEquipped(id))continue;let v=check(id),valid=qualifiedWheelStats(itm(id));t.active++;t.str+=valid.str;t.int+=valid.int;t.stats+=valid.stats;t.excluded=(t.excluded||0)+valid.excluded;t.ar+=v.arSum;t.br+=v.brSum;t.rows+=v.count;if(v.complete&&!v.issues.length)t.filled++;if(v.color==='green')t.green++;if(v.color==='yellow')t.yellow++;if(v.color==='red')t.red++;if(v.ready)t.ready++;if(v.complete&&v.wheelComplete&&!v.issues.length&&v.itemPct!=null){t.qualitySum+=v.itemPct;t.qualityCount++;}}t.qualityAvg=t.qualityCount?t.qualitySum/t.qualityCount:null;return t;}
 
 /* 120%-os referenciák: a felhasználó 2026-11-04-i képernyőképének táblázata. */
 const BALANCE_120_REFERENCE={
@@ -498,40 +525,68 @@ function balanceThreshold(cap=S.cap){
  return {phy:Math.ceil(1.3*maxStat-1e-9),mag:Math.ceil(1.2*maxStat-1e-9),maxStat,source:'képlet'};
 }
 function balanceMetrics(cap=S.cap,setTotals=total(),base=S.balanceBases?.[cap]){
- const ref=balanceThreshold(cap);
+ const candidateLevel=base?.level;
+ const level=candidateLevel!==''&&candidateLevel!=null&&Number.isInteger(Number(candidateLevel))&&Number(candidateLevel)>=1&&Number(candidateLevel)<=Number(cap)
+  ? Number(candidateLevel):Number(cap);
+ const ref=balanceThreshold(level);
+ const extraSTR=base?.extraStr===''||base?.extraStr==null?0:Math.max(0,num(base.extraStr));
+ const extraINT=base?.extraInt===''||base?.extraInt==null?0:Math.max(0,num(base.extraInt));
  const hasStr=base?.str!==''&&base?.str!=null&&Number.isFinite(Number(base.str))&&Number(base.str)>=0;
  const hasInt=base?.int!==''&&base?.int!=null&&Number.isFinite(Number(base.int))&&Number(base.int)>=0;
- const str=hasStr?Number(base.str)+setTotals.str:null,int=hasInt?Number(base.int)+setTotals.int:null;
+ const str=hasStr?Number(base.str)+setTotals.str+extraSTR:null,int=hasInt?Number(base.int)+setTotals.int+extraINT:null;
  const phy=str==null?null:Math.max(0,Math.min(120,100-(100*2/3)*(ref.maxStat-str)/ref.maxStat));
  const mag=int==null?null:Math.max(0,Math.min(120,100*int/ref.maxStat));
- return {...ref,baseSTR:hasStr?Number(base.str):null,baseINT:hasInt?Number(base.int):null,
+ return {...ref,refPhy:ref.phy,refMag:ref.mag,level,extraSTR,extraINT,excludedStatRows:setTotals.excluded||0,baseSTR:hasStr?Number(base.str):null,baseINT:hasInt?Number(base.int):null,
   gearSTR:setTotals.str,gearINT:setTotals.int,str,int,phy,mag,
   strMissing:str==null?null:Math.max(0,Math.ceil(ref.phy-str)),
   intMissing:int==null?null:Math.max(0,Math.ceil(ref.mag-int))};
 }
 function balancePanel(t=total()){
  const b=balanceMetrics(S.cap,t),base=S.balanceBases?.[S.cap]||freshBalanceBase();
- function tile(kind,label,score,current,missing,goal,gear,stat){
+ const readObserved=key=>{
+  const raw=base[key];if(raw==null||raw==='')return null;
+  const n=Number(raw);return Number.isFinite(n)&&n>=0&&n<=120?n:null;
+ };
+ const tile=(kind,label,score,current,missing,goal,gear,extra,stat,observed)=>{
   const present=score!=null,bar=present?Math.max(0,Math.min(100,score/120*100)):0;
-  return `<div class="balance-result ${kind}"><small>${label}</small>
+  const delta=observed==null||!present?null:score-observed;
+  const comparison=delta==null?'Add meg a játékban látott értéket az ellenőrzéshez.':
+   'Eltérés (számolt − játék): '+(delta>0?'+':'')+r2(delta)+' százalékpont'+
+   (Math.abs(delta)<=0.5?' · közel egyezik':' · ellenőrizd az alapstatokat és az egyéb bónuszokat');
+  return `<div class="balance-result ${kind}">
+   <small>${label}</small>
    <strong>${present?percent(score):'—'} <small style="display:inline">/ 120%</small></strong>
    <div class="balance-meter"><span style="width:${bar}%"></span></div>
-   <small>Összes ${stat}: <b>${current==null?'—':'+'+r2(current)}</b> · SET Wheel: <b>+${r2(gear)}</b></small>
-   <small class="balance-goal">120% cél: ${goal} ${stat} · ${missing==null?'Alap '+stat+' még nincs megadva':missing===0?'✓ Elérve':'még +'+r2(missing)+' '+stat+' kell'}</small>
+   <small>Teljes ${stat}: <b>${current==null?'—':r2(current)}</b> · Wheel: +${r2(gear)} · Egyéb: +${r2(extra)}</small>
+   <small class="balance-goal">120% cél: ${goal} ${stat} · ${missing==null?'Az alap '+stat+' még hiányzik':missing===0?'✓ Elérve':'még +'+r2(missing)+' '+stat+' kell'}</small>
+   <small style="margin-top:6px">Játékban látott: <b>${observed==null?'—':percent(observed)}</b>. ${comparison}</small>
   </div>`;
- }
- return `<section class="panel balance-panel" aria-label="Karakter Balance">
-  <h2>⚖️ Physical / Magical Balance — ${S.cap} CAP</h2>
-  <div class="info">A 120%-os célpontok ${b.source==='kép'?'a korábban küldött képről származnak':'a képen megadott képletből számított értékek (nem szerepeltek a táblázatban)'}. A karaktered <b>felszerelés nélküli</b> statjaihoz a rögzített és felszerelt Wheel-sorok STR/INT bónuszait adjuk. A Balance% számított becslés, nem a játékból kiolvasott érték.</div>
+ };
+ const input=(key,label,placeholder,max,step='1')=>
+  `<label>${label}<input type="number" inputmode="${step==='1'?'numeric':'decimal'}" min="${key==='level'?1:0}" max="${max}" step="${step}" data-balance-field="${key}" aria-label="${label}" placeholder="${placeholder}" value="${esc(base[key]??'')}"></label>`;
+ return `<section id="wheel-balance" class="panel balance-panel" aria-label="Karakter Balance">
+  <h2>⚖️ Physical / Magical Balance – ${S.cap} CAP, ${b.level}. szint</h2>
+  <div class="info">A 120%-os célok a referenciaképen megadott képletből származnak (${b.source==='kép'?'a választott szinthez külön táblázati adat is tartozik':'ehhez a szinthez képletből számított célok'}).
+   A Balance% <b>nem szerveradat</b>, hanem a rögzített, ellenőrzött STR/INT sorokon alapuló becslés.</div>
   <div class="balance-inputs">
-   <label>Karakter alap STR, itemek nélkül<input type="number" inputmode="numeric" min="0" max="1000000" step="1" data-balance-base="str" placeholder="Alap STR" value="${esc(base.str??'')}"></label>
-   <label>Karakter alap INT, itemek nélkül<input type="number" inputmode="numeric" min="0" max="1000000" step="1" data-balance-base="int" placeholder="Alap INT" value="${esc(base.int??'')}"></label>
+   ${input('level','Karakter szintje (üresen: CAP)','Alap: '+S.cap,S.cap)}
+   ${input('str','Alap STR (item és egyéb bónusz nélkül)','Alap STR',1000000)}
+   ${input('int','Alap INT (item és egyéb bónusz nélkül)','Alap INT',1000000)}
+   ${input('extraStr','Egyéb +STR bónusz (nem Wheel)','Pl. +5',1000000)}
+   ${input('extraInt','Egyéb +INT bónusz (nem Wheel)','Pl. +5',1000000)}
   </div>
+  <p class="info">Ne számold kétszer ugyanazt: az <b>alap STR/INT</b> ne tartalmazza a Wheel-bónuszokat és az „Egyéb” mezőben külön megadott pontokat.</p>
+  ${b.excludedStatRows?'<div class="warnbox">⚠ '+b.excludedStatRows+' hibás vagy maximumot túllépő STR/INT sor kimaradt a SET és Balance összesítéséből. Javítsd az item-adatlapon.</div>':''}
   <div class="balance-results">
-    ${tile('phy','💪 Physical Balance',b.phy,b.str,b.strMissing,balanceThreshold(S.cap).phy,b.gearSTR,'STR')}
-    ${tile('mag','🪄 Magical Balance',b.mag,b.int,b.intMissing,balanceThreshold(S.cap).mag,b.gearINT,'INT')}
+   ${tile('phy','💪 Physical Balance',b.phy,b.str,b.strMissing,b.refPhy,b.gearSTR,b.extraSTR,'STR',readObserved('observedPhy'))}
+   ${tile('mag','🪄 Magical Balance',b.mag,b.int,b.intMissing,b.refMag,b.gearINT,b.extraINT,'INT',readObserved('observedMag'))}
   </div>
-  <div class="info">Az alapértékeket külön mentjük SET-enként. Az aktuális Wheel-sorok, SET vagy CAP változása automatikusan frissíti a Balance-kijelzést.</div>
+  <h3>🧪 Összevetés a játékban látott Balance-szal</h3>
+  <div class="balance-inputs">
+   ${input('observedPhy','Játékban látott Physical Balance (%)','Pl. 115,4',120,'0.1')}
+   ${input('observedMag','Játékban látott Magical Balance (%)','Pl. 117,2',120,'0.1')}
+  </div>
+  <p class="info">A játékban látott százalék csak <b>ellenőrzési adat</b>, nem módosítja a számítási képletet. Eltérésnél nézd át a szintet, az alapstatokat és a bónuszokat. A mezőket SET-enként mentjük.</p>
  </section>`;
 }
 // 4.8/cycle 3 – target assistant uses actual STR/INT lines and user-set row ceilings.
@@ -556,7 +611,7 @@ function availableStatImprovements(type){
 function balanceTargetAdvice(){
  const balance=balanceMetrics(),out={};
  for(const [type,missing,needed] of [
-   ['STR',balance.strMissing,balance.phy],['INT',balance.intMissing,balance.mag]
+   ['STR',balance.strMissing,balance.refPhy],['INT',balance.intMissing,balance.refMag]
  ]){
   const lines=availableStatImprovements(type),capacity=lines.reduce((a,x)=>a+x.gain,0);
   out[type]={missing,target:needed,capacity,lines,
@@ -567,9 +622,9 @@ function balanceTargetAdvice(){
 }
 function balanceTargetPanel(){
  const {balance,out}=balanceTargetAdvice();
- return `<section class="panel" style="margin:0 0 16px;border-color:#316c57">
+ return `<section class="panel" id="wheel-target" style="margin:16px 0;border-color:#316c57">
    <h3>🎯 120% Balance célsegéd – a jelenlegi Wheel-sorokkal</h3>
-   <div class="info">A CAP-hez tartozó ${balance.phy} STR és ${balance.mag} INT célértékhez viszonyít. A még elérhető statpontokat <b>csak a már meglévő STR/INT sorok</b> és azok kézzel beállított maximumai alapján számolja. Nem ígér jobb rollt vagy új sorokat.</div>
+   <div class="info">A ${balance.level}. szinthez tartozó ${balance.refPhy} STR és ${balance.refMag} INT célértékhez viszonyít. A még elérhető statpontokat <b>csak a már meglévő STR/INT sorok</b> és azok kézzel beállított maximumai alapján számolja. Nem ígér jobb rollt vagy új sorokat.</div>
    <div class="stats">${[['STR','💪 Physical'],['INT','🪄 Magical']].map(([type,title])=>{
       const x=out[type];
       const msg=x.missing==null?'Add meg az alap '+type+' karakterstatot':
@@ -604,7 +659,7 @@ function optimizedLinePlan(type,missing=null){
 }
 function optimizerPanel(){
  const plans=[optimizedLinePlan('STR'),optimizedLinePlan('INT')];
- return `<section class="panel" style="margin-bottom:16px;border-color:#2b6655">
+ return `<section class="panel" id="wheel-optimize" style="margin-bottom:16px;border-color:#2b6655">
   <h3>🧠 SET-optimalizáló – mit fejlessz először?</h3>
   <p class="info">A legnagyobb <b>elméleti statjavulást</b> adó meglévő sorok kerülnek előre. Ez azt mutatja, melyik soron van a legtöbb kiaknázatlan STR/INT, és hány sort kellene tökéletesíteni az elméleti célhoz. Nem jósolja meg a dobási esélyeket vagy a szükséges pörgetések számát.</p>
   ${plans.map(plan=>`<div class="feature" style="margin:12px 0;padding:10px;border:1px solid var(--border);border-radius:10px">
@@ -630,7 +685,7 @@ function compareSetMetrics(cap,entry){
   if(id==='shield'&&!WEAPONS[weapon]?.shield)continue;
   const obj=id==='weapon'?(d.weaponInventory?.[weapon]||freshItem('weapon')):(d.items?.[id]||freshItem(id));
   const v=check(id,obj,cfg,weapon);
-  t.active++;t.str+=v.str;t.int+=v.int;
+  t.active++;const valid=qualifiedWheelStats(obj,cfg);t.str+=valid.str;t.int+=valid.int;
   if(v.ready)t.ready++;
   if(v.complete&&v.wheelComplete&&!v.issues.length&&v.itemPct!=null){t.qualityCount++;t.qualitySum+=v.itemPct;}
  }
@@ -654,13 +709,13 @@ function getSetComparison(cap=S.cap){
 }
 function setComparePanel(){
  const data=getSetComparison();
- if(!data)return `<section class="panel" style="margin-top:16px"><h3>⚔ SET-ek összehasonlítása</h3><p class="info">A két külön SET összevetéséhez készíts legalább még egy SET-et a felső mentett szettek kezelőben.</p></section>`;
+ if(!data)return `<section class="panel" id="wheel-compare" style="margin-top:16px"><h3>⚔ SET-ek összehasonlítása</h3><p class="info">A két külön SET összevetéséhez készíts legalább még egy SET-et a felső mentett szettek kezelőben.</p></section>`;
  const {entries,left,right,leftId,rightId}=data;
  const pick=(side,value)=>`<label>${side==='left'?'Első SET':'Második SET'}<select data-set-compare="${side}">${entries.map(e=>`<option value="${esc(e.id)}" ${e.id===value?'selected':''}>${esc(e.name)}</option>`).join('')}</select></label>`;
  const f=x=>x==null?'—':percent(x),show=x=>x==null?'—':'+'+r2(x);
  const delta=(a,b)=>a==null||b==null?'—':(b-a>0?'+':'')+r2(b-a);
  const row=(label,a,b,change)=>`<tr><td>${label}</td><td>${show(a)}</td><td>${show(b)}</td><td>${change}</td></tr>`;
- return `<section class="panel" style="margin-top:16px;border-color:#346a66">
+ return `<section class="panel" id="wheel-compare" style="margin-top:16px;border-color:#346a66">
   <h3>⚔ SET-ek összehasonlítása – ${S.cap} CAP / ${currentCfg().degree}DG</h3>
   <div class="formrow two">${pick('left',leftId)}${pick('right',rightId)}</div>
   <div style="overflow-x:auto;margin-top:12px"><table class="tinytable" style="min-width:520px">
@@ -801,11 +856,11 @@ ${wheelComparePanel(id,ob)}
  ${ob.history?.length?`<h3>Korábbi pörgetések (${ob.history.length})</h3><div class="history">${ob.history.slice().reverse().slice(0,10).map(h=>`<div>${esc(h.time)} · ${h.count} sor · STR +${h.str}, INT +${h.int} · Attack ${h.ar} / Block ${h.br} · ${esc(h.status)}</div>`).join('')}</div>`:'<p class="info">Még nem mentettél el korábbi pörgetést. A jelenlegi sorok ettől függetlenül automatikusan mentődnek.</p>'}
 </section>`;}
 function overviewTable(){return `<section class="panel set-overview"><h2>🧾 Teljes szett – célértékek és állapotok</h2><div style="overflow-x:auto"><table class="tinytable status-table"><thead><tr><th>Item</th><th>Grade</th><th>Wheel</th><th>STR</th><th>INT</th><th>STR roll%</th><th>INT roll%</th><th>HP saját / max</th><th>MP saját / max</th><th>Parry saját / max</th><th>Freezing saját / max</th><th>Teljes Wheel %</th><th>Saját cél</th><th>STR/INT célhiány</th><th>Jelzés</th></tr></thead><tbody>${IDS.map(id=>{const o=itm(id),v=check(id);return `<tr class="item-${v.color} ${!isEquipped(id)?'unequipped':''}" data-overview-row="${id}"><td><button class="linklike" data-item="${id}">${esc(NAMES[id])}</button></td><td>${esc(o.grade)}</td><td>${v.count}/${v.limit}</td><td>+${r2(v.str)}</td><td>+${r2(v.int)}</td><td>${percent(v.strQuality)}</td><td>${percent(v.intQuality)}</td>${['HP','MP','PARRY','FREEZE'].map((k)=>{let r=num(currentCfg()[{HP:'maxHP',MP:'maxMP',PARRY:'maxPARRY',FREEZE:'maxFREEZE'}[k]]),b=ensureBonusStats(o)[k];return `<td>${b===''||b==null?'—':`+${r2(num(b))} / ${r?'+'+r2(r):'?'} (${percent(r?num(b)/r*100:null)})`}</td>`}).join('')}<td><b>${percent(v.itemPct)}</b></td><td><b>${percent(v.goalPct)}</b></td><td>${v.missingPoints==null?'—':'+'+v.missingPoints}</td><td>${statusP(v)}${id==='weapon'||id==='shield'?`<div class="tiny">${v.extra.length?'⚠ Külön feltétel hiányzik':'✓ Rate/Critical feltételek rendben'}</div>`:''}</td></tr>`}).join('')}</tbody></table></div><p class="info">A fehér sor semleges, a piros 20% alatti eredményt, a sárga a céltól legfeljebb 10 százalékponttal elmaradó itemet, a zöld a teljesült %-os célt jelöli. A hiányos/hibás sorokat a jobb oldali részleteknél ellenőrizheted.</p></section>`;}
-function setView(){return shellCards()+balancePanel()+balanceTargetPanel()+optimizerPanel()+`<div class="content">${itemList()}${editPanel()}</div>${overviewTable()}${setComparePanel()}${backupReminderPanel()}<div class="notice">Az egyedi célszázalékok és a sorok automatikusan mentődnek. Biztonsági mentéshez használd a <b>Mentés JSON-ba</b> gombot.</div>`;}
+function setView(){return shellCards()+`<nav class="wheel-jumps" aria-label="Gyors ugrás a kalkulátor részeihez"><a href="#wheel-items">⚔ Wheel-sorok</a><a href="#wheel-balance">⚖ Balance</a><a href="#wheel-target">🎯 Célsegéd</a><a href="#wheel-optimize">🧠 Optimalizáló</a><a href="#wheel-compare">🔁 SET-ek</a></nav>`+balancePanel()+`<div class="content" id="wheel-items">${itemList()}${editPanel()}</div>${balanceTargetPanel()}${optimizerPanel()}${overviewTable()}${setComparePanel()}${backupReminderPanel()}<div class="notice">Az egyedi célszázalékok és a sorok automatikusan mentődnek. Biztonsági mentéshez használd a <b>Mentés JSON-ba</b> gombot.</div>`;}
 function chancesComplete(cfg=currentCfg()){let p=cfg.chances||{};let vals=Object.keys({STR:1,INT:1,AR:1,BR:1,CRIT:1,OTHER:1}).map(k=>p[k]);return vals.every(v=>v!==''&&v!=null&&Number.isFinite(Number(v))&&num(v)>=0)&&Math.abs(vals.reduce((a,b)=>a+num(b),0)-100)<.00001;}
 function chanceView(){let c=currentCfg(),id=S.active,v=check(id),p=c.chances||{},sum=['STR','INT','AR','BR','CRIT','OTHER'].reduce((a,k)=>a+num(p[k]),0);return `<div class="layout2"><section class="panel"><h2>🎲 Következő Wheel / Feather Pen</h2><p class="info">Aktív item: <b>${esc(NAMES[id])}</b>. A valós Sailor esélyek nem nyilvánosak vagy nem igazoltak. Ez az <b>állítható feltételezésekkel működő matematikai becslés</b>, nem hivatalos dropráta.</p><div class="rulehint">A modell minden sor típusát az általad beállított eséllyel húzza ki, majd az értékét egyenletesen választja 1 és az aktuális CAP-maximum között. Ez nem tükrözi a lehetséges 5/10/20/30/40 Attack Rate lépcsőket. Ez <b>feltételezés</b>, nem a Sailor szerver algoritmusa.</div><h3>Soronkénti típus-esélyek (%)</h3><div class="grid3">${[['STR','STR'],['INT','INT'],['AR','Attack Rate'],['BR','Blocking Rate'],['CRIT','Critical'],['OTHER','Egyéb']].map(([k,n])=>`<label>${n}<input type="number" min="0" max="100" step="0.1" placeholder="ismeretlen" data-prob="${k}" value="${esc(p[k]??'')}"></label>`).join('')}</div><div class="actions"><button id="evenModel">Példaeloszlás (nem hivatalos)</button><button id="clearModel">Esélyek törlése</button></div><p class="info">Összeg: <b>${r2(sum)}%</b> / 100%. A példaértékek csak demonstrációk, nem valódi szerveradatok.</p><label style="max-width:350px">Következő pörgetés sorainak száma<select id="lineMode">${optionList({fixed:'Ugyanannyi sor, mint most',random:'1…grade maximum – egyenletesen (becslés)'},c.lineMode)}</select></label><div class="actions"><button class="primary" id="simulateBtn" ${chancesComplete(c)?'':'disabled'}>▶ 30 000 próbadobás futtatása</button></div>${!chancesComplete(c)?`<div class="warnbox">A százalékok összegének pontosan 100%-nak kell lennie, és minden mezőt ki kell tölteni. Addig nem mutatunk kitalált sikeresélyt.</div>`:''}</section>
 <section class="panel"><h2>📈 Valós / becsült haladás</h2><div class="stats"><div class="stat"><small>Jelenlegi STR+INT</small><strong>+${r2(v.stats)}</strong></div><div class="stat"><small>Jelenlegi sorok</small><strong>${v.count}</strong></div><div class="stat"><small>Átlagos STR/INT</small><strong>${percent(v.statQuality)}</strong></div><div class="stat"><small>Cél / aktuális</small><strong style="font-size:15px">${percent(v.itemPct)} / ${percent(v.goalPct)}</strong></div></div><div id="simResult">${lastSim&&lastSim.cap===S.cap&&lastSim.id===id?lastSim.html:`<div class="notice">Tölts ki egy valódi itemet, add meg a feltételezett sor-esélyeket, és futtasd a modellt. Itt jelenik meg a következő teljes újrapörgetés javulási esélye.</div>`}</div><h3 style="margin-top:18px">Mit jelent az esély?</h3><p class="feature muted">• <b>STR+INT javulás:</b> hány szimulált pörgetés adott több összes statpontot, mint a jelenlegi item.<br>• <b>Saját cél teljesítése:</b> hány próbadobás éri el a kiválasztott itemen megadott %-ot. A fegyver/Shield kötelező feltételei külön számítanak.<br>• <b>CAP / grade váltás:</b> nem jelent automatikus valós tárgyfejlesztést; minden CAP-nak külön adatlapja van.</p><div class="notice"><b>Aktuális item:</b> STR +${r2(v.str)} (${percent(v.strQuality)} maxérték, ${percent(v.strShare)} részarány) · INT +${r2(v.int)} (${percent(v.intQuality)} maxérték, ${percent(v.intShare)} részarány) · közös rollminőség: <b>${percent(v.statQuality)}</b>.</div></section></div>`;}
-function rulesView(){let c=currentCfg();return `<section class="panel"><h2>⚙ ${S.cap} CAP · ${c.degree}DG — szerverparaméterek</h2><div class="notice"><b>v4.8 BÉTA:</b> Az alábbi maximális értékeket a játékosok visszajelzése alapján pontosítjuk. A Freezing ékszernél alapból 20% = 100%. A Normal / SoS / SoM / Sun CAP-alap sorlimiten túl az adott itemhez saját limit is adható.</div><div class="notice"><b>100%-os, kézzel szerkeszthető HP/MP értékek:</b> 90 CAP = 600; 100 = 860; 110 = 1300; 120 = 1300; 125 = 2100; 130 = 2300. 140 CAP nincs hitelesített referenciával feltöltve. <b>Parry Rate:</b> 90 CAP = 40, 100+ CAP = 60 (az elválasztás egyelőre feltételezés). <b>Attack Rate:</b> CAP/DG szerint szerkeszthető (alapból 40 vagy 60); <b>Critical:</b> +1/+2/+3, ahol +3 = 100%; <b>Blocking Rate:</b> 100 = 100%. <b>Durability:</b> menthető, de nem része a minősítésnek. Mindegyik referencia szabadon átírható. A külön itemenkénti saját HP/MP/Parry/Freezing értékeket a Szett &amp; itemek fülön add meg.</div><div class="warnbox">90 CAP / 9DG esetén az STR/INT szervermaximum egyelőre nem ismert, a 40/60 között állítható Attack Rate, +3 Critical és a ruházat HP/MP/Parry/Durability maximumai a begyűjtött adatokon alapulnak. A 5/10/20/30/40 Attack Rate értéklépcsők egyelőre ellenőrzendő tippek. Az itt látható STR/INT minőség matematikai arány, nem feltétlenül a régi SRO kliensben megjelenő Blue-%. A 9/10/11 soros SoS/SoM/Sun értékek a felhasználó által kért <b>kezdő feltételezések</b>, a Sailor 90 CAP szerveren még nincsenek igazolva. Az STR/INT alap értékválasztó +1 és +11 között működik, de a soronkénti modellmaximum felülírható; ez nem szerveresély vagy bizonyított maximum. A rate maximumok továbbra is szerkeszthető sablonértékek. A 130 CAP 14DG Magic/Rare/Legend 9/10/11 rendszeréről létezik nyilvános leírás, de nem igazolja a SoS/SoM/Sun mappinget minden CAP-ra.</div><div class="layout2"><div><h3>Egyetlen sor megengedett értékei</h3><div class="formrow two">${[['maxSTR','Maximum STR/sor (1–11)'],['maxINT','Maximum INT/sor (1–11)'],['maxAR','Maximum Attack Rate/sor'],['maxBR','Maximum Blocking Rate/sor'],['maxCRIT','Maximum Critical/sor (1–3)'],['maxHP','Maximum HP Increase/sor'],['maxMP','Maximum MP Increase/sor'],['maxDUR','Maximum Durability/sor'],['maxPARRY','Maximum Parry Rate/sor'],['maxFREEZE','Maximum Freezing (%) – ékszer']].map(([k,n])=>{if(k==='maxDUR')return `<label>${n} – nem pontozott<input value="Durability értéke megadható a sorban" disabled></label>`;return `<label>${n}<input type="number" min="1" max="${k==='maxSTR'||k==='maxINT'?11:k==='maxCRIT'?3:99999}" data-config="${k}" value="${esc(c[k]??'')}"></label>`;}).join('')}</div><div class="notice"><b>STR/INT (minden CAP):</b> választható +1…+11, ideiglenes matematikai referencia +11/sor. A pontos szervermaximum nincs megerősítve. <b>90 CAP / 9DG egyéb feltételezett értékek:</b> Attack Rate maximum 40/sor (átváltható 60-ra), Critical 1–3/sor. Attack Rate lépcsőtippek: 5, 10, 20, 30, 40 (még nem véglegesítve). A Blue-roll erőssége és a dobási esély külön fogalom.</div><h3 style="margin-top:20px">Itemfokozatok – sorlimitek</h3><p class="info">A SoS, SoM, Sun és Normal alap sorlimiteket te állítod; az adott itemnek külön is adhatsz sorlimitet. A CAP/DG profil és a soronkénti modellmaximum is szerkeszthető a Szett & itemek fülön. Az elméleti STR/INT plafon = sorlimit × az aktuálisan megadott STR vagy INT sormaximum.</p><div class="formrow two">${['Normal','SoS','SoM','Sun'].map(k=>`<label>${k} maximális sor<input type="number" min="1" max="30" data-grade-max="${k}" value="${esc(c.gradeMax[k])}"></label>`).join('')}</div></div><div><h3>Főfegyver & Shield követelmények</h3><div class="formrow two">${[['weaponMinAttackLines','Minimum Attack Rate sor'],['weaponMinPerfectAttackLines','Minimum tökéletes Attack Rate sor'],['weaponMinAttackTotal','Minimum összes Attack Rate'],['weaponMinBlockLines','Minimum tökéletes Blocking Rate sor fegyveren'],['weaponMinBlockValue','Minimum Blocking Rate sorérték (információs)'],['weaponMinStats','Minimum STR+INT fegyveren'],['critMin','Minimum Critical sor Spear / 2H'],['critIdeal','Ideális Critical sor Spear / 2H'],['shieldMinBlockLines','Minimum 100%-os Blocking Rate sor Shielden']].map(([k,n])=>`<label>${n}<input type="number" min="0" max="999" data-config="${k}" value="${esc(c[k]??'')}"></label>`).join('')}</div><div class="notice">Minden CAP külön itemadatokat és minden CAP/DG pár külön statmaximumprofilt tart. Például a 90 CAP-os Shoulder eredménye nem írja felül a 100 CAP-os Shoulder eredményét.</div></div></div><div class="actions"><button class="danger" id="resetCap">Ennek a CAP-nak a szabályait alaphelyzetbe</button><button class="alt" id="resetAll">MINDEN adat törlése</button></div></section>`;}
+function rulesView(){let c=currentCfg();return `<section class="panel"><h2>⚙ ${S.cap} CAP · ${c.degree}DG — szerverparaméterek</h2><div class="notice"><b>v4.9 BÉTA:</b> Az alábbi maximális értékeket a játékosok visszajelzése alapján pontosítjuk. A Freezing ékszernél alapból 20% = 100%. A Normal / SoS / SoM / Sun CAP-alap sorlimiten túl az adott itemhez saját limit is adható.</div><div class="notice"><b>100%-os, kézzel szerkeszthető HP/MP értékek:</b> 90 CAP = 600; 100 = 860; 110 = 1300; 120 = 1300; 125 = 2100; 130 = 2300. 140 CAP nincs hitelesített referenciával feltöltve. <b>Parry Rate:</b> 90 CAP = 40, 100+ CAP = 60 (az elválasztás egyelőre feltételezés). <b>Attack Rate:</b> CAP/DG szerint szerkeszthető (alapból 40 vagy 60); <b>Critical:</b> +1/+2/+3, ahol +3 = 100%; <b>Blocking Rate:</b> 100 = 100%. <b>Durability:</b> menthető, de nem része a minősítésnek. Mindegyik referencia szabadon átírható. A külön itemenkénti saját HP/MP/Parry/Freezing értékeket a Szett &amp; itemek fülön add meg.</div><div class="warnbox">90 CAP / 9DG esetén az STR/INT szervermaximum egyelőre nem ismert, a 40/60 között állítható Attack Rate, +3 Critical és a ruházat HP/MP/Parry/Durability maximumai a begyűjtött adatokon alapulnak. A 5/10/20/30/40 Attack Rate értéklépcsők egyelőre ellenőrzendő tippek. Az itt látható STR/INT minőség matematikai arány, nem feltétlenül a régi SRO kliensben megjelenő Blue-%. A 9/10/11 soros SoS/SoM/Sun értékek a felhasználó által kért <b>kezdő feltételezések</b>, a Sailor 90 CAP szerveren még nincsenek igazolva. Az STR/INT alap értékválasztó +1 és +11 között működik, de a soronkénti modellmaximum felülírható; ez nem szerveresély vagy bizonyított maximum. A rate maximumok továbbra is szerkeszthető sablonértékek. A 130 CAP 14DG Magic/Rare/Legend 9/10/11 rendszeréről létezik nyilvános leírás, de nem igazolja a SoS/SoM/Sun mappinget minden CAP-ra.</div><div class="layout2"><div><h3>Egyetlen sor megengedett értékei</h3><div class="formrow two">${[['maxSTR','Maximum STR/sor (1–11)'],['maxINT','Maximum INT/sor (1–11)'],['maxAR','Maximum Attack Rate/sor'],['maxBR','Maximum Blocking Rate/sor'],['maxCRIT','Maximum Critical/sor (1–3)'],['maxHP','Maximum HP Increase/sor'],['maxMP','Maximum MP Increase/sor'],['maxDUR','Maximum Durability/sor'],['maxPARRY','Maximum Parry Rate/sor'],['maxFREEZE','Maximum Freezing (%) – ékszer']].map(([k,n])=>{if(k==='maxDUR')return `<label>${n} – nem pontozott<input value="Durability értéke megadható a sorban" disabled></label>`;return `<label>${n}<input type="number" min="1" max="${k==='maxSTR'||k==='maxINT'?11:k==='maxCRIT'?3:99999}" data-config="${k}" value="${esc(c[k]??'')}"></label>`;}).join('')}</div><div class="notice"><b>STR/INT (minden CAP):</b> választható +1…+11, ideiglenes matematikai referencia +11/sor. A pontos szervermaximum nincs megerősítve. <b>90 CAP / 9DG egyéb feltételezett értékek:</b> Attack Rate maximum 40/sor (átváltható 60-ra), Critical 1–3/sor. Attack Rate lépcsőtippek: 5, 10, 20, 30, 40 (még nem véglegesítve). A Blue-roll erőssége és a dobási esély külön fogalom.</div><h3 style="margin-top:20px">Itemfokozatok – sorlimitek</h3><p class="info">A SoS, SoM, Sun és Normal alap sorlimiteket te állítod; az adott itemnek külön is adhatsz sorlimitet. A CAP/DG profil és a soronkénti modellmaximum is szerkeszthető a Szett & itemek fülön. Az elméleti STR/INT plafon = sorlimit × az aktuálisan megadott STR vagy INT sormaximum.</p><div class="formrow two">${['Normal','SoS','SoM','Sun'].map(k=>`<label>${k} maximális sor<input type="number" min="1" max="30" data-grade-max="${k}" value="${esc(c.gradeMax[k])}"></label>`).join('')}</div></div><div><h3>Főfegyver & Shield követelmények</h3><div class="formrow two">${[['weaponMinAttackLines','Minimum Attack Rate sor'],['weaponMinPerfectAttackLines','Minimum tökéletes Attack Rate sor'],['weaponMinAttackTotal','Minimum összes Attack Rate'],['weaponMinBlockLines','Minimum tökéletes Blocking Rate sor fegyveren'],['weaponMinBlockValue','Minimum Blocking Rate sorérték (információs)'],['weaponMinStats','Minimum STR+INT fegyveren'],['critMin','Minimum Critical sor Spear / 2H'],['critIdeal','Ideális Critical sor Spear / 2H'],['shieldMinBlockLines','Minimum 100%-os Blocking Rate sor Shielden']].map(([k,n])=>`<label>${n}<input type="number" min="0" max="999" data-config="${k}" value="${esc(c[k]??'')}"></label>`).join('')}</div><div class="notice">Minden CAP külön itemadatokat és minden CAP/DG pár külön statmaximumprofilt tart. Például a 90 CAP-os Shoulder eredménye nem írja felül a 100 CAP-os Shoulder eredményét.</div></div></div><div class="actions"><button class="danger" id="resetCap">Ennek a CAP-nak a szabályait alaphelyzetbe</button><button class="alt" id="resetAll">MINDEN adat törlése</button></div></section>`;}
 function helpView(){return `<section class="panel"><h2>ⓘ Útmutató / ismert korlátok</h2><div class="layout2"><div class="feature"><h3>Hogyan használd?</h3><p><b>1.</b> Válaszd ki a CAP-ot, degree-t és fegyvertípust.<br><b>2.</b> Bal oldalon válassz itemet (Shoulder, Hands, Foot, Head, Chest, Legs, 4 ékszer, fegyver, Shield).<br><b>3.</b> Add meg az item <b>valódi grade-jét</b> és hogy hány Wheel-sort sikerült pörgetni.<br><b>4.</b> Használd a „Wheel-sorösszetétel” mezőket: például 5 STR + 2 INT + 1 Parry = 8 sor. Alkalmazás után minden egyes sor értékét külön add meg. A teljes Wheel-minőség a pontozott sorok (STR/INT/Parry/Attack/Block/Critical/HP/MP) maximális értékükhöz viszonyított százalékának átlaga; a Durability/Egyéb nem pontozott. STR és INT esetén alapból +1 és +11 között választhatsz; a kézi sormaximum ehhez igazítja az értékválasztót, nagy maximumhoz számmezőt ad. Ez nem hitelesített szervermaximum.<br><b>5.</b> A kiválasztott itemnél a saját HP/MP/Parry értékeket kézzel add meg; a program a CAP-hoz beállított maximumhoz viszonyítja. A 125 CAP külön választható. A SoS és egyéb grade-sorlimitek szabadon módosíthatók.<br><b>6.</b> Add meg minden itemhez az egyedi %-os célodat. A teljes item sorának színe az aktuális haladás alapján vált: zöld (cél), sárga (10 százalékponton belül), fehér (távol), piros (20% alatt). A STR és INT minőségét és részarányát külön látod.<br><b>7.</b> A „pörgetés mentése” gombbal historikus sorozatokat is követhetsz.</p><h3>Több SET kezelése</h3><p>A felső <b>Mentett SET-ek</b> részen készíthetsz új szettet, másolhatsz egy meglévőt, átnevezheted vagy törölheted. Minden CAP-hoz saját külön SET-lista tartozik. Az egyes SET-ekhez az itemek, a választott fegyver és annak összes változata, a Shield és az előzmények is hozzá vannak mentve. A CAP-on belüli SET-váltás nem írja felül a másik szettet.</p><h3>Adatmentés</h3><p>A program helyben ment, de másik gépen/böngészőben nem szinkronizál. Az <b>Export JSON</b> biztonsági másolat, amit az Import gombbal visszatölthetsz. A ZIP-ben nincs külső függőség.</p></div><div class="feature"><h3>Fontos szabályok</h3><p><b>STR/INT minőség:</b> A STR/INT sorok megadott értéke osztva az ideiglenes +11-es modellezési felső értékkel; külön STR% és INT%, plusz közös súlyozott minőség. A STR/INT részarány külön mérőszám: STR vagy INT osztva (STR+INT) összponttal. Minden itemhez külön, 1–100%-os saját célt állíthatsz be. A teljes Wheel-minőség az összes megadott, számszerűen pontozható sor átlaga; a hiányzó érték nulla pontot ad, és nem lesz végleges értékelés. Ettől külön látható a célzott STR/INT sorokhoz viszonyított haladás. A legfeljebb +11-es STR/INT maximum csak ideiglenes matematikai referencia; a tényleges soronkénti modellmaximum a Wheel-táblázatban felülírható.</p><p><b>Fegyver:</b> 14 választható CH/EU fegyvertípus; mindegyikhez külön Wheel-sorok és előzmények minden CAP-ban. 90 CAP-on alapkövetelmény a 2 maximális (+40-es) Attack Rate sor, összesen legalább +80 Attack Rate, egy megfelelő Blocking Rate sor, +12 STR/INT. Spear és 2H Sword esetén Critical alapból kötelező, de ezt fegyverenként ki- és bekapcsolhatod. Pajzs csak az arra alkalmas fegyvereknél számít.</p><p><b>Esélyek:</b> a modell nem ismeri a Sailor szerver dobási eloszlását. Csak akkor becsül, ha te saját feltételezett eloszlást adsz meg; az értékeket alapból egyenletesnek tekinti. A soronkénti kézi modellhatárok az itemminőség számítását érintik; a jövőbeli dobás szimulációja továbbra is CAP-alapmaximumokkal dolgozik. A 90 CAP Attack Rate mező 5/10/20/30/40 értékeket javasol, de ezek teljességét még ellenőrizni kell; más beírt értéket sem tilt le.</p><p><b>Szerveradat:</b> a 14DG Magic 9 / Rare 10 / Legend 11 maximumot Sailorhoz kötődő leírás tartalmazza; a SoS / SoM / Sun fokozatok 90–110 CAP-os limitjét ebből nem lehet biztosan következtetni. A képernyőn átírható.</p><p><b>Források:</b><br><a style="color:#8de8c9" href="https://pvpboard.com/en/silkroad/sailor-online" target="_blank" rel="noopener">Sailor Online – PVPBoard bemutató</a><br><a style="color:#8de8c9" href="https://www.rev-gg.com/wheel-system" target="_blank" rel="noopener">Wheel működés – másik SRO szerver, szemléltetés</a></p></div></div></section>`;}
 function paint(){topControls();$('#root').innerHTML=S.tab==='chance'?chanceView():S.tab==='rules'?rulesView():S.tab==='help'?helpView():setView();bindRendered();}
 function toast(txt){let old=$('.toast');if(old)old.remove();let x=document.createElement('div');x.className='toast';x.textContent=txt;document.body.append(x);clearTimeout(toastTimer);toastTimer=setTimeout(()=>x.remove(),2700);}
@@ -817,11 +872,16 @@ function bindRendered(){
   S.setCompare[S.cap]??={};S.setCompare[S.cap][key]=el.value;
   save();paint();
  });
- document.querySelectorAll('[data-balance-base]').forEach(el=>el.onchange=()=>{
-  const key=el.dataset.balanceBase,raw=el.value.trim();if(key!=='str'&&key!=='int')return;
-  const n=Number(raw);
-  if(raw!==''&&(!Number.isInteger(n)||n<0||n>1000000)){toast('Az alap STR és INT 0–1 000 000 közötti egész szám lehet.');paint();return;}
-  if(!S.balanceBases)S.balanceBases={};
+ document.querySelectorAll('[data-balance-field]').forEach(el=>el.onchange=()=>{
+  const key=el.dataset.balanceField,allowed=['str','int','level','extraStr','extraInt','observedPhy','observedMag'];
+  if(!allowed.includes(key))return;
+  const raw=el.value.trim(),n=Number(raw);
+  const fractionAllowed=key==='observedPhy'||key==='observedMag';
+  const min=key==='level'?1:0,max=key==='level'?Number(S.cap):fractionAllowed?120:1000000;
+  if(raw!==''&&(!Number.isFinite(n)||n<min||n>max||(!fractionAllowed&&!Number.isInteger(n)))){
+   toast('Érvénytelen Balance-adat: '+key+' ('+min+'–'+max+').');paint();return;
+  }
+  S.balanceBases??={};
   const vals=S.balanceBases[S.cap]??=freshBalanceBase();vals[key]=raw===''?'':n;
   lastSim=null;save();paint();
  });
@@ -874,7 +934,7 @@ function bindRendered(){
    lastSim=null;save();paint();
  });
  document.querySelectorAll('[data-prob]').forEach(el=>el.onchange=()=>{currentCfg().chances[el.dataset.prob]=el.value===''?'':Math.max(0,Math.min(100,num(el.value)));lastSim=null;save();paint();});
- let snap=$('#snapshotBtn');if(snap)snap.onclick=()=>{let v=check(S.active),o=itm(S.active);if(v.count===0){toast('Adj meg legalább 1 sort!');return;}recordWheelSnapshot(S.active,o);save();paint();toast('Wheel-állapot rögzítve a naplóban.');};
+ let snap=$('#snapshotBtn');if(snap)snap.onclick=()=>{let v=check(S.active),o=itm(S.active);if(v.count===0){toast('Adj meg legalább 1 sort!');return;}if(!recordWheelSnapshot(S.active,o)){toast('Csak teljesen kitöltött, hibamentes Wheel-állapot menthető.');return;}save();paint();toast('Wheel-állapot rögzítve a naplóban.');};
  let reset=$('#resetItemBtn');if(reset)reset.onclick=()=>{if(confirm(`Törlöd a ${NAMES[S.active]} összes eredményét és előzményeit ezen a CAP-on?`)){if(S.active==='weapon')S.weaponInventory[S.cap][weaponId()]=freshItem('weapon');else items()[S.active]=freshItem(S.active);lastSim=null;save();paint();}};
  let cr=$('#critReqSel');if(cr)cr.onchange=()=>{S.critOverrides[S.cap][weaponId()]=cr.value==='yes';lastSim=null;save();paint();};
  let go=$('#goChance');if(go)go.onclick=()=>{S.tab='chance';paint();};
@@ -897,7 +957,7 @@ $('#goalSel').onchange=e=>{S.goal=Math.max(1,Math.min(100,num(e.target.value)||7
 $('#applyGoalAll').onclick=()=>{if(confirm(`Az összes ${S.cap} CAP-os item célját ${percent(S.goal)} értékre állítsam?`)){for(const id of IDS)itm(id).goalPct=S.goal;lastSim=null;save();paint();toast('Az összes item saját célja frissítve.');}};
 document.querySelectorAll('[data-tab]').forEach(el=>el.onclick=()=>{S.tab=el.dataset.tab;save();paint();});
 function downloadBlob(name,contents,type='application/json'){let url=URL.createObjectURL(new Blob([contents],{type}));let a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),3000);}
-$('#exportBtn').onclick=()=>{downloadBlob('Sailor_Wheel_Backup_'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify(S,null,2));noteBackupExport();paint();toast('V4.8 BÉTA JSON-export indítva, ellenőrizd a letöltött fájlt.');};
+$('#exportBtn').onclick=()=>{downloadBlob('Sailor_Wheel_Backup_'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify(S,null,2));noteBackupExport();paint();toast('V4.9 BÉTA JSON-export indítva, ellenőrizd a letöltött fájlt.');};
 $('#importBtn').onclick=()=>$('#importFile').click();
 $('#importFile').onchange=async e=>{let file=e.target.files?.[0];if(!file)return;
 try{let data=JSON.parse(await file.text());if(!data||!data.cfg||!data.sets||!data.cfg[90]||!data.sets[90])throw Error('Nem Sailor Wheel mentés.');
