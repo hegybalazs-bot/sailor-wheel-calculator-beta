@@ -709,7 +709,7 @@ function getSetComparison(cap=S.cap){
 }
 function setComparePanel(){
  const data=getSetComparison();
- if(!data)return `<section class="panel" style="margin-top:16px"><h3>⚔ SET-ek összehasonlítása</h3><p class="info">A két külön SET összevetéséhez készíts legalább még egy SET-et a felső mentett szettek kezelőben.</p></section>`;
+ if(!data)return `<section class="panel" id="wheel-compare" style="margin-top:16px"><h3>⚔ SET-ek összehasonlítása</h3><p class="info">A két külön SET összevetéséhez készíts legalább még egy SET-et a felső mentett szettek kezelőben.</p></section>`;
  const {entries,left,right,leftId,rightId}=data;
  const pick=(side,value)=>`<label>${side==='left'?'Első SET':'Második SET'}<select data-set-compare="${side}">${entries.map(e=>`<option value="${esc(e.id)}" ${e.id===value?'selected':''}>${esc(e.name)}</option>`).join('')}</select></label>`;
  const f=x=>x==null?'—':percent(x),show=x=>x==null?'—':'+'+r2(x);
