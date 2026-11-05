@@ -798,6 +798,7 @@ function normalizeSetBank(){
    if(!bank.entries.some(e=>e.id===bank.activeId))bank.activeId=bank.entries[0].id;
    applySetEntry(cap,bank.entries.find(e=>e.id===bank.activeId));
  }
+ S.apparelStyle=normalizeApparelStyle(activeEntry(S.cap)?.data?.apparelStyle);
  S.schemaVersion=SCHEMA_VERSION;
 }
 normalizeSetBank();
@@ -1442,7 +1443,7 @@ function chooseCap(value){
   S.sets[cap]=Object.fromEntries(IDS.map(id=>[id,freshItem(id)]));
   normalizeGoals();applyStrIntChoiceRange();applyBonusReferenceV42();applyRateRulesV43();initializeDegreeModels();applyFixedStatLimits();normalizeSetBank();
  }
- S.cap=cap;S.weapon=weaponId(cap);S.active='shoulder';lastSim=null;
+ S.cap=cap;S.weapon=weaponId(cap);S.apparelStyle=normalizeApparelStyle(activeEntry(cap)?.data?.apparelStyle);S.active='shoulder';lastSim=null;
  save();paint();return true;
 }
 function topControls(){refreshServerPicker();refreshSetPicker();let c=currentCfg(),wid=weaponId(),w=WEAPONS[wid];
