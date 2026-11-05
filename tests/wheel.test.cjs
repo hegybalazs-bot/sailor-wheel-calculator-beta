@@ -55,7 +55,7 @@ function boot(){
  state:()=>S,html:()=>document.querySelector('#root').innerHTML,
  save,paint,createSet,selectSet,recordWheelSnapshot,
  wheelHistoryStats,wheelComparison,optimizedLinePlan,balanceTargetAdvice,
- getSetComparison,balanceThreshold,balanceMetrics,qualifiedWheelStats,uiIcon,itemLabel,statLabel,itemList,editPanel,shellCards,parryWheelOverview,parryWheelOverviewCell,overviewValidWheelStats,overviewItemView,overviewSummary,overviewTable,check,total,noteBackupExport,backupReminderState
+ getSetComparison,balanceThreshold,balanceMetrics,qualifiedWheelStats,validUserIconData,setUserIcon,clearUserIcon,userIconPanel,uiIcon,itemLabel,statLabel,itemList,editPanel,autoWheelEstimate,autoWheelChancePanel,chanceView,shellCards,parryWheelOverview,parryWheelOverviewCell,overviewValidWheelStats,overviewItemView,overviewSummary,overviewTable,check,total,noteBackupExport,backupReminderState
 };`,sandbox,{timeout:5000});
  return {hooks:sandbox.hooks,document,store,inputs};
 }
@@ -540,4 +540,105 @@ test('v4.9.5: icon and text in desktop/mob SET overview; data are unchanged',()=
  assert.match(hooks.editPanel(),/sro-icon--item/);
  assert.equal(JSON.stringify(hooks.total()),before);
  assert.equal(hooks.state().sets[90].shoulder.rows[0].value,6);
+});
+
+test('v4.9.6: local PNG replaces inventory illustration without altering SET stats',()=>{
+ const {hooks,store}=boot(),s=hooks.state(),o=s.sets[90].shoulder;
+ o.count=1;o.rows=[{type:'STR',value:6,modelMax:11}];
+ const before=hooks.total().str;
+ const png='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAA=';
+ assert.equal(hooks.validUserIconData(png),true);
+ assert.equal(hooks.setUserIcon('shoulder',png),true);
+ assert.ok(hooks.itemLabel('shoulder').includes('sro-icon--custom'));
+ assert.ok(hooks.itemLabel('shoulder').includes('<img'));
+ assert.ok(hooks.itemLabel('shoulder').includes('Shoulder'));
+ assert.ok(hooks.itemList().includes('sro-icon--custom'));
+ assert.ok(hooks.overviewTable().includes('sro-icon--custom'));
+ assert.ok(hooks.editPanel().includes('sro-icon--custom'));
+ assert.equal(hooks.total().str,before);
+ hooks.save();
+ assert.equal(JSON.parse(store['sailor-wheel-calculator-v4']).userIcons.shoulder,png);
+});
+
+test('v4.9.6: PNG/WebP upload restrictions, clearing and labelled inputs',()=>{
+ const {hooks}=boot(),png='data:image/png;base64,AAAA';
+ assert.equal(hooks.setUserIcon('shoulder','data:image/svg+xml;base64,PHN2Zz48c2NyaXB0Pg=='),false);
+ assert.equal(hooks.setUserIcon('invalid-slot',png),false);
+ assert.equal(hooks.setUserIcon('hands','https://example.invalid/a.png'),false);
+ assert.equal(hooks.setUserIcon('hands','data:image/png;base64,'+'A'.repeat(145001)),false);
+ assert.equal(hooks.setUserIcon('hands',png),true);
+ assert.ok(hooks.uiIcon('item','hands').includes('<img'));
+ assert.equal(hooks.clearUserIcon('hands'),true);
+ assert.ok(hooks.uiIcon('item','hands').includes('<svg'));
+ const panel=hooks.userIconPanel();
+ assert.equal((panel.match(/data-custom-icon="/g)||[]).length,12);
+ assert.ok(panel.includes('Media.pk2'));
+ assert.ok(panel.includes('9DG Garment'));
+});
+
+test('v4.9.6: perfect shoulder cannot improve under same-types uniform-value model',()=>{
+ const {hooks}=boot(),s=hooks.state(),o=s.sets[90].shoulder;
+ o.count=1;o.rows=[{type:'STR',value:11,modelMax:11}];
+ hooks.save();hooks.paint();
+ const e=hooks.autoWheelEstimate('shoulder');
+ assert.equal(e.ready,true);
+ assert.equal(e.baseQuality,100);
+ assert.equal(e.better,0);
+ assert.ok(e.worse>80);
+ assert.ok(e.same>0&&e.same<20);
+ assert.equal(e.notBetter,100);
+ assert.equal(e.statBetter,0);
+ for(const word of ['Javulás','Változatlan','Romlás','Nem javul','Nem valós Sailor szerveresély']){
+  assert.ok(hooks.autoWheelChancePanel('shoulder').includes(word),word);
+ }
+ assert.ok(hooks.editPanel().includes('Automatikus javulásbecslés'));
+ assert.ok(hooks.chanceView().includes('Automatikus javulásbecslés'));
+});
+
+test('v4.9.6: low-value shoulder cannot worsen and model follows changes',()=>{
+ const {hooks}=boot(),s=hooks.state(),o=s.sets[90].shoulder;
+ o.count=1;o.rows=[{type:'STR',value:1,modelMax:11}];
+ let e=hooks.autoWheelEstimate('shoulder');
+ assert.equal(e.ready,true);
+ assert.equal(e.worse,0);
+ assert.ok(e.better>80);
+ o.rows[0].value=11;
+ e=hooks.autoWheelEstimate('shoulder');
+ assert.equal(e.better,0);
+ assert.equal(e.notBetter,100);
+ assert.ok(Math.abs(e.better+e.same+e.worse-100)<0.00001);
+ o.rows[0].value='';
+ assert.equal(hooks.autoWheelEstimate('shoulder').ready,false);
+});
+
+test('v4.9.6: multislot model is deterministic and keeps STR+INT comparison distinct',()=>{
+ const {hooks}=boot(),s=hooks.state(),o=s.sets[90].shoulder;
+ o.count=3;o.rows=[
+  {type:'STR',value:6,modelMax:11},
+  {type:'INT',value:7,modelMax:11},
+  {type:'PARRY',value:20,modelMax:40}
+ ];
+ const a=hooks.autoWheelEstimate('shoulder'),b=hooks.autoWheelEstimate('shoulder');
+ assert.equal(a.ready,true);
+ assert.equal(a.trials,20000);
+ assert.equal(a.rated,3);
+ assert.equal(a.statLines,2);
+ assert.equal(a.baseStats,13);
+ assert.ok(a.better>0&&a.better<100);
+ assert.ok(a.worse>0&&a.worse<100);
+ assert.ok(Math.abs(a.better+a.same+a.worse-100)<0.00001);
+ assert.equal(a.better,b.better);
+ assert.equal(a.statBetter,b.statBetter);
+ assert.ok(hooks.autoWheelChancePanel('shoulder').includes('típusa és száma változatlan'));
+});
+
+test('v4.9.6: incomplete and invalid item does not get invented percentages',()=>{
+ const {hooks}=boot(),s=hooks.state(),o=s.sets[90].shoulder;
+ assert.equal(hooks.autoWheelEstimate('shoulder').ready,false);
+ o.count=2;o.rows=[{type:'STR',value:5,modelMax:11},{type:'INT',value:'',modelMax:11}];
+ assert.equal(hooks.autoWheelEstimate('shoulder').ready,false);
+ o.rows[1].value=99;
+ assert.equal(hooks.autoWheelEstimate('shoulder').ready,false);
+ o.rows=[{type:'OTHER',value:''},{type:'DUR',value:''}];
+ assert.equal(hooks.autoWheelEstimate('shoulder').ready,false);
 });

@@ -113,3 +113,25 @@ A vizuális téma alapja a klasszikus **9th Degree (9DG) Chinese Garment**, kül
 - A piktogramok közvetlenül az egyfájlos HTML-ben vannak; **nincs külső ikon-CDN**, így az offline jelleg és a JSON-mentés megmarad.
 
 Tesztelés: a `node --test tests/wheel.test.cjs` regressziós tesztek ellenőrzik a 12 item ikonját, a piros STR/kék INT színét, a neveket és a számítások változatlanságát. Valódi mobilböngészős megjelenítési teszt külön feladat.
+
+## Emerald v4.9.6 – automatikus javulásbecslés itemenként és eredeti képek betöltése
+
+### Azonnali becslés a kijelölt itemhez
+Ha kiválasztod például a **Shoulder** itemet és megadod az összes pontozott Wheel-sor típusát, értékét, valamint a szerkeszthető soronkénti maximumát, a **Szett & itemek** és a **Következő Wheel / Feather Pen** nézetben azonnal megjelenik az automatikus becslés:
+
+- **Javulás**: a következő értéksor a jelenleginél nagyobb átlagos Wheel-minőséget ad.
+- **Változatlan**: azonos átlagos Wheel-minőség.
+- **Romlás**: alacsonyabb átlagos Wheel-minőség.
+- **Nem javul**: a változatlan és a romlás együtt.
+- Külön jelenik meg a **STR+INT összpontszám növekedésének modellezett esélye**, ha az itemen van STR/INT sor.
+
+A becslés **20 000 determinisztikus Monte Carlo próbadobással** készül; nem igényli a sorok esélyeinek manuális kitöltését, és automatikusan frissül az itemek és statok változásakor. **Feltételezés:** az item Wheel-sorainak típusa és száma **nem változik**, csak az egyes, már ismert sorok értéke; a sorsolás a beállított `1…maximum` tartományon belül *egyenletes* (Freezing esetén 0,1 lépéssel). Az összes számszerű, pontozott sor azonos súllyal szerepel a Wheel-minőségben, a Durability és az Egyéb nem pontozott. A kijelzett százalék a **feltételes modell eredménye**, **nem ellenőrzött szerveresély**, és nem jósolja meg az eltérő sorösszetételű újrapörgetést. Ez utóbbihoz az eddigi kézi teljes-újrapörgetés modell megmarad. **Hiányos vagy érvénytelen sorok esetén nem jelenítünk meg kitalált százalékot.**
+
+### Eredeti Silkroad inventory ikonok saját képből
+A felszereléslista alján az új **„Eredeti Silkroad ikonok betöltése”** kinyitható panellel a 12 felszerelési slothoz külön **PNG vagy WebP** ikon választható (maximum 96 KB / kép). A betöltött kép automatikusan és mindenhol lecseréli a v4.9.5-ben készült stilizált SVG-t, az **ikon + szöveg** formátum megmarad. A saját képek is bekerülnek a helyi mentés és a JSON-export adataiba, más CAP és SET esetén is látszanak; külön törölhetők, amivel a vektoros helyettesítő visszaáll.
+
+**A csomag nem tartalmazza az eredeti Silkroad 9DG játékikonokat**: azokat a felhasználó tölti fel megbízható, jogszerűen használható PNG/WebP fájlból. A Silkroad kliens ikonjai jellemzően a `Media.pk2` / `.ddj` formátumhoz kötődnek, amit először képformátumba kell alakítani. A program nem nyúl a játék klienséhez. Az ikonok helyi fájlok, **nincs külső képlink és nincs automatikus szerverfeltöltés**.
+
+A meglévő SET-adatok, szabályok, JSON-visszatöltés és alapvető képlet változatlan; a tárolás szerkezete visszafelé kompatibilis.
+
+**Teszt:** `node --test tests/wheel.test.cjs` – 33 automatizált regressziós teszt. Mobilos valós eszközteszt még hátravan.
