@@ -55,7 +55,7 @@ function boot(){
  state:()=>S,html:()=>document.querySelector('#root').innerHTML,translateText,translateMarkup,setUiLanguage,helpViewEnglish,promptUI,confirmUI,alertUI,validServerState,profileCaps,
  save,paint,createSet,selectSet,recordWheelSnapshot,
  wheelHistoryStats,wheelComparison,optimizedLinePlan,balanceTargetAdvice,
- getSetComparison,balanceThreshold,balanceMetrics,qualifiedWheelStats,chooseCap,rowValueEditor,itemBlueInventory,blueInventoryView,addServerProfile,renameServerProfile,switchServerProfile,currentServerName,exportAllProfiles,importAllProfiles,applyFixedStatLimits,switchDegreeModel,blueTypesFor,blueCatalogKey,BLUE_BASE,setBlueTypes,resetBlueTypes,blueCatalogWarnings,blueCatalogPanel,blueTypeCountPanel,visiblePlanTypes,chanceWeightsFor,ensureChanceWeights,chancesComplete,rowMax,penOneBlueEstimate,keepOrRerollAdvice,keepOrRerollPanel,validUserIconData,setUserIcon,clearUserIcon,userIconPanel,uiIcon,itemLabel,statLabel,itemList,editPanel,iconIdentity,verifiedIconFor,VERIFIED_ICON_ASSETS,normalizeApparelStyle,autoWheelEstimate,autoWheelChancePanel,chanceView,shellCards,parryWheelOverview,parryWheelOverviewCell,overviewValidWheelStats,overviewItemView,overviewSummary,overviewTable,check,total,noteBackupExport,backupReminderState
+ getSetComparison,balanceThreshold,balanceMetrics,qualifiedWheelStats,chooseCap,rowValueEditor,itemBlueInventory,blueInventoryView,addServerProfile,renameServerProfile,switchServerProfile,currentServerName,exportAllProfiles,importAllProfiles,applyFixedStatLimits,switchDegreeModel,blueTypesFor,blueCatalogKey,BLUE_BASE,setBlueTypes,resetBlueTypes,blueCatalogWarnings,blueCatalogPanel,blueTypeCountPanel,visiblePlanTypes,chanceWeightsFor,ensureChanceWeights,chancesComplete,rowMax,penOneBlueEstimate,keepOrRerollAdvice,keepOrRerollPanel,validUserIconData,setUserIcon,clearUserIcon,userIconPanel,uiIcon,itemLabel,statLabel,itemList,editPanel,iconIdentity,verifiedIconFor,verifiedWheelIconFor,wheelToolIcon,VERIFIED_ICON_ASSETS,normalizeApparelStyle,autoWheelEstimate,autoWheelChancePanel,chanceView,shellCards,parryWheelOverview,parryWheelOverviewCell,overviewValidWheelStats,overviewItemView,overviewSummary,overviewTable,check,total,noteBackupExport,backupReminderState
 };`,sandbox,{timeout:5000});
  return {hooks:sandbox.hooks,document,store,inputs};
 }
@@ -1389,4 +1389,25 @@ test('v5 icon foundation: ambiguous verified matches fail closed',()=>{
  })));
  assert.equal(hooks.verifiedIconFor('chest'),null);
  assert.match(hooks.itemLabel('chest'),/helyettesítő/);
+});
+
+test('v5 Wheel icon registry: only unique verified Wheel/Feather Pen art is rendered',()=>{
+ const {hooks}=boot();
+ assert.equal(hooks.verifiedWheelIconFor('wheel_of_fortune'),null);
+ assert.match(hooks.wheelToolIcon('wheel_of_fortune','🎲'),/🎲/);
+ hooks.VERIFIED_ICON_ASSETS.push({
+  category:'wheel',role:'wheel_of_fortune',verified:true,
+  path:'assets/icons/wheel/wheel.png'
+ },{
+  category:'wheel',role:'feather_pen',verified:true,
+  path:'assets/icons/wheel/pen.webp'
+ });
+ assert.match(hooks.chanceView(),/data-icon-source="verified-wheel"/);
+ assert.match(hooks.wheelToolIcon('feather_pen','🧠'),/pen.webp/);
+ assert.equal(hooks.verifiedWheelIconFor('unknown'),null);
+ hooks.VERIFIED_ICON_ASSETS.push({
+  category:'wheel',role:'feather_pen',verified:true,
+  path:'assets/icons/wheel/another.png'
+ });
+ assert.equal(hooks.verifiedWheelIconFor('feather_pen'),null,'ambiguous wheel role must use fallback');
 });
