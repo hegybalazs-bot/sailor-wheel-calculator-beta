@@ -759,7 +759,7 @@ test('v4.9.7: Pen estimate refuses missing/unsupported Blue limits',()=>{
 
 test('v4.9.7: a met item goal yields KEEP advice even with high improvement chance',()=>{
  const {hooks}=boot(),s=hooks.state(),obj=s.sets[90].shoulder;
- obj.count=1;obj.rows=[{type:'STR',value:8,modelMax:11}];obj.goalPct=50;
+ obj.count=1;obj.target=1;obj.rows=[{type:'STR',value:8,modelMax:11}];obj.goalPct=50;
  const a=hooks.keepOrRerollAdvice('shoulder');
  assert.equal(a.ready,true);
  assert.equal(a.tone,'keep');
