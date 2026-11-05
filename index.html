@@ -62,6 +62,12 @@
 .balance-reference-values strong{display:block;margin-top:5px;font-size:21px;color:#afffd5}
 @media(max-width:800px){.balance-reference-values{grid-template-columns:repeat(2,minmax(0,1fr))}.balance-reference-values strong{font-size:19px}}
 
+/* v4.9.8 – profile controls */
+.serverbar{margin:14px 25px 0;padding:12px 15px;display:flex;align-items:center;flex-wrap:wrap;gap:10px;border:1px solid #335f59;border-radius:10px;background:#102522}
+.serverbar label{min-width:200px;max-width:320px;flex:1}
+.serverbar strong{color:#b4ffdc}
+.serverbar small{flex-basis:100%;font-size:11px;color:#b9d7d0}
+@media(max-width:650px){.serverbar{margin:12px 10px 0}.serverbar label{flex-basis:100%;max-width:none}}
 /* v4.9.8 – every possible Blue visibly represented in the final overview */
 .set-overview .blue-inventory-overview{min-width:180px;max-width:420px;padding:5px;border:1px solid #315d55;border-radius:8px;background:#0a1c1f}
 .set-overview .blue-inventory-overview summary{cursor:pointer;color:#b7fce0;font-weight:700;font-size:12px;white-space:normal}
@@ -242,7 +248,14 @@ background:radial-gradient(circle at 28% 15%,#453656,#1c2136 66%,#102329);box-sh
 </head>
 <body><div class="shell">
 <header><div class="brand"><h1><span class="emblem">⚔</span>SAILOR WHEEL CALCULATOR <span class="badgebox">EMERALD v4.9.7 BÉTA</span></h1><small>Szettkezelő · Wheel-sorok · STR/INT · Fegyver & Shield · Pörgetési esélymodell</small></div><div class="head-actions"><a href="visszajelzes.html" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;justify-content:center;border:1px solid #3c846f;border-radius:10px;padding:8px 12px;color:#afffdf;font-weight:700;text-decoration:none">📝 Hibajelentés / ötlet</a><button id="exportBtn">↓ Mentés JSON-ba</button><button id="importBtn">↑ Betöltés</button><button class="alt" id="printBtn">⎙ Nyomtatás</button><input type="file" id="importFile" accept=".json,application/json" class="hide"></div></header>
-<div style="margin:12px 25px 0;padding:10px 15px;border:1px solid #997e35;border-radius:10px;background:#2c2514;color:#ffe4a5;font-size:12px"><b>NYILVÁNOS TESZTVÁLTOZAT:</b> a CAP / SoS / SoM / Sun maximumok ellenőrzendő becslések. A program nem kapcsolódik a Sailor szerveréhez. A beírt adatok csak a böngésződben tárolódnak; készíts rendszeresen JSON mentést.</div><section class="setbar" aria-label="Szettkezelés">
+<div style="margin:12px 25px 0;padding:10px 15px;border:1px solid #997e35;border-radius:10px;background:#2c2514;color:#ffe4a5;font-size:12px"><b>NYILVÁNOS TESZTVÁLTOZAT:</b> a CAP / SoS / SoM / Sun maximumok ellenőrzendő becslések. A program nem kapcsolódik a Sailor szerveréhez. A beírt adatok csak a böngésződben tárolódnak; készíts rendszeresen JSON mentést.</div><section class="serverbar" aria-label="Szerverprofil kezelése">
+ <strong>🌐 Szerverprofil</strong>
+ <label>Aktív szerver<select id="serverPicker" aria-label="Aktív Silkroad szerverprofil"></select></label>
+ <button id="newServerBtn" type="button">＋ Új szerverprofil</button>
+ <button id="renameServerBtn" type="button">✎ Szerver átnevezése</button>
+ <small>Minden szerver saját CAP-beállításokat, SET-eket, Blue-katalógust és statokat tárol.</small>
+ </section>
+ <section class="setbar" aria-label="Szettkezelés">
   <div class="setbar-title"><strong>🗂 Mentett SET-ek</strong><span id="setCount" class="muted"></span></div>
   <label class="setbar-picker">Aktív szett neve<select id="setPicker" aria-label="Mentett szettek"></select></label>
   <div class="setbar-actions"><button class="primary" id="newSetBtn">＋ Új SET</button><button id="copySetBtn">⧉ Másolás</button><button class="alt" id="renameSetBtn">✎ Átnevezés</button><button class="danger" id="deleteSetBtn">⌫ Törlés</button></div>
@@ -469,7 +482,8 @@ const BONUS_HP_MP_REF={90:600,100:860,110:1300,120:1300,125:2100,130:2300};
 // A 40/60 átmenet CAP-ja egyelőre feltételezés: 90=40, 100+-on 60; minden CAP szerkeszthető.
 const BONUS_PARRY_REF={90:40,100:60,110:60,120:60,125:60,130:60,140:60};
 const STR_INT_CHOICE_MAX=11; // Ideiglenes kezelési tartomány; nem igazolt Sailor-szervermaximum.
-const STORAGE='sailor-wheel-calculator-v4';
+const STORAGE='sailor-wheel-calculator-v4'; // Legacy key retained to preserve saved sets
+const SERVERS_STORAGE='wheel-calculator-server-profiles-v1';
 const LEGACY_STORAGE='sailor-wheel-calculator-v1';
 const SCHEMA_VERSION=4.9;
 const $=s=>document.querySelector(s);const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -634,6 +648,95 @@ function normalizeSetBank(){
  S.schemaVersion=SCHEMA_VERSION;
 }
 normalizeSetBank();
+// v4.9.8 – Independent server profiles. The active profile stays in the legacy
+// STORAGE record; inactive profiles are kept in a separate server-index key.
+// No nested copy of the active state is stored there (prevents quota duplication).
+let P;
+function initServerProfiles(){
+ try{P=JSON.parse(localStorage.getItem(SERVERS_STORAGE)||'null');}catch(_){P=null;}
+ if(!P||!Array.isArray(P.entries)||!P.entries.length){
+  P={activeId:'srv_sailor',entries:[{id:'srv_sailor',name:'Sailor Online',data:null}]};
+ }
+ P.entries=P.entries.filter(x=>x&&typeof x.id==='string'&&typeof x.name==='string').slice(0,30);
+ if(!P.entries.length)P={activeId:'srv_sailor',entries:[{id:'srv_sailor',name:'Sailor Online',data:null}]};
+ if(!P.entries.some(x=>x.id===P.activeId))P.activeId=P.entries[0].id;
+ P.entries.find(x=>x.id===P.activeId).data=null;
+}
+function activeServerProfile(){return P.entries.find(x=>x.id===P.activeId);}
+function currentServerName(){return activeServerProfile()?.name||'Sailor Online';}
+function refreshServerPicker(){
+ const picker=$('#serverPicker');if(!picker)return;
+ picker.innerHTML=P.entries.map(e=>`<option value="${esc(e.id)}" ${e.id===P.activeId?'selected':''}>${esc(e.name)}</option>`).join('');
+}
+function serverStateSnapshot(){
+ syncActiveSet();snapshotDegreeModel(currentCfg());
+ return copyJSON(S);
+}
+function restoreServerState(data){
+ if(!data||!data.cfg||!data.sets)throw Error('Hibás szerverprofil adat.');
+ S=copyJSON(data);
+ if(!CAPS.includes(Number(S.cap))&&Number.isInteger(Number(S.cap))&&Number(S.cap)>=1&&Number(S.cap)<=200)CAPS.push(Number(S.cap));
+ for(const cap of Object.keys(S.cfg||{}).map(Number)){
+  if(Number.isInteger(cap)&&cap>=1&&cap<=200&&!CAPS.includes(cap))CAPS.push(cap);
+ }
+ CAPS.sort((a,b)=>a-b);
+ normalizeGoals();applyStrIntChoiceRange();applyBonusReferenceV42();applyRateRulesV43();
+ initializeDegreeModels();normalizeSetBank();
+ if(!CAPS.includes(S.cap))S.cap=90;
+ if(!IDS.includes(S.active))S.active='shoulder';
+}
+function switchServerProfile(id){
+ const target=P.entries.find(x=>x.id===id);
+ if(!target)return false;
+ if(target.id===P.activeId)return true;
+ if(!target.data||!target.data.cfg||!target.data.sets)return false;
+ activeServerProfile().data=serverStateSnapshot();
+ const newState=copyJSON(target.data);
+ target.data=null;
+ P.activeId=id;
+ restoreServerState(newState);
+ lastSim=null;save();paint();return true;
+}
+function addServerProfile(name){
+ const label=String(name??'').trim().slice(0,60);
+ if(!label||P.entries.length>=30)return false;
+ activeServerProfile().data=serverStateSnapshot();
+ const id='srv_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7);
+ P.entries.push({id,name:label,data:null});P.activeId=id;
+ S=initial();normalizeGoals();applyStrIntChoiceRange();applyBonusReferenceV42();applyRateRulesV43();
+ initializeDegreeModels();normalizeSetBank();
+ S.active='shoulder';S.tab='set';lastSim=null;
+ save();paint();return true;
+}
+function renameServerProfile(name){
+ const label=String(name??'').trim().slice(0,60);
+ if(!label)return false;
+ activeServerProfile().name=label;save();paint();return true;
+}
+function exportAllProfiles(){
+ const snapshot=serverStateSnapshot();
+ return {...snapshot,serverProfiles:{activeId:P.activeId,entries:P.entries.map(e=>({
+  id:e.id,name:e.name,data:e.id===P.activeId?snapshot:copyJSON(e.data)
+ }))}};
+}
+function importAllProfiles(data){
+ if(!data||!data.cfg||!data.sets||!data.cfg[90]||!data.sets[90])throw Error('Nem érvényes Wheel Calculator mentés.');
+ const raw=data.serverProfiles;
+ const active={...data};delete active.serverProfiles;
+ if(raw&&Array.isArray(raw.entries)&&raw.entries.length&&raw.entries.length<=30){
+  const entries=raw.entries.filter(e=>e&&typeof e.id==='string'&&typeof e.name==='string'&&e.data&&e.data.cfg&&e.data.sets);
+  if(!entries.length)throw Error('Sérült szerverprofil-mentés.');
+  const selected=entries.find(e=>e.id===raw.activeId)||entries[0];
+  P={activeId:selected.id,entries:entries.map(e=>({id:e.id,name:e.name.slice(0,60),data:e.id===selected.id?null:e.data}))};
+  restoreServerState(selected.data);
+ }else{
+  // Old Sailor-only exports restore the active profile, retaining other profiles.
+  restoreServerState(active);
+ }
+ lastSim=null;save();paint();
+ return true;
+}
+initServerProfiles();
 function makeSetName(defaultName,question){const answer=prompt(question,defaultName);if(answer===null)return null;let name=safeSetName(answer);if(!name){alert('A SET neve nem lehet üres.');return null;}return name;}
 function selectSet(id){let bank=activeBank(),entry=bank.entries.find(x=>x.id===id);if(!entry||bank.activeId===id)return;
  syncActiveSet();bank.activeId=id;applySetEntry(S.cap,entry);S.active='shoulder';lastSim=null;save();paint();toast('SET betöltve: '+entry.name);
@@ -658,7 +761,7 @@ function refreshSetPicker(){let bank=activeBank();let picker=$('#setPicker');if(
 }
 
 let lastSim=null;let toastTimer;
-function save(){try{syncActiveSet();snapshotDegreeModel(currentCfg());S.schemaVersion=SCHEMA_VERSION;localStorage.setItem(STORAGE,JSON.stringify(S));$('#saveStatus').textContent='✓ V4.9.7 BÉTA SET mentve';}catch(_){$('#saveStatus').textContent='⚠ A böngésző nem engedi a tárolást – exportálj JSON-t!';}}
+function save(){try{syncActiveSet();snapshotDegreeModel(currentCfg());S.schemaVersion=SCHEMA_VERSION;localStorage.setItem(STORAGE,JSON.stringify(S));if(typeof P!=='undefined'&&P?.entries)localStorage.setItem(SERVERS_STORAGE,JSON.stringify(P));$('#saveStatus').textContent='✓ V4.9.7 BÉTA SET mentve';}catch(_){$('#saveStatus').textContent='⚠ A böngésző nem engedi a tárolást – exportálj JSON-t!';}}
 function currentCfg(){return S.cfg[S.cap];}function items(){return S.sets[S.cap];}
 function weaponId(cap=S.cap){return normalizeWeapon(S.weaponByCap?.[cap]||S.weapon);}
 function critRequired(id=weaponId(),cap=S.cap){return S.critOverrides?.[cap]?.[id]===undefined?WEAPONS[id].crit:Boolean(S.critOverrides[cap][id]);}
@@ -1151,7 +1254,7 @@ function chooseCap(value){
  S.cap=cap;S.weapon=weaponId(cap);S.active='shoulder';lastSim=null;
  save();paint();return true;
 }
-function topControls(){refreshSetPicker();let c=currentCfg(),wid=weaponId(),w=WEAPONS[wid];
+function topControls(){refreshServerPicker();refreshSetPicker();let c=currentCfg(),wid=weaponId(),w=WEAPONS[wid];
  $('#capSel').innerHTML=CAPS.map(v=>`<option ${String(S.cap)===String(v)?'selected':''} value="${v}">${v} CAP</option>`).join('');
  $('#capQuick').value=String(S.cap);
  $('#degreeInput').value=c.degree;
@@ -1725,14 +1828,17 @@ $('#goalSel').onchange=e=>{S.goal=Math.max(1,Math.min(100,num(e.target.value)||7
 $('#applyGoalAll').onclick=()=>{if(confirm(`Az összes ${S.cap} CAP-os item célját ${percent(S.goal)} értékre állítsam?`)){for(const id of IDS)itm(id).goalPct=S.goal;lastSim=null;save();paint();toast('Az összes item saját célja frissítve.');}};
 document.querySelectorAll('[data-tab]').forEach(el=>el.onclick=()=>{S.tab=el.dataset.tab;save();paint();});
 function downloadBlob(name,contents,type='application/json'){let url=URL.createObjectURL(new Blob([contents],{type}));let a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),3000);}
-$('#exportBtn').onclick=()=>{downloadBlob('Sailor_Wheel_Backup_'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify(S,null,2));noteBackupExport();paint();toast('V4.9.7 BÉTA JSON-export indítva, ellenőrizd a letöltött fájlt.');};
+$('#exportBtn').onclick=()=>{downloadBlob('Wheel_Calculator_Backup_'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify(exportAllProfiles(),null,2));noteBackupExport();paint();toast('V4.9.7 BÉTA JSON-export indítva, ellenőrizd a letöltött fájlt.');};
 $('#importBtn').onclick=()=>$('#importFile').click();
 $('#importFile').onchange=async e=>{let file=e.target.files?.[0];if(!file)return;
-try{let data=JSON.parse(await file.text());if(!data||!data.cfg||!data.sets||!data.cfg[90]||!data.sets[90])throw Error('Nem Sailor Wheel mentés.');
+try{let data=JSON.parse(await file.text());if(!data||!data.cfg||!data.sets||!data.cfg[90]||!data.sets[90])throw Error('Nem érvényes Wheel Calculator mentés.');
  if(confirm('Betöltöd a teljes mentést? A jelenlegi v4-es adatok felülíródnak. Előbb érdemes JSON-ba menteni.')){
-  S=data;normalizeGoals();applyStrIntChoiceRange();applyBonusReferenceV42();applyRateRulesV43();initializeDegreeModels();normalizeSetBank();lastSim=null;save();paint();toast('Mentés betöltve, SET-ek helyreállítva.');
+  importAllProfiles(data);toast('Mentés betöltve, szerverprofilok és SET-ek helyreállítva.');
  }}catch(err){alert('Nem sikerült betölteni: '+err.message)}e.target.value='';};
 $('#printBtn').onclick=()=>window.print();
+$('#serverPicker').onchange=e=>{if(!switchServerProfile(e.target.value)){toast('A szerverprofil betöltése nem sikerült.');paint();}};
+$('#newServerBtn').onclick=()=>{const name=prompt('Új szerver neve (külön mentésekkel):','Új Silkroad szerver');if(name===null)return;if(!addServerProfile(name))toast('Adj meg érvényes nevet (maximum 30 szerver).');};
+$('#renameServerBtn').onclick=()=>{const name=prompt('Szerver új neve:',currentServerName());if(name===null)return;if(!renameServerProfile(name))toast('A szerver neve nem lehet üres.');};
 $('#setPicker').onchange=e=>selectSet(e.target.value);
 $('#newSetBtn').onclick=()=>createSet(false);
 $('#copySetBtn').onclick=()=>createSet(true);
