@@ -54,7 +54,7 @@ function boot(){
  state:()=>S,html:()=>document.querySelector('#root').innerHTML,
  save,paint,createSet,selectSet,recordWheelSnapshot,
  wheelHistoryStats,wheelComparison,optimizedLinePlan,balanceTargetAdvice,
- getSetComparison,balanceThreshold,balanceMetrics,qualifiedWheelStats,parryWheelOverview,parryWheelOverviewCell,overviewTable,check,total,noteBackupExport,backupReminderState
+ getSetComparison,balanceThreshold,balanceMetrics,qualifiedWheelStats,parryWheelOverview,parryWheelOverviewCell,overviewValidWheelStats,overviewItemView,overviewSummary,overviewTable,check,total,noteBackupExport,backupReminderState
 };`,sandbox,{timeout:5000});
  return {hooks:sandbox.hooks,document,store,inputs};
 }
@@ -301,7 +301,7 @@ test('v4.9.2: Parry from Wheel rows is shown in final SET overview',()=>{
  assert.equal(p.quality,80);
  assert.equal(p.count,1);
  const table=hooks.overviewTable();
- assert.match(table,/<th>Parry Rate \/ max<\/th>/);
+ assert.match(table,/<th>Parry Rate<\/th>/);
  assert.doesNotMatch(table,/<th>Parry külön/);
  const row=table.match(/data-overview-row="shoulder"[\s\S]*?<\/tr>/)?.[0];
  assert.ok(row,'shoulder row missing');
@@ -343,12 +343,12 @@ test('v4.9.2: multi-line Parry uses best valid row maximum; invalid values are w
  assert.match(hooks.parryWheelOverviewCell(obj),/Hibás sor/);
 });
 
-test('v4.9.3: 15 headers align with row cells and Parry does not duplicate',()=>{
+test('v4.9.4: 9 headers align with row cells and Parry does not duplicate',()=>{
  const {hooks}=boot();
  const html=hooks.overviewTable();
  const thead=html.match(/<thead>([\s\S]*?)<\/thead>/)?.[1]??'';
  const headerCount=(thead.match(/<th>/g)||[]).length;
- assert.equal(headerCount,15);
+ assert.equal(headerCount,9);
  assert.equal((thead.match(/Parry Rate/g)||[]).length,1);
  for(const name of ['shoulder','hands','weapon']){
   const row=html.match(new RegExp('data-overview-row="'+name+'"[\\s\\S]*?<\\/tr>'))?.[0];
@@ -375,5 +375,105 @@ test('v4.9.3: Wheel-only, manual-only and both display in one Parry cell',()=>{
  assert.doesNotMatch(row('hands'),/Wheel:<\/b>/);
  assert.match(row('chest'),/Wheel:<\/b> \+30 \/ \+40 \(75%\)/);
  assert.match(row('chest'),/Kézi:<\/b> \+35 \/ \+40 \(87[,.]5%\)/);
- assert.equal((row('chest').match(/<td\b/g)||[]).length,15);
+ assert.equal((row('chest').match(/<td\b/g)||[]).length,9);
+});
+
+test('v4.9.4: desktop table and mobile cards cover the same 12 items',()=>{
+ const {hooks}=boot();
+ const html=hooks.overviewTable();
+ const desktop=(html.match(/data-overview-row="/g)||[]).length;
+ const mobile=(html.match(/data-overview-card="/g)||[]).length;
+ assert.equal(desktop,12);
+ assert.equal(mobile,12);
+ assert.match(html,/<th>STR \/ INT<\/th>/);
+ assert.match(html,/<th>Parry Rate<\/th>/);
+ assert.match(html,/<th>Rate: AR \/ BR \/ Crit<\/th>/);
+ assert.match(html,/class="overview-cards"/);
+ assert.match(html,/Mutasd a többi statot/);
+ assert.match(html,/SET statösszesítés/);
+});
+
+test('v4.9.4: separate validated Wheel and manual stat totals without duplicate HP/MP',()=>{
+ const {hooks}=boot(),s=hooks.state(),shoulder=s.sets[90].shoulder,hands=s.sets[90].hands;
+ shoulder.count=6;shoulder.rows=[
+  {type:'STR',value:5,modelMax:11},
+  {type:'INT',value:4,modelMax:11},
+  {type:'AR',value:20,modelMax:40},
+  {type:'BR',value:80,modelMax:100},
+  {type:'CRIT',value:3,modelMax:3},
+  {type:'AR',value:99,modelMax:40}
+ ];
+ hands.count=3;hands.rows=[
+  {type:'HP',value:500,modelMax:600},
+  {type:'MP',value:450,modelMax:600},
+  {type:'PARRY',value:20,modelMax:40}
+ ];
+ hands.bonusStats.HP=300;
+ hands.bonusStats.MP=200;
+ hands.bonusStats.PARRY=30;
+ const shield=s.sets[90].shield;shield.count=1;shield.rows=[{type:'STR',value:11,modelMax:11}];
+ hooks.save();hooks.paint();
+ const stats=hooks.overviewSummary(['shoulder','hands','shield'].map(id=>hooks.overviewItemView(id)));
+ assert.equal(stats.str,5,'unused spear shield must not add STR');
+ assert.equal(stats.int,4);
+ assert.equal(stats.ar,20,'invalid AR 99/40 should not be counted');
+ assert.equal(stats.br,80);
+ assert.equal(stats.crit,1);
+ assert.equal(stats.hpWheel,500);
+ assert.equal(stats.mpWheel,450);
+ assert.equal(stats.hpManual,300);
+ assert.equal(stats.mpManual,200);
+ assert.equal(stats.parryLines,1);
+ assert.equal(stats.invalid,1,'invalid rate roll excluded and flagged');
+ const row=hooks.overviewTable().match(/data-overview-row="hands"[\s\S]*?<\/tr>/)?.[0];
+ assert.ok(row);
+ assert.match(row,/Wheel:<\/b> \+20 \/ \+40 \(50%\)/);
+ assert.match(row,/Kézi:<\/b> \+30 \/ \+40 \(75%\)/);
+ assert.match(row,/HP \+300 \/ \+600 \(50%\)/);
+ assert.doesNotMatch(row,/\+800 \/ /);
+});
+
+test('v4.9.4: custom row ceilings and CAP reference change remain consistent',()=>{
+ const {hooks}=boot(),s=hooks.state(),shoulder=s.sets[90].shoulder;
+ shoulder.count=2;
+ shoulder.rows=[{type:'PARRY',value:33,modelMax:50},{type:'AR',value:45,modelMax:60}];
+ shoulder.bonusStats.PARRY=38;
+ hooks.save();hooks.paint();
+ let item=hooks.overviewItemView('shoulder');
+ assert.equal(item.extra.totals.PARRY.sum,33);
+ assert.equal(item.extra.totals.AR.sum,45);
+ assert.equal(hooks.parryWheelOverview(shoulder).max,50);
+ const first=hooks.overviewTable().match(/data-overview-row="shoulder"[\s\S]*?<\/tr>/)?.[0];
+ assert.ok(first);
+ assert.match(first,/\+33 \/ \+50 \(66%\)/);
+ assert.match(first,/\+38 \/ \+40 \(95%\)/);
+ assert.match(first,/AR: \+45/);
+ s.cfg[90].maxPARRY=60;
+ hooks.paint();
+ const second=hooks.overviewTable().match(/data-overview-row="shoulder"[\s\S]*?<\/tr>/)?.[0];
+ assert.match(second,/Kézi:<\/b> \+38 \/ \+60 \(63[,.]3%\)/);
+ assert.match(second,/Wheel:<\/b> \+33 \/ \+50 \(66%\)/);
+});
+
+test('v4.9.4: out-of-model manual values are flagged rather than inflating totals',()=>{
+ const {hooks}=boot(),s=hooks.state(),hands=s.sets[90].hands;
+ hands.count=1;hands.rows=[{type:'HP',value:400,modelMax:600}];
+ hands.bonusStats.HP=999; // model cap for 90 is 600
+ hooks.save();hooks.paint();
+ const summary=hooks.overviewSummary(['hands'].map(id=>hooks.overviewItemView(id)));
+ assert.equal(summary.hpWheel,400);
+ assert.equal(summary.hpManual,0,'invalid manual over-cap must not inflate estimated SET totals');
+ assert.match(hooks.overviewTable(),/\+999 \/ \+600 \(166[,.]5%\) ⚠/);
+});
+
+test('v4.9.4: missing HP/MP/Rate data show a dash instead of pretend +0',()=>{
+ const {hooks}=boot();
+ const summary=hooks.overviewSummary(['shoulder','hands'].map(id=>hooks.overviewItemView(id)));
+ assert.equal(summary.hpWheelCount,0);
+ assert.equal(summary.hpManualCount,0);
+ assert.equal(summary.arCount,0);
+ const overview=hooks.overviewTable();
+ assert.match(overview,/HP \/ MP Wheel<\/small><strong>— \/ —<\/strong>/);
+ assert.match(overview,/HP \/ MP kézi<\/small><strong>— \/ —<\/strong>/);
+ assert.match(overview,/Attack \/ Block<\/small><strong>— \/ —<\/strong>/);
 });

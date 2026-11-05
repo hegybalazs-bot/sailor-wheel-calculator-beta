@@ -22,7 +22,7 @@
 </main><script>
 'use strict';const g=id=>document.getElementById(id).value.trim();
 document.getElementById('copy').onclick=async()=>{
-const data=`⚔ Sailor Wheel Calculator – BÉTA visszajelzés\nCAP: ${g('cap')}\nItem: ${g('item')}\nGrade: ${g('grade')}\nTípus: ${g('type')}\nTapasztalat: ${g('current')||'(nincs kitöltve)'}\nElvárt / hiteles adat: ${g('expected')||'(nincs kitöltve)'}\nÖtlet: ${g('idea')||'—'}\nKépernyőkép: Discordon külön csatolom.\nBéta verzió: Emerald v4.9.3`;
+const data=`⚔ Sailor Wheel Calculator – BÉTA visszajelzés\nCAP: ${g('cap')}\nItem: ${g('item')}\nGrade: ${g('grade')}\nTípus: ${g('type')}\nTapasztalat: ${g('current')||'(nincs kitöltve)'}\nElvárt / hiteles adat: ${g('expected')||'(nincs kitöltve)'}\nÖtlet: ${g('idea')||'—'}\nKépernyőkép: Discordon külön csatolom.\nBéta verzió: Emerald v4.9.4`;
 try{await navigator.clipboard.writeText(data);document.getElementById('status').textContent='✓ Másolva! Most illeszd be a Discordra.';}catch(err){let t=document.createElement('textarea');t.value=data;document.body.append(t);t.select();const ok=document.execCommand('copy');t.remove();document.getElementById('status').textContent=ok?'✓ Másolva! Most illeszd be a Discordra.':'Nem sikerült automatikusan másolni. Próbáld meg PC-n, vagy írd ki kézzel.';}
 };
 </script></body></html>
