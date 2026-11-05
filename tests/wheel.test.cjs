@@ -465,3 +465,15 @@ test('v4.9.4: out-of-model manual values are flagged rather than inflating total
  assert.equal(summary.hpManual,0,'invalid manual over-cap must not inflate estimated SET totals');
  assert.match(hooks.overviewTable(),/\+999 \/ \+600 \(166[,.]5%\) ⚠/);
 });
+
+test('v4.9.4: missing HP/MP/Rate data show a dash instead of pretend +0',()=>{
+ const {hooks}=boot();
+ const summary=hooks.overviewSummary(['shoulder','hands'].map(id=>hooks.overviewItemView(id)));
+ assert.equal(summary.hpWheelCount,0);
+ assert.equal(summary.hpManualCount,0);
+ assert.equal(summary.arCount,0);
+ const overview=hooks.overviewTable();
+ assert.match(overview,/HP \/ MP Wheel<\/small><strong>— \/ —<\/strong>/);
+ assert.match(overview,/HP \/ MP kézi<\/small><strong>— \/ —<\/strong>/);
+ assert.match(overview,/Attack \/ Block<\/small><strong>— \/ —<\/strong>/);
+});
