@@ -1,4 +1,4 @@
-# Sailor Wheel Calculator – Emerald v4.9.2 BÉTA
+# Sailor Wheel Calculator – Emerald v4.9.3 BÉTA
 
 A Sailor Online felszerelés / Wheel-sor kalkulátora, kipróbálásra szánt **béta verzió**.
 
@@ -86,3 +86,7 @@ A karakter **felszerelés nélküli** STR/INT értékeit külön meg kell adni. 
 - Az adott item **legmagasabb érvényes Parry Wheel-sorát** jeleníti meg a sor saját, akár kézzel szerkesztett modellmaximumával és minőségi százalékával. Több sor esetén a legjobb értéket mutatja, nem az összegüket; hibás sorra figyelmeztet.
 - Az eddigi, az itemhez kézzel megadott **„Parry külön (kézi) / max”** megmarad külön oszlopban. A két adat nem adódik össze, így nem kerül tévesen duplán beszámításra.
 - A meglévő mentések és a 4.9-es adattárolási séma nem változnak; csak a megjelenítés bővült.
+
+## Emerald v4.9.3 – egyetlen Parry Rate oszlop
+
+A teljes SET-táblázatban a korábbi két Parry-oszlop helyett **egyetlen „Parry Rate / max” oszlop** jelenik meg. A Wheel-ről kiolvasott legjobb érvényes Parry-sor **Wheel** jelöléssel látszik (például `+20 / +40 (50%)`). Ha ugyanahhoz az itemhez külön **kézi Parry** értéket is megadtak, az ugyanebben a cellában egy másik sorban jelenik meg. Az értékeket nem adjuk össze és egyik forrást sem töröljük. Hiányzó és hibás sorok kezelése megmaradt.
