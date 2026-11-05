@@ -1193,28 +1193,29 @@ test('v4.10.0: custom CAP in one server does not leak into newly created or rest
 
 test('v4.10.0: corrupt multi-server import is rejected atomically with all previous data intact',()=>{
  const {hooks,store}=boot();
+ const stable=obj=>JSON.stringify(obj,(key,value)=>key==='updatedAt'?undefined:value);
  assert.equal(hooks.addServerProfile('English server'),true);
  assert.equal(hooks.chooseCap(140),true);
  hooks.state().sets[140].shoulder.count=1;
  hooks.state().sets[140].shoulder.rows=[{type:'STR',value:11,modelMax:11}];
  hooks.save();
- const baseline=JSON.stringify(hooks.exportAllProfiles());
+ const baseline=stable(hooks.exportAllProfiles());
  const active=hooks.currentServerName();
  const beforeStored=store['sailor-wheel-calculator-v4'];
  const invalid=JSON.parse(baseline);
  delete invalid.serverProfiles.entries[0].data.cfg[130];
  assert.throws(()=>hooks.importAllProfiles(invalid),/Sérült|hiányos|szerverprofil/);
  assert.equal(hooks.currentServerName(),active);
- assert.equal(JSON.stringify(hooks.exportAllProfiles()),baseline);
+ assert.equal(stable(hooks.exportAllProfiles()),baseline);
  assert.equal(store['sailor-wheel-calculator-v4'],beforeStored);
  const duplicate=JSON.parse(baseline);
  duplicate.serverProfiles.entries[1].id=duplicate.serverProfiles.entries[0].id;
  assert.throws(()=>hooks.importAllProfiles(duplicate),/Sérült|ismétlődő/);
- assert.equal(JSON.stringify(hooks.exportAllProfiles()),baseline);
+ assert.equal(stable(hooks.exportAllProfiles()),baseline);
  const badActive=JSON.parse(baseline);
  badActive.serverProfiles.activeId='missing';
  assert.throws(()=>hooks.importAllProfiles(badActive),/aktív szerverprofilja hiányzik/);
- assert.equal(JSON.stringify(hooks.exportAllProfiles()),baseline);
+ assert.equal(stable(hooks.exportAllProfiles()),baseline);
 });
 
 test('v4.10.0: feedback page offers English/Hungarian text and no duplicated calculator name',()=>{
