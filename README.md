@@ -1,4 +1,4 @@
-# Sailor Wheel Calculator – Emerald v4.7 BÉTA
+# Sailor Wheel Calculator – Emerald v4.8 BÉTA
 
 A Sailor Online felszerelés / Wheel-sor kalkulátora, kipróbálásra szánt **béta verzió**.
 
@@ -46,3 +46,16 @@ A `noindex,nofollow` jelzés nem hozzáférésvédelem: aki megkapja a linket, m
 A képen megadott képlet szerint `MaxStat = 28 + CAP×4`, `Magical Balance = min(120,100×INT/MaxStat)`, `Physical Balance = min(120,100−(100×2/3)×(MaxStat−STR)/MaxStat)`. A szimuláció a CAP-et veszi karakterszintnek. A tényleges játékmechanika ettől eltérhet, ezért a Balance százalék **számított érték**, nem a szerverből kiolvasott mutató.
 
 A karakter **felszerelés nélküli** STR/INT értékeit külön meg kell adni. A kalkulátor ehhez csak a kiválasztott, felszerelt SET **Wheel-soraiból** származó STR/INT pontokat adja hozzá; egyéb bónuszokat nem talál ki. Hiányzó alapérték esetén a százalék helyén „—” látszik. Az adatok SET-enként megmaradnak, és a JSON mentésbe is bekerülnek.
+
+## Emerald v4.8 – hat új funkció
+
+1. **Wheel-napló és statisztikák:** a „Pörgetés mentése” gombbal rögzített állapotok számát, átlagát, rekordját és egymás utáni javulásait összesíti. A napló nem detektálja a tényleges szerverpörgetéseket; a javulási arány nem dobási esély.
+2. **Régi/új Wheel összevetése:** az utolsó mentett eredményt az aktuálissal, illetve két korábbi mentést egymással hasonlít össze. STR/INT és teljes Wheel%-változások.
+3. **120%-os Balance célsegéd:** az aktuális CAP-küszöbhöz hiányzó pontokat a meglévő STR/INT sorok saját kézzel beállított maximumával veti össze.
+4. **SET-optimalizáló:** a legnagyobb elméleti javulási lehetőséggel rendelkező meglévő sorokat sorolja előre; nem állítja, hogy hány pörgetés kell majd hozzá. Nem feltételez új sorokat vagy bizonyított dobáseloszlást.
+5. **SET-összehasonlító:** ugyanazon CAP két mentett szettjének STR, INT, Wheel-minőség, Balance és teljesített itemfeltételeit jeleníti meg. Az aktuális CAP/DG modellmaximummal számol.
+6. **JSON-export emlékeztető:** a helyi böngészőben megjegyzi az utolsó **exportindítás** idejét, és 7 nap elteltével figyelmeztet. A tényleges fájl sikeres letöltését a böngészőben kell ellenőrizni.
+
+**Adatmegőrzés:** a `sailor-wheel-calculator-v4` localStorage-kulcs változatlan. A meglévő SET-ekhez és Wheel-előzményekhez kompatibilis mezők kerültek. A korábbi előzmények összehasonlíthatók, de a régi modellezési maximumok nem mindig rekonstruálhatók pontosan.
+
+**Tesztfuttatás** (Node.js 20+; nincs külső csomag): `node --test tests/wheel.test.cjs`. A GitHub Actions PR-ellenőrzés is ezt futtatja. A fizikai Android-böngészős vizsgálat ettől külön teszt.
