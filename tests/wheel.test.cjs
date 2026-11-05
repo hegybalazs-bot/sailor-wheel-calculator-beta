@@ -317,7 +317,7 @@ test('v4.9.2: manually entered Parry and Wheel Parry are separate, not added',()
  const row=hooks.overviewTable().match(/data-overview-row="hands"[\s\S]*?<\/tr>/)?.[0];
  assert.ok(row);
  assert.match(row,/\+33 \/ \+50 \(66%\)/);
- assert.match(row,/\+35 \/ \+40 \(87\.5%\)/);
+ assert.match(row,/\+35 \/ \+40 \(87[,.]5%\)/);
  assert.doesNotMatch(row,/\+68 \/ /,'manual and Wheel Parry must not be summed');
 });
 
