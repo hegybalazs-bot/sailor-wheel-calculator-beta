@@ -135,3 +135,36 @@ A felszereléslista alján az új **„Eredeti Silkroad ikonok betöltése”** 
 A meglévő SET-adatok, szabályok, JSON-visszatöltés és alapvető képlet változatlan; a tárolás szerkezete visszafelé kompatibilis.
 
 **Teszt:** `node --test tests/wheel.test.cjs` – 33 automatizált regressziós teszt. Mobilos valós eszközteszt még hátravan.
+
+## Emerald v4.9.7 – Blue-típusok itemenként, KEEP / REROLL
+
+### Különböző Blue-fajták felszerelésenként
+
+A kalkulátor a **lehetséges különböző Blue-típusok** Silkroad R-listájával indul (nem a Wheel sorok darabszámával):
+
+| Item | Blue-fajták |
+| --- | ---: |
+| Shoulder (Talisman), Hands (Wristlet), Foot (Shoes) | 4 mindegyik |
+| Head (Hat), Legs (Trousers) | 6 mindegyik |
+| Chest (Suit) | 7 |
+| Earring, Necklace | 8 mindegyik |
+| Ring 1, Ring 2 | **10 mindegyik** |
+| Weapon | 6 |
+| Shield | 5 |
+
+A **Chest** speciális „HP/MP Recovery” típusa; a **Shield** külön „Critical Ratio” típusa; az ékszerek többféle státuszellenállással (Freeze, Burn, Electric Shock, Poison, Zombie, valamint ékszertípustól függő Stun / Combustion / Disease / Sleep / Fear) szerepelnek.
+
+Források: [SRO Wheel itemenkénti Blue-lista](https://www.srolobby.com/konular/silkroad-online-wheel-sistemi-fate-fortune-pen.1422/) és [Eris Wheel magyarázat](https://www.eris-silkroad.online/guide/system). **A lista iSRO/Silkroad R referencia, nem Sailor által megerősített.** Ha egy 90 CAP / 9DG itemnél más típusok lehetségesek, a panelen hozzáadhatók vagy kikapcsolhatók.
+
+A **Szett & itemek** fülön a Blue-katalógus mutatja az adott item típusait; a nagy SET-összesítő alatt egy **12 itemes típusáttekintő** is van. Az aktív lista külön mentődik **CAP + Degree + item** szinten a böngészőben és a teljes JSON-exportban. A felhasználó által kikapcsolt típusok **nem törlik** a már rögzített Wheel-sorokat: a kalkulátor figyelmeztet az eltérésre, és azok szerkeszthetők maradnak. A szerszám oldali sorválasztók és az „összetétel” gyorskitöltés a kiválasztott Blue-típusokat ajánlják fel.
+
+### Megtartás vagy újrapörgetés?
+
+- A **Feather Pen** rendszerének megfelelő *feltételes* képlet egy jelenlegi Wheel-sorból választ egyet azonos eséllyel, és annak **értékét** a beállított 1…maximum tartományból egyenletesen újrasorsolja. Az eredményből pontosan számolja a **javulás / változatlan / romlás / nem javul** arányokat a teljes Wheel-minőségre. Ha a kiválasztott sor Durability, nem változik a pontozott Wheel-minőség. Egyéb vagy hibás sorok, ismeretlen maximumok esetén **nem ad kitalált esélyt**.
+- Az „**Inkább tartsd meg / Újrapörgetés mérlegelhető / Mérlegeld a kockázatot**” tanácsok *heurisztikus döntéstámogatást* adnak: a felhasználó célját és a modellezett javulási arányt veszik figyelembe. Az item előírt STR/INT sorai és Weapon/Shield speciális Rate-feltételei hiányakor **nem ajánlja a Feather Pent**, mert az értékújradobás nem hoz létre új típusú Blue-sorokat.
+- A **Wheel of Fortune** a sorok **típusát is módosíthatja**. A Pen modell eredményét **nem szabad** Fortune esélynek nevezni, mert a valódi Blue-típus gyakorisága ismeretlen. A régi 20 000 próbadobásos „minden sorérték újrahúzása” külön hipotetikus összehasonlítás marad, nem a Pen valódi működése.
+- A 30 000 próbadobásos **teljes-újrapörgetés** kézi modellje is itemenkénti Blue-készletből dolgozik. A valós típusesélyek **nincsenek előre kitöltve**; minden engedélyezett típushoz 0–100%-os feltételezés kell, összesen 100%. A szervermaximum nélküli státusz-Blue-oknál **külön 100%-os maximumot** is kell megadni, ha pozitív esélyt kapnak. Az ilyen maximumok külön CAP/Degree profilban tárolódnak. Az egyenlő eloszlás kizárólag felhasználó által választott **DEMÓ** feltevés, nem hivatalos érték.
+
+**Fontos:** a Sailor szerver eredeti Blue gyakoriságai, Feather Pen sorválasztási súlyai és értékeloszlásai jelenleg ismeretlenek. Egyetlen kijelzett százalék vagy tanács sem bizonyítja a játék tényleges esélyét, és a program nem számol Silk/Gold költséggel. Ezeket a valódi játékadatokkal később hitelesíteni kell.
+
+Tesztek: `node --test tests/wheel.test.cjs` – **45 automatizált teszt**, a végleges CI-ellenőrzéssel. Valódi mobilböngészős vizuális teszt külön szükséges.
