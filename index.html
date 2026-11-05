@@ -105,6 +105,43 @@
  .set-overview .overview-details{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 
+
+/* v4.9.5 – 9DG Chinese Garment inspired inventory pictograms; original vector art, not game sprites */
+.sro-item-label,.sro-stat-label{display:inline-flex;align-items:center;gap:7px;vertical-align:middle;min-width:0;max-width:100%}
+.sro-item-label>span:last-child,.sro-stat-label>span:last-child{min-width:0;overflow-wrap:anywhere}
+.sro-icon{display:inline-flex;align-items:center;justify-content:center;flex:none;line-height:0;vertical-align:middle}
+.sro-icon svg{display:block;width:100%;height:100%;overflow:visible}
+.sro-icon--item{width:30px;height:30px;padding:3px;border:1px solid #856f48;border-radius:8px;color:#ddc080;
+background:radial-gradient(circle at 28% 15%,#453656,#1c2136 66%,#102329);box-shadow:inset 0 1px 2px #ffde8b33,0 2px 8px #0005}
+.sro-icon--item svg .i-fill{fill:#283a55;stroke:currentColor;stroke-width:1.9;stroke-linejoin:round}
+.sro-icon--item svg .i-line{fill:none;stroke:currentColor;stroke-width:1.9;stroke-linejoin:round;stroke-linecap:round}
+.sro-icon--item svg .i-gem{fill:#65d7e8;stroke:#e5ba6d;stroke-width:1}
+.sro-icon--item.sro-ornament{color:#c3ddf6;border-color:#507887;background:radial-gradient(circle at 30% 10%,#263d50,#121d2d)}
+.sro-icon--stat{width:17px;height:17px;color:#d5b784}
+.sro-icon--stat svg{stroke:currentColor;fill:none;stroke-width:2.25;stroke-linecap:round;stroke-linejoin:round}
+.sro-icon--stat.stat-str{color:#ff6675;filter:drop-shadow(0 0 4px #b4274355)}
+.sro-icon--stat.stat-int,.sro-icon--stat.stat-mp{color:#66baff;filter:drop-shadow(0 0 4px #207de866)}
+.sro-icon--stat.stat-hp{color:#ff7083}
+.sro-icon--stat.stat-parry,.sro-icon--stat.stat-br{color:#99dfc8}
+.sro-icon--stat.stat-crit,.sro-icon--stat.stat-ar{color:#ffd581}
+.sro-icon--stat.stat-freeze{color:#9be8f9}
+.item .nm .sro-item-label{gap:9px}
+.item .nm .sro-icon--item{width:34px;height:34px}
+.item .nm{display:flex;min-width:0}
+.item .tiny{margin-left:43px}
+.set-overview .linklike .sro-item-label{white-space:normal;text-decoration:none}
+.set-overview .sro-icon--item{width:29px;height:29px}
+.set-overview .overview-kpi .sro-stat-label{gap:6px}
+.set-overview .overview-kpi .sro-icon--stat{width:15px;height:15px}
+.set-overview .overview-stat-pair{gap:8px}
+.set-overview .overview-stat-pair b{white-space:nowrap}
+.set-overview .overview-card-metrics .sro-stat-label{gap:4px}
+.set-overview .overview-card-metrics .sro-icon--stat{width:15px;height:15px}
+.item-editor-head .sro-icon--item{width:38px;height:38px}
+.item-editor-head{display:flex;align-items:center;flex-wrap:wrap;gap:10px}
+.garment-mode-caption{font-size:11px;color:#d7bf81;margin:-4px 0 12px}
+@media(max-width:780px){.item .tiny{margin-left:0}.item .nm .sro-icon--item{width:30px;height:30px}.sro-item-label{gap:5px}}
+
 /* v4.9 – Gyors mobil navigáció, könnyen elérhető Wheel-szerkesztő */
 .wheel-jumps{display:flex;gap:8px;overflow-x:auto;padding:2px 0 12px;scrollbar-width:thin}
 .wheel-jumps a{flex:none;display:inline-block;padding:9px 12px;color:#b4ffe2;background:#102a29;border:1px solid #2c755f;border-radius:9px;text-decoration:none;font-size:12px;font-weight:750}
@@ -156,6 +193,57 @@
 const IDS=['shoulder','hands','foot','head','chest','legs','necklace','earring','ring1','ring2','weapon','shield'];
 const NAMES={shoulder:'Shoulder',hands:'Hands',foot:'Foot',head:'Head',chest:'Chest',legs:'Legs',necklace:'Nyaklánc',earring:'Fülbevaló',ring1:'Gyűrű 1',ring2:'Gyűrű 2',weapon:'Főfegyver',shield:'Shield'};
 const TYPES={STR:'STR',INT:'INT',AR:'Attack Rate',BR:'Blocking Rate',CRIT:'Critical',HP:'HP',MP:'MP',DUR:'Durability',PARRY:'Parry Rate',FREEZE:'Freezing (%)',OTHER:'Egyéb'};
+/* v4.9.5 – source-controlled, offline SVG pictograms inspired by the 9DG Mad Sky Storm Chinese Garment.
+   These are original decorative UI drawings, not exact Silkroad Online game assets. */
+const GARMENT_9DG_NAMES={
+ shoulder:'Mad Sky Storm Talisman',hands:'Mad Sky Storm Wristlet',
+ foot:'Mad Sky Storm Shoes',head:'Mad Sky Storm Hat / Hood',
+ chest:'Mad Sky Storm Suit',legs:'Mad Sky Storm Trousers'
+};
+const ITEM_ICON_PATHS={
+ shoulder:'<path class="i-fill" d="M6 12L13 7L19 7L26 12L24 21L18 17L16 26L14 17L8 21Z"/><path class="i-line" d="M9 12L16 15L23 12M16 15V23"/><path class="i-gem" d="M16 7l3 4-3 3-3-3z"/>',
+ hands:'<path class="i-fill" d="M7 8L11 6L12 14L16 11L20 14L21 6L25 8L24 25L18 27L15 21L12 27L8 25Z"/><path class="i-line" d="M9 17L12 19L16 16L20 19L23 17M9 22H23"/><path class="i-gem" d="M16 14l2 3-2 2-2-2z"/>',
+ foot:'<path class="i-fill" d="M9 5H17L19 16L26 21L26 26H6V20L10 16Z"/><path class="i-line" d="M10 15L19 16M6 24H26M12 7L15 13"/><path class="i-gem" d="M15 17l2 2-2 2-2-2z"/>',
+ head:'<path class="i-fill" d="M8 13L11 5L21 5L24 13L21 25L16 28L11 25Z"/><path class="i-line" d="M9 14L16 10L23 14M12 18L16 16L20 18M12 22L16 24L20 22"/><path class="i-gem" d="M16 4l3 4-3 4-3-4z"/>',
+ chest:'<path class="i-fill" d="M9 5L13 8H19L23 5L28 11L24 18L22 26H10L8 18L4 11Z"/><path class="i-line" d="M13 8L16 14L19 8M16 14V26M9 17L16 19L23 17"/><path class="i-gem" d="M16 13l2 3-2 2-2-2z"/>',
+ legs:'<path class="i-fill" d="M8 5H24L23 15L21 28H15L14 18L12 28H6L7 15Z"/><path class="i-line" d="M8 10H23M14 12V19M6 24H12M16 24H22"/><path class="i-gem" d="M16 7l2 2-2 2-2-2z"/>',
+ necklace:'<path class="i-line" d="M7 7Q7 20 16 23Q25 20 25 7M7 7L11 9M25 7L21 9"/><path class="i-gem" d="M16 19l5 5-5 6-5-6z"/>',
+ earring:'<path class="i-line" d="M10 5A6 6 0 1 1 21 10M16 13L16 22"/><path class="i-gem" d="M16 19l5 5-5 5-5-5z"/>',
+ ring1:'<ellipse class="i-fill" cx="16" cy="22" rx="9" ry="6"/><path class="i-gem" d="M16 4l7 9-7 7-7-7z"/><path class="i-line" d="M12 13h8M16 5v14"/>',
+ ring2:'<ellipse class="i-fill" cx="16" cy="22" rx="9" ry="6"/><path class="i-gem" d="M16 4l8 9-8 7-8-7z"/><path class="i-line" d="M8 14L16 8L24 14M16 10V19"/>',
+ weapon:'<path class="i-line" d="M6 27L25 5M10 21L15 26M8 24L13 29"/><path class="i-gem" d="M24 3l5 1-1 5-7 6-3-3z"/>',
+ shield:'<path class="i-fill" d="M16 3L27 8V17Q25 24 16 29Q7 24 5 17V8Z"/><path class="i-line" d="M16 6V25M8 13H24M10 19L16 24L22 19"/><path class="i-gem" d="M16 11l4 4-4 4-4-4z"/>'
+};
+const STAT_ICON_PATHS={
+ STR:'<path d="M6 20l2-6 4-2 4 3 3-2 5 3-2 8H8Z"/><path d="M11 12l-2-3 3-3 3 4M16 15l2-6 4 1 1 6M9 20h12"/>',
+ INT:'<path d="M16 3l10 12-10 14L6 15Z"/><path d="M16 3v26M6 15h20M10 9l6 6 6-6"/>',
+ HP:'<path d="M16 28S4 20 4 12a7 7 0 0 1 12-5 7 7 0 0 1 12 5c0 8-12 16-12 16Z"/>',
+ MP:'<path d="M16 3C12 10 7 15 7 21a9 9 0 0 0 18 0C25 15 20 10 16 3Z"/><path d="M11 22q1 4 5 4"/>',
+ PARRY:'<path d="M6 5l20 20M26 5L6 25M5 6l4-2 3 6M27 6l-4-2-3 6M5 22l5 5M27 22l-5 5"/>',
+ AR:'<path d="M5 26L26 5M19 5h7v7M5 26l5-1-4-4M8 14l9 9"/>',
+ BR:'<path d="M16 3L27 8v9q-2 8-11 12Q7 25 5 17V8Z"/><path d="M10 16l4 4 8-9"/>',
+ CRIT:'<path d="M16 3v6M16 23v6M3 16h6M23 16h6"/><circle cx="16" cy="16" r="7"/><circle cx="16" cy="16" r="2"/>',
+ FREEZE:'<path d="M16 3v26M3 16h26M7 7l18 18M25 7L7 25M12 7l4 4 4-4M12 25l4-4 4 4"/>',
+ DUR:'<path d="M6 25h20M9 25V14h14v11M11 10L16 5l5 5M11 18h10"/>',
+ OTHER:'<path d="M16 3l4 9 9 4-9 4-4 9-4-9-9-4 9-4z"/>'
+};
+function uiIcon(kind,key){
+ const item=kind==='item';
+ const raw=item?(ITEM_ICON_PATHS[key]||ITEM_ICON_PATHS.weapon):(STAT_ICON_PATHS[key]||STAT_ICON_PATHS.OTHER);
+ const klass=item?'sro-icon sro-icon--item'+(GARMENT_9DG_NAMES[key]?'':' sro-ornament'):
+  'sro-icon sro-icon--stat stat-'+String(key).toLowerCase();
+ return `<span class="${klass}" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" focusable="false">${raw}</svg></span>`;
+}
+function itemLabel(id){
+ const ref=GARMENT_9DG_NAMES[id],title=ref?
+  '9DG Chinese Garment / '+ref+' (stilizált, nem eredeti játékikon)':
+  '9DG hangulatú díszítő ikon (nem felszerelés-adat)';
+ return `<span class="sro-item-label" title="${esc(title)}">${uiIcon('item',id)}<span>${esc(NAMES[id]||id)}</span></span>`;
+}
+function statLabel(type,label=TYPES[type]||type){
+ return `<span class="sro-stat-label">${uiIcon('stat',type)}<span>${esc(label)}</span></span>`;
+}
+
 const JEWELRY_IDS=['necklace','earring','ring1','ring2'];
 const isJewelry=id=>JEWELRY_IDS.includes(id);
 function allowedTypes(id){return Object.fromEntries(Object.entries(TYPES).filter(([k])=>k!=='FREEZE'||isJewelry(id)));}
