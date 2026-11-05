@@ -301,12 +301,13 @@ test('v4.9.2: Parry from Wheel rows is shown in final SET overview',()=>{
  assert.equal(p.quality,80);
  assert.equal(p.count,1);
  const table=hooks.overviewTable();
- assert.match(table,/Parry Rate \(Wheel\)/);
- assert.match(table,/Parry külön \(kézi\) \/ max/);
+ assert.match(table,/<th>Parry Rate \/ max<\/th>/);
+ assert.doesNotMatch(table,/<th>Parry külön/);
  const row=table.match(/data-overview-row="shoulder"[\s\S]*?<\/tr>/)?.[0];
  assert.ok(row,'shoulder row missing');
  assert.match(row,/\+32 \/ \+40 \(80%\)/);
- assert.ok(row.includes('>—</td>'),'manual Parry column should remain empty until separately specified');
+ assert.match(row,/Wheel:<\/b> \+32 \/ \+40/);
+ assert.doesNotMatch(row,/Kézi:/,'unused manual field must not create a duplicate Parry value');
 });
 
 test('v4.9.2: manually entered Parry and Wheel Parry are separate, not added',()=>{
@@ -317,7 +318,7 @@ test('v4.9.2: manually entered Parry and Wheel Parry are separate, not added',()
  const row=hooks.overviewTable().match(/data-overview-row="hands"[\s\S]*?<\/tr>/)?.[0];
  assert.ok(row);
  assert.match(row,/\+33 \/ \+50 \(66%\)/);
- assert.match(row,/\+35 \/ \+40 \(87[,.]5%\)/);
+ assert.match(row,/Kézi:<\/b> \+35 \/ \+40 \(87[,.]5%\)/);
  assert.doesNotMatch(row,/\+68 \/ /,'manual and Wheel Parry must not be summed');
 });
 
@@ -340,4 +341,39 @@ test('v4.9.2: multi-line Parry uses best valid row maximum; invalid values are w
  p=hooks.parryWheelOverview(obj);
  assert.equal(p.best,null);
  assert.match(hooks.parryWheelOverviewCell(obj),/Hibás sor/);
+});
+
+test('v4.9.3: 15 headers align with row cells and Parry does not duplicate',()=>{
+ const {hooks}=boot();
+ const html=hooks.overviewTable();
+ const thead=html.match(/<thead>([\s\S]*?)<\/thead>/)?.[1]??'';
+ const headerCount=(thead.match(/<th>/g)||[]).length;
+ assert.equal(headerCount,15);
+ assert.equal((thead.match(/Parry Rate/g)||[]).length,1);
+ for(const name of ['shoulder','hands','weapon']){
+  const row=html.match(new RegExp('data-overview-row="'+name+'"[\\s\\S]*?<\\/tr>'))?.[0];
+  assert.ok(row,name+' row must exist');
+  assert.equal((row.match(/<td\b/g)||[]).length,headerCount,name+' cells must align with headers');
+ }
+});
+
+test('v4.9.3: Wheel-only, manual-only and both display in one Parry cell',()=>{
+ const {hooks}=boot(),s=hooks.state();
+ const shoulder=s.sets[90].shoulder;shoulder.count=1;
+ shoulder.rows=[{type:'PARRY',value:20,modelMax:40}];
+ const hands=s.sets[90].hands;hands.count=0;
+ hands.bonusStats.PARRY=25;
+ const chest=s.sets[90].chest;chest.count=1;
+ chest.rows=[{type:'PARRY',value:30,modelMax:40}];
+ chest.bonusStats.PARRY=35;
+ hooks.save();
+ const table=hooks.overviewTable();
+ const row=name=>table.match(new RegExp('data-overview-row="'+name+'"[\\s\\S]*?<\\/tr>'))?.[0];
+ assert.match(row('shoulder'),/Wheel:<\/b> \+20 \/ \+40 \(50%\)/);
+ assert.doesNotMatch(row('shoulder'),/Kézi:/);
+ assert.match(row('hands'),/Kézi:<\/b> \+25 \/ \+40 \(62[,.]5%\)/);
+ assert.doesNotMatch(row('hands'),/Wheel:<\/b>/);
+ assert.match(row('chest'),/Wheel:<\/b> \+30 \/ \+40 \(75%\)/);
+ assert.match(row('chest'),/Kézi:<\/b> \+35 \/ \+40 \(87[,.]5%\)/);
+ assert.equal((row('chest').match(/<td\b/g)||[]).length,15);
 });
