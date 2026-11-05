@@ -55,7 +55,7 @@ function boot(){
  state:()=>S,html:()=>document.querySelector('#root').innerHTML,
  save,paint,createSet,selectSet,recordWheelSnapshot,
  wheelHistoryStats,wheelComparison,optimizedLinePlan,balanceTargetAdvice,
- getSetComparison,balanceThreshold,balanceMetrics,qualifiedWheelStats,blueTypesFor,blueCatalogKey,BLUE_BASE,setBlueTypes,resetBlueTypes,blueCatalogWarnings,blueCatalogPanel,blueTypeCountPanel,visiblePlanTypes,chanceWeightsFor,ensureChanceWeights,chancesComplete,rowMax,penOneBlueEstimate,keepOrRerollAdvice,keepOrRerollPanel,validUserIconData,setUserIcon,clearUserIcon,userIconPanel,uiIcon,itemLabel,statLabel,itemList,editPanel,autoWheelEstimate,autoWheelChancePanel,chanceView,shellCards,parryWheelOverview,parryWheelOverviewCell,overviewValidWheelStats,overviewItemView,overviewSummary,overviewTable,check,total,noteBackupExport,backupReminderState
+ getSetComparison,balanceThreshold,balanceMetrics,qualifiedWheelStats,chooseCap,rowValueEditor,itemBlueInventory,blueInventoryView,addServerProfile,renameServerProfile,switchServerProfile,currentServerName,exportAllProfiles,importAllProfiles,applyFixedStatLimits,switchDegreeModel,blueTypesFor,blueCatalogKey,BLUE_BASE,setBlueTypes,resetBlueTypes,blueCatalogWarnings,blueCatalogPanel,blueTypeCountPanel,visiblePlanTypes,chanceWeightsFor,ensureChanceWeights,chancesComplete,rowMax,penOneBlueEstimate,keepOrRerollAdvice,keepOrRerollPanel,validUserIconData,setUserIcon,clearUserIcon,userIconPanel,uiIcon,itemLabel,statLabel,itemList,editPanel,autoWheelEstimate,autoWheelChancePanel,chanceView,shellCards,parryWheelOverview,parryWheelOverviewCell,overviewValidWheelStats,overviewItemView,overviewSummary,overviewTable,check,total,noteBackupExport,backupReminderState
 };`,sandbox,{timeout:5000});
  return {hooks:sandbox.hooks,document,store,inputs};
 }
@@ -349,7 +349,7 @@ test('v4.9.4: 9 headers align with row cells and Parry does not duplicate',()=>{
  const html=hooks.overviewTable();
  const thead=html.match(/<thead>([\s\S]*?)<\/thead>/)?.[1]??'';
  const headerCount=(thead.match(/<th>/g)||[]).length;
- assert.equal(headerCount,9);
+ assert.equal(headerCount,10);
  assert.equal([...thead.matchAll(/<th>[\s\S]*?<\/th>/g)].filter(m=>plain(m[0]).trim()==='Parry Rate').length,1,'one visible Parry header');
  for(const name of ['shoulder','hands','weapon']){
   const row=html.match(new RegExp('data-overview-row="'+name+'"[\\s\\S]*?<\\/tr>'))?.[0];
@@ -376,7 +376,7 @@ test('v4.9.3: Wheel-only, manual-only and both display in one Parry cell',()=>{
  assert.doesNotMatch(row('hands'),/Wheel:<\/b>/);
  assert.match(row('chest'),/Wheel:<\/b> \+30 \/ \+40 \(75%\)/);
  assert.match(row('chest'),/Kézi:<\/b> \+35 \/ \+40 \(87[,.]5%\)/);
- assert.equal((row('chest').match(/<td\b/g)||[]).length,9);
+ assert.equal((row('chest').match(/<td\b/g)||[]).length,10);
 });
 
 test('v4.9.4: desktop table and mobile cards cover the same 12 items',()=>{
@@ -588,7 +588,7 @@ test('v4.9.6: perfect shoulder cannot improve under same-types uniform-value mod
  assert.ok(e.same>0&&e.same<20);
  assert.equal(e.notBetter,100);
  assert.equal(e.statBetter,0);
- for(const word of ['Javulás','Változatlan','Romlás','Nem javul','Nem valós Sailor szerveresély']){
+ for(const word of ['Javulás','Változatlan','Romlás','Nem javul','Nem valós, igazolt szerveresély']){
   assert.ok(hooks.autoWheelChancePanel('shoulder').includes(word),word);
  }
  assert.ok(hooks.editPanel().includes('Minden sor értékének újrahúzása'));
@@ -740,7 +740,7 @@ test('v4.9.7: Pen changes one blue, preserves unscored DUR without false improve
  assert.equal(p.worse,0);
  assert.ok(Math.abs(p.better+p.same+p.worse-100)<1e-7);
  assert.match(hooks.keepOrRerollPanel('shoulder'),/Feather Pen/);
- assert.match(hooks.keepOrRerollPanel('shoulder'),/nem igazolt Sailor szerveresély/);
+ assert.match(hooks.keepOrRerollPanel('shoulder'),/nem igazolt szerveresély/);
 });
 
 test('v4.9.7: Pen estimate refuses missing/unsupported Blue limits',()=>{
@@ -853,4 +853,203 @@ test('v4.9.7: do not recommend Feather Pen when required Blue line type/count is
  assert.match(a.reason,/Wheel of Fortune/);
  ob.target=1;
  assert.equal(hooks.keepOrRerollAdvice('shoulder').tone,'reroll');
+});
+
+test('v4.9.8: each configured 90–140 CAP accepts independent Wheel rows and persists',()=>{
+ const {hooks,document,store}=boot();
+ const caps=[90,100,110,120,125,130,140];
+ for(const cap of caps){
+  assert.equal(hooks.chooseCap(cap),true,'switch to '+cap);
+  const s=hooks.state();
+  assert.equal(s.cap,cap);
+  assert.equal(document.querySelector('#capQuick').value,String(cap));
+  const shoulder=s.sets[cap].shoulder;
+  shoulder.count=1;shoulder.rows=[{type:'STR',value:Math.max(1,Math.min(11,Math.floor(cap/10)-7)),modelMax:20}];
+  hooks.save();hooks.paint();
+  assert.equal(hooks.qualifiedWheelStats(shoulder).str,Math.max(1,Math.min(11,Math.floor(cap/10)-7)));
+  assert.equal(JSON.parse(store['sailor-wheel-calculator-v4']).sets[cap].shoulder.rows[0].value,Math.max(1,Math.min(11,Math.floor(cap/10)-7)));
+ }
+ for(const cap of caps){
+  assert.equal(hooks.chooseCap(cap),true);
+  assert.equal(hooks.state().sets[cap].shoulder.rows[0].value,Math.max(1,Math.min(11,Math.floor(cap/10)-7)),'CAP data must not leak or reset');
+ }
+});
+
+test('v4.9.8: typeable 100/110/120/125/130/140 CAP and adding custom CAP without changing old items',()=>{
+ const {hooks,document}=boot();
+ const manual=document.querySelector('#capQuick'),apply=document.querySelector('#capApply');
+ assert.equal(typeof apply.onclick,'function');
+ assert.equal(typeof manual.onkeydown,'function');
+ assert.equal(hooks.chooseCap('100'),true);
+ assert.equal(hooks.chooseCap('110'),true);
+ manual.value='120';apply.onclick();assert.equal(hooks.state().cap,120);
+ manual.value='125';apply.onclick();assert.equal(hooks.state().cap,125);
+ manual.value='130';apply.onclick();assert.equal(hooks.state().cap,130);
+ manual.value='140';apply.onclick();assert.equal(hooks.state().cap,140);
+ assert.equal(hooks.chooseCap('150'),true);
+ assert.equal(hooks.state().cap,150);
+ assert.equal(hooks.state().cfg[150].degree,9);
+ assert.equal(hooks.chooseCap('90'),true);
+ assert.equal(hooks.state().cfg[90].degree,9);
+ assert.equal(hooks.chooseCap('200'),true);
+ assert.equal(hooks.chooseCap('201'),false);
+ assert.equal(hooks.chooseCap('100.5'),false);
+ assert.equal(hooks.chooseCap('nope'),false);
+ assert.equal(hooks.state().cap,200);
+});
+
+test('v4.9.8: fixed +11 STR/INT maxima across CAPs, preserving legacy over-cap rows as warnings',()=>{
+ const {hooks,document}=boot();
+ assert.equal(hooks.chooseCap(130),true);
+ const s=hooks.state(),obj=s.sets[130].shoulder;
+ s.cfg[130].maxSTR=45;s.cfg[130].maxINT=32;
+ obj.count=2;obj.rows=[{type:'STR',value:40,modelMax:45},{type:'INT',value:30,modelMax:32}];
+ hooks.save();hooks.paint();
+ assert.equal(s.cfg[130].maxSTR,11);
+ assert.equal(s.cfg[130].maxINT,11);
+ assert.equal(hooks.check('shoulder').str,0);
+ assert.equal(hooks.check('shoulder').int,0);
+ assert.equal(hooks.qualifiedWheelStats(obj).stats,0);
+ assert.ok(hooks.check('shoulder').issues.some(x=>x.includes('maximum 11')));
+ assert.equal(obj.rows[0].value,40,'old rows retained for correction');
+ assert.ok(hooks.rowValueEditor(obj.rows[0],0).includes('1–11'),'fixed ceiling must be shown in the row value selector');
+ assert.ok(hooks.rowValueEditor(obj.rows[0],0).includes('határon kívül'));
+ obj.rows=[{type:'STR',value:11,modelMax:45},{type:'INT',value:11,modelMax:32}];
+ hooks.save();hooks.paint();
+ assert.equal(hooks.qualifiedWheelStats(obj).stats,22);
+ assert.equal(document.querySelector('#capQuick').value,'130');
+ assert.ok(hooks.html().includes('STR (+11 fix)'));
+});
+
+test('v4.9.8: final SET overview lists every possible Blue with missing versus present markers',()=>{
+ const {hooks}=boot(),s=hooks.state(),shoulder=s.sets[90].shoulder;
+ shoulder.count=2;shoulder.rows=[{type:'STR',value:11,modelMax:11},{type:'PARRY',value:20,modelMax:40}];
+ const data=hooks.itemBlueInventory('shoulder');
+ assert.equal(data.available,4);
+ assert.equal(data.present,2);
+ assert.equal(data.records.length,4);
+ assert.equal(data.records.find(r=>r.type==='STR').values[0],'+11 / +11 (100%)');
+ assert.equal(data.records.find(r=>r.type==='PARRY').values[0],'+20 / +40 (50%)');
+ assert.equal(data.records.find(r=>r.type==='INT').count,0);
+ assert.equal(data.records.find(r=>r.type==='DUR').count,0);
+ const table=hooks.overviewTable();
+ assert.match(table,/>Összes Blue-típus<\/th>/);
+ const row=table.match(/data-overview-row="shoulder"[\s\S]*?<\/tr>/)?.[0];
+ assert.ok(row);
+ assert.match(row,/2\/4 Blue-fajta felvéve/);
+ assert.match(row,/Nincs az itemen/);
+ assert.match(row,/Parry Rate/);
+ assert.match(table,/data-overview-card="shoulder"[\s\S]*?blue-inventory-overview/);
+});
+
+test('v4.9.8: unexpected Blue is visible but does not alter source data or catalog',()=>{
+ const {hooks}=boot(),s=hooks.state(),obj=s.sets[90].shoulder;
+ obj.count=1;obj.rows=[{type:'HP',value:200,modelMax:600}];
+ const data=hooks.itemBlueInventory('shoulder');
+ assert.equal(data.available,4);
+ assert.equal(data.present,0);
+ assert.equal(data.extra,1);
+ assert.equal(data.records.length,5);
+ assert.match(hooks.blueInventoryView('shoulder'),/nem szerepel a listában/);
+ assert.equal(hooks.blueTypesFor('shoulder').length,4);
+ assert.equal(obj.rows[0].value,200);
+});
+
+test('v4.9.8: independent server profiles keep CAP, Wheel rows, and Blue overrides separate',()=>{
+ const {hooks,store}=boot(),s=hooks.state();
+ assert.equal(hooks.currentServerName(),'Sailor Online');
+ s.sets[90].shoulder.count=1;
+ s.sets[90].shoulder.rows=[{type:'STR',value:11,modelMax:11}];
+ assert.equal(hooks.setBlueTypes('shoulder',['STR','INT']),true);
+ hooks.save();
+ assert.equal(hooks.addServerProfile('Test Server'),true);
+ assert.equal(hooks.currentServerName(),'Test Server');
+ assert.equal(hooks.state().sets[90].shoulder.count,0);
+ assert.equal(hooks.blueTypesFor('shoulder').length,4);
+ assert.equal(hooks.renameServerProfile('Other Silkroad Server'),true);
+ const other=hooks.exportAllProfiles();
+ assert.equal(other.serverProfiles.entries.length,2);
+ const sailor=other.serverProfiles.entries.find(e=>e.name==='Sailor Online');
+ assert.equal(sailor.data.sets[90].shoulder.rows[0].value,11);
+ const first=other.serverProfiles.entries.find(e=>e.name==='Sailor Online').id;
+ assert.equal(hooks.switchServerProfile(first),true);
+ assert.equal(hooks.currentServerName(),'Sailor Online');
+ assert.equal(hooks.state().sets[90].shoulder.rows[0].value,11);
+ assert.equal(hooks.blueTypesFor('shoulder').length,2);
+ assert.equal(hooks.switchServerProfile(other.serverProfiles.activeId),true);
+ assert.equal(hooks.currentServerName(),'Other Silkroad Server');
+ assert.equal(hooks.state().sets[90].shoulder.count,0);
+ assert.ok(JSON.parse(store['wheel-calculator-server-profiles-v1']).entries.length===2);
+});
+
+test('v4.9.8: importing all-server JSON restores separate profiles and old Sailor-only export',()=>{
+ const {hooks}=boot();
+ assert.equal(hooks.addServerProfile('Server Two'),true);
+ assert.equal(hooks.chooseCap(140),true);
+ const now=hooks.state();
+ now.sets[140].shoulder.count=1;
+ now.sets[140].shoulder.rows=[{type:'INT',value:8,modelMax:11}];
+ hooks.save();
+ const backup=JSON.parse(JSON.stringify(hooks.exportAllProfiles()));
+ assert.equal(backup.serverProfiles.entries.length,2);
+ assert.equal(hooks.addServerProfile('Temporary'),true);
+ assert.equal(hooks.importAllProfiles(backup),true);
+ assert.equal(hooks.currentServerName(),'Server Two');
+ assert.equal(hooks.state().sets[140].shoulder.rows[0].value,8);
+ assert.equal(hooks.exportAllProfiles().serverProfiles.entries.length,2);
+ const legacy=JSON.parse(JSON.stringify(backup.serverProfiles.entries[0].data));
+ assert.equal(hooks.importAllProfiles(legacy),true);
+ assert.equal(hooks.state().cap,90);
+ assert.equal(hooks.exportAllProfiles().serverProfiles.entries.length,2);
+});
+
+test('v4.9.8: fixed maxima apply to all profiles and degree snapshots without deleting rolls',()=>{
+ const {hooks}=boot(),s=hooks.state();
+ assert.equal(s.cfg[90].maxSTR,11);
+ assert.equal(s.cfg[90].maxINT,11);
+ assert.equal(s.cfg[90].maxDUR,200);
+ for(const cap of [130,140]){
+  assert.equal(hooks.chooseCap(cap),true);
+  const cfg=hooks.state().cfg[cap];
+  assert.equal(cfg.maxHP,2300);
+  assert.equal(cfg.maxPARRY,60);
+  assert.equal(cfg.maxDUR,200);
+  assert.equal(cfg.maxSTR,11);
+  assert.equal(cfg.maxINT,11);
+  cfg.maxHP=99999;cfg.maxPARRY=500;cfg.maxSTR=30;cfg.maxDUR=300;
+  hooks.save();
+  assert.equal(cfg.maxHP,2300);assert.equal(cfg.maxPARRY,60);
+  assert.equal(cfg.maxSTR,11);assert.equal(cfg.maxDUR,200);
+  hooks.switchDegreeModel(cfg.degree+1);
+  assert.equal(cfg.maxSTR,11);
+  assert.equal(cfg.maxHP,2300);
+  assert.equal(cfg.maxPARRY,60);
+  assert.equal(cfg.maxDUR,200);
+  const obj=hooks.state().sets[cap].shoulder;
+  obj.count=2;
+  obj.rows=[{type:'HP',value:3000,modelMax:9999},{type:'PARRY',value:80,modelMax:99}];
+  assert.ok(hooks.check('shoulder').issues.some(x=>x.includes('maximum 2300')));
+  assert.ok(hooks.check('shoulder').issues.some(x=>x.includes('maximum 60')));
+  assert.equal(obj.rows[0].value,3000);
+ }
+ assert.equal(hooks.chooseCap(90),true);
+ const o=hooks.state().sets[90].shoulder;
+ o.count=1;o.rows=[{type:'DUR',value:201}];
+ assert.ok(hooks.check('shoulder').issues.some(x=>x.includes('Durability maximum 200%')));
+ o.rows[0].value=200;
+ assert.ok(!hooks.check('shoulder').issues.some(x=>x.includes('Durability maximum')));
+ assert.match(hooks.blueInventoryView('shoulder'),/200% \/ 200%/);
+});
+
+test('v4.9.8: input constraints signal true STR INT caps, universal Durability and 130+ HP Parry',()=>{
+ const {hooks}=boot();
+ assert.equal(hooks.chooseCap(140),true);
+ const html=hooks.html();
+ assert.match(html,/max="11"[^>]*data-config="maxSTR"/);
+ assert.match(html,/max="11"[^>]*data-config="maxINT"/);
+ assert.match(html,/data-config="maxHP"/);
+ assert.match(html,/data-config="maxPARRY"/);
+ assert.equal(hooks.state().cfg[140].maxHP,2300);
+ assert.equal(hooks.state().cfg[140].maxPARRY,60);
+ assert.equal(hooks.state().cfg[140].maxDUR,200);
 });

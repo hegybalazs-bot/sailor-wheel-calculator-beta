@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="hu"><head><meta name="robots" content="noindex,nofollow"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Sailor Wheel – Béta visszajelzés</title>
+<html lang="hu"><head><meta name="robots" content="noindex,nofollow"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Wheel Calculator – Béta visszajelzés</title>
 <style>
 :root{color-scheme:dark;font-family:Inter,Segoe UI,Arial,sans-serif}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top left,#123a2d,#080f16 50%,#050a0d);color:#ecfff7;line-height:1.55}.wrap{max-width:900px;margin:0 auto;padding:28px 18px 50px}h1{font-size:26px;margin:5px 0}h2{font-size:17px;margin-top:25px;color:#8dffcc}.box{background:#101f22;border:1px solid #2d6e59;border-radius:14px;padding:18px;margin:16px 0}.tip{border-color:#b59c53;background:#282516;color:#ffe5a8}.subtitle{color:#abc9c0;font-size:13px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}label{display:grid;gap:5px;color:#b8e2d4;font-weight:650;font-size:14px}input,select,textarea{width:100%;border-radius:9px;border:1px solid #427564;background:#071813;padding:10px 12px;color:white;font:inherit}textarea{min-height:105px;resize:vertical}button,a.link{border-radius:10px;border:1px solid #43a888;background:#137a57;color:white;padding:12px 18px;font:inherit;font-weight:750;cursor:pointer;text-decoration:none;display:inline-block}button:hover,a.link:hover{background:#198c67}a{color:#91ffe0}.actions{display:flex;flex-wrap:wrap;gap:9px}.status{min-height:1.4em;color:#74ffc1;font-weight:750;margin-top:10px}@media(max-width:640px){.grid{grid-template-columns:1fr}h1{font-size:23px}}
 </style></head><body><main class="wrap">
-<div class="subtitle">ITW1NKY · EMERALD BETA TEST</div><h1>⚔ Sailor Wheel Calculator – Visszajelzés</h1>
+<div class="subtitle">ITW1NKY · EMERALD BETA TEST</div><h1>⚔ Wheel Calculator Calculator – Visszajelzés</h1>
 <p>Segíts ellenőrizni a Sailor Online statmaximumait, a Wheel-sorok értékeit és a kalkulátor működését! Nem kell regisztrálni, ez az űrlap <b>nem küld adatokat szerverre</b>: a jelentést kimásolhatod és elküldheted Discordon.</p>
 <div class="box tip"><b>Fontos:</b> Az 1–11 STR/INT, a SoS/SoM/Sun sorlimitek, a CAP-maximumok és a pörgetési esélyek egy része még tesztelendő. Ha tudsz biztos játékbeli értéket, írd le, és lehetőleg küldj külön képernyőképet is a Discordon.</div>
 <div class="box">
@@ -22,7 +22,7 @@
 </main><script>
 'use strict';const g=id=>document.getElementById(id).value.trim();
 document.getElementById('copy').onclick=async()=>{
-const data=`⚔ Sailor Wheel Calculator – BÉTA visszajelzés\nCAP: ${g('cap')}\nItem: ${g('item')}\nGrade: ${g('grade')}\nTípus: ${g('type')}\nTapasztalat: ${g('current')||'(nincs kitöltve)'}\nElvárt / hiteles adat: ${g('expected')||'(nincs kitöltve)'}\nÖtlet: ${g('idea')||'—'}\nKépernyőkép: Discordon külön csatolom.\nBéta verzió: Emerald v4.9.7`;
+const data=`⚔ Wheel Calculator Calculator – BÉTA visszajelzés\nCAP: ${g('cap')}\nItem: ${g('item')}\nGrade: ${g('grade')}\nTípus: ${g('type')}\nTapasztalat: ${g('current')||'(nincs kitöltve)'}\nElvárt / hiteles adat: ${g('expected')||'(nincs kitöltve)'}\nÖtlet: ${g('idea')||'—'}\nKépernyőkép: Discordon külön csatolom.\nBéta verzió: Emerald v4.9.8`;
 try{await navigator.clipboard.writeText(data);document.getElementById('status').textContent='✓ Másolva! Most illeszd be a Discordra.';}catch(err){let t=document.createElement('textarea');t.value=data;document.body.append(t);t.select();const ok=document.execCommand('copy');t.remove();document.getElementById('status').textContent=ok?'✓ Másolva! Most illeszd be a Discordra.':'Nem sikerült automatikusan másolni. Próbáld meg PC-n, vagy írd ki kézzel.';}
 };
 </script></body></html>

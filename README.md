@@ -1,6 +1,6 @@
-# Sailor Wheel Calculator – Emerald v4.9.4 BÉTA
+# Wheel Calculator – Emerald v4.9.8 BÉTA
 
-A Sailor Online felszerelés / Wheel-sor kalkulátora, kipróbálásra szánt **béta verzió**.
+A Silkroad Online szerverekhez használható felszerelés- és Wheel-sor-kalkulátor, kipróbálásra szánt **béta verzió**. Alapértelmezett profilja: Sailor Online.
 
 ## Jellemzők
 - 120%-os **Physical és Magical Balance** célértékek CAP szerint, a korábban küldött képből
@@ -168,3 +168,14 @@ A **Szett & itemek** fülön a Blue-katalógus mutatja az adott item típusait; 
 **Fontos:** a Sailor szerver eredeti Blue gyakoriságai, Feather Pen sorválasztási súlyai és értékeloszlásai jelenleg ismeretlenek. Egyetlen kijelzett százalék vagy tanács sem bizonyítja a játék tényleges esélyét, és a program nem számol Silk/Gold költséggel. Ezeket a valódi játékadatokkal később hitelesíteni kell.
 
 Tesztek: `node --test tests/wheel.test.cjs` – **45 automatizált teszt**, a végleges CI-ellenőrzéssel. Valódi mobilböngészős vizuális teszt külön szükséges.
+
+## Emerald v4.9.8 – több szerver, CAP bevitel, összes Blue és véglegesített statkorlátok
+
+- Az alkalmazás látható neve **Wheel Calculator**. Az alapértelmezett szerverprofil neve **Sailor Online**, de további, egymástól független nevű Silkroad szerverprofilok létrehozhatók/átnevezhetők/kiválaszthatók. Profilonként külön CAP, Degree, SET-ek, Blue-katalógusok és szerveres maximumok mentődnek.
+- A CAP választható legördülő menüből vagy közvetlenül begépelve (1–200, egész szám). A 90, 100, 110, 120, 125, 130 és 140 CAP külön menthető és visszatölthető. Új CAP kiválasztása csak új CAP-profilt készít, a többi CAP mentését nem törli.
+- A „**Teljes SET – Blue-k és statok**” összesítő most minden felszerelésnél megjeleníti az adott item **összes lehetséges Blue-fajtáját**, a kitöltött típusokat saját értékkel / maximummal / százalékkal, a hiányzókat „Nincs az itemen” jelzéssel és az alaplistán kívül beírt sorokat figyelmeztetéssel. Az asztali táblázat 10 főoszlopos, a mobilkártyák saját lenyitható Blue-listát kapnak. A Blue-lista **nem** ad hozzá automatikusan új Wheel-sort, és a különböző típusok száma **nem** az egyszerre pörgethető sorok maximális száma.
+- **Pontosított, közös statkorlátok a felhasználó által megadott szabály alapján:** minden szerveren és CAP-on **STR max +11 / sor, INT max +11 / sor**; minden szerveren **Durability maximum 200%**, nem pontozott Wheel-minőségként; **130 CAP-től HP maximum 2300, Parry maximum 60**. Ezek a korlátok új profiloknál, más Degree beállításnál és régebbi mentések visszatöltése után is érvényesek. A régi, föléjük eső Wheel-sorokat nem töröljük; hibásnak jelöljük, és nem számoljuk érvényes statnak.
+- A **130+ HP 2300 és Parry 60** a közös felső határ; más, eddig még nem hitelesített szerverstatisztikákat (pl. 140 CAP MP) nem állítunk biztosnak.
+- A teljes JSON-export **minden szerverprofil adatait tartalmazza**. A korábbi Sailor-only JSON mentés importálható; a böngészőben korábban tárolt régi SET-eket az új szerverprofil-rendszer migrációja nem törli. A legbiztonságosabb, ha szerverváltás előtt és után rendszeresen JSON-exportot készítünk.
+
+**Ellenőrzés:** a `tests/wheel.test.cjs` automatikus regressziós tesztjei a CAP-beállításokat, a szerverprofilok szétválasztását, a teljes Blue-táblázatot, a végleges statkorlátokat és a régi SET-működést fedik le. Valódi mobilos megjelenítés és a valós játékbeli Wheel-esélyek ellenőrzése továbbra is külön feladat.
