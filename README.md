@@ -1,4 +1,4 @@
-# Wheel Calculator – Emerald v4.9.8 BÉTA
+# Wheel Calculator – Emerald v4.9.9 BÉTA
 
 A Silkroad Online szerverekhez használható felszerelés- és Wheel-sor-kalkulátor, kipróbálásra szánt **béta verzió**. Alapértelmezett profilja: Sailor Online.
 
@@ -175,7 +175,13 @@ Tesztek: `node --test tests/wheel.test.cjs` – **45 automatizált teszt**, a v�
 - A CAP választható legördülő menüből vagy közvetlenül begépelve (1–200, egész szám). A 90, 100, 110, 120, 125, 130 és 140 CAP külön menthető és visszatölthető. Új CAP kiválasztása csak új CAP-profilt készít, a többi CAP mentését nem törli.
 - A „**Teljes SET – Blue-k és statok**” összesítő most minden felszerelésnél megjeleníti az adott item **összes lehetséges Blue-fajtáját**, a kitöltött típusokat saját értékkel / maximummal / százalékkal, a hiányzókat „Nincs az itemen” jelzéssel és az alaplistán kívül beírt sorokat figyelmeztetéssel. Az asztali táblázat 10 főoszlopos, a mobilkártyák saját lenyitható Blue-listát kapnak. A Blue-lista **nem** ad hozzá automatikusan új Wheel-sort, és a különböző típusok száma **nem** az egyszerre pörgethető sorok maximális száma.
 - **Pontosított, közös statkorlátok a felhasználó által megadott szabály alapján:** minden szerveren és CAP-on **STR max +11 / sor, INT max +11 / sor**; minden szerveren **Durability maximum 200%**, nem pontozott Wheel-minőségként; **130 CAP-től HP maximum 2300, Parry maximum 60**. Ezek a korlátok új profiloknál, más Degree beállításnál és régebbi mentések visszatöltése után is érvényesek. A régi, föléjük eső Wheel-sorokat nem töröljük; hibásnak jelöljük, és nem számoljuk érvényes statnak.
-- A **130+ HP 2300 és Parry 60** a közös felső határ; más, eddig még nem hitelesített szerverstatisztikákat (pl. 140 CAP MP) nem állítunk biztosnak.
+- A **130+ HP 2300 és Parry 60** a közös felső határ. A 140 CAP MP referencia egyelőre azonos a 130 CAP MP értékével: **2300**; az esetleges későbbi szerverfrissítéstől függetlenül továbbra is szerkeszthető referencia.
 - A teljes JSON-export **minden szerverprofil adatait tartalmazza**. A korábbi Sailor-only JSON mentés importálható; a böngészőben korábban tárolt régi SET-eket az új szerverprofil-rendszer migrációja nem törli. A legbiztonságosabb, ha szerverváltás előtt és után rendszeresen JSON-exportot készítünk.
 
 **Ellenőrzés:** a `tests/wheel.test.cjs` automatikus regressziós tesztjei a CAP-beállításokat, a szerverprofilok szétválasztását, a teljes Blue-táblázatot, a végleges statkorlátokat és a régi SET-működést fedik le. Valódi mobilos megjelenítés és a valós játékbeli Wheel-esélyek ellenőrzése továbbra is külön feladat.
+
+## Emerald v4.9.9 – 140 CAP Wheel-értékek a 130 CAP alapján
+
+A játékos megerősítése szerint a 140 CAP-es Wheel statrendszer egyelőre **ugyanaz, mint 130 CAP-on**, mert a játékban nem történt további releváns frissítés. A két CAP alap **STR/INT, Attack/Block/Critical, HP/MP, Durability, Parry és Freezing maximuma** megegyezik. Különösen: **140 CAP MP: 2300** (ugyanúgy, mint 130-on).
+
+A 140 CAP-re korábban elmentett **üres vagy hiányzó MP referencia** az aktív szerverprofil 130-as MP értékéből – annak hiányában 2300-ból – feltöltődik, beleértve a CAP + Degree pillanatképeket. A **szándékosan megadott eltérő, érvényes 140-es MP-értéket és valamennyi item Wheel-sorát megőrizzük**. Ez kezdeti szerveradat-referencia, nem bizonyított Wheel-esély. A karakter aktuális szintjéből számított Balance **továbbra is különbözik** 130 és 140 szinten.

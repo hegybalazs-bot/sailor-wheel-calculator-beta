@@ -1053,3 +1053,55 @@ test('v4.9.8: input constraints signal true STR INT caps, universal Durability a
  assert.equal(hooks.state().cfg[140].maxPARRY,60);
  assert.equal(hooks.state().cfg[140].maxDUR,200);
 });
+
+test('v4.9.9: 140 CAP Wheel maxima match 130 CAP including MP, Balance remains level-specific',()=>{
+ const {hooks}=boot(),s=hooks.state();
+ const keys=['maxSTR','maxINT','maxAR','maxBR','maxCRIT','maxHP','maxMP','maxDUR','maxPARRY','maxFREEZE'];
+ for(const key of keys)assert.equal(s.cfg[140][key],s.cfg[130][key],key+' should inherit 130 CAP reference');
+ assert.equal(s.cfg[140].maxMP,2300);
+ assert.equal(s.cfg[140].degreeMaxima[s.cfg[140].degree].maxMP,2300);
+ assert.notEqual(s.cfg[140].degree,s.cfg[130].degree,'Degree choice is separate from Wheel maxima');
+ assert.notEqual(hooks.balanceThreshold(130).maxStat,hooks.balanceThreshold(140).maxStat,'Balance still follows character level');
+ assert.equal(hooks.chooseCap(140),true);
+ const c=hooks.state().cfg[140];
+ assert.equal(c.maxMP,2300);
+ hooks.switchDegreeModel(16);
+ assert.equal(c.maxMP,2300,'new Degree keeps the 130 CAP MP reference');
+ hooks.state().tab='rules';hooks.paint();
+ assert.match(hooks.html(),/140 CAP MP-referenciája jelenleg a 130 CAP-éval egyezik/);
+});
+
+test('v4.9.9: blank legacy 140 MP maxima inherit 130 across CAP and saved Degree snapshots',()=>{
+ const {hooks,store}=boot(),s=hooks.state();
+ s.cfg[140].maxMP=null;
+ s.cfg[140].degreeMaxima[15].maxMP='';
+ s.cfg[140].degreeMaxima[14]={...s.cfg[140].degreeMaxima[15],maxMP:null};
+ s.cfg[130].maxMP=2300;
+ hooks.applyFixedStatLimits();
+ assert.equal(s.cfg[140].maxMP,2300);
+ assert.equal(s.cfg[140].degreeMaxima[15].maxMP,2300);
+ assert.equal(s.cfg[140].degreeMaxima[14].maxMP,2300);
+ assert.equal(hooks.chooseCap(140),true);
+ hooks.save();
+ assert.equal(JSON.parse(store['sailor-wheel-calculator-v4']).cfg[140].maxMP,2300);
+ hooks.switchDegreeModel(14);
+ assert.equal(hooks.state().cfg[140].maxMP,2300);
+});
+
+test('v4.9.9: explicit 140 MP overrides and existing Wheel rows are not silently overwritten',()=>{
+ const {hooks}=boot(),s=hooks.state();
+ const c=s.cfg[140];
+ c.maxMP=2100;
+ c.degreeMaxima[15].maxMP=2100;
+ const obj=s.sets[140].chest;
+ obj.count=1;obj.rows=[{type:'MP',value:1900,modelMax:2300}];
+ hooks.applyFixedStatLimits();
+ assert.equal(c.maxMP,2100,'user-defined server maximum must survive');
+ assert.equal(c.degreeMaxima[15].maxMP,2100);
+ assert.equal(obj.rows[0].value,1900,'saved Wheel roll untouched');
+ assert.equal(obj.rows[0].modelMax,2300,'per-item custom ceiling untouched');
+ assert.equal(hooks.chooseCap(140),true);
+ assert.equal(hooks.state().cfg[140].maxMP,2100);
+ assert.equal(hooks.chooseCap(130),true);
+ assert.equal(hooks.state().cfg[130].maxMP,2300,'130 CAP independent from 140 override');
+});
