@@ -643,7 +643,7 @@ function weaponId(cap=S.cap){return normalizeWeapon(S.weaponByCap?.[cap]||S.weap
 function critRequired(id=weaponId(),cap=S.cap){return S.critOverrides?.[cap]?.[id]===undefined?WEAPONS[id].crit:Boolean(S.critOverrides[cap][id]);}
 function itm(id){let obj=id==='weapon'?S.weaponInventory[S.cap][weaponId()]:items()[id];ensureBonusStats(obj);return obj;}
 function isEquipped(id){return id!=='shield'||WEAPONS[weaponId()].shield;}
-function rowMax(type,cfg=currentCfg()){return {STR:cfg.maxSTR,INT:cfg.maxINT,AR:cfg.maxAR,BR:cfg.maxBR,CRIT:cfg.maxCRIT,HP:cfg.maxHP,MP:cfg.maxMP,DUR:null,PARRY:cfg.maxPARRY,FREEZE:cfg.maxFREEZE}[type]??null;}
+function rowMax(type,cfg=currentCfg()){return {STR:cfg.maxSTR,INT:cfg.maxINT,AR:cfg.maxAR,BR:cfg.maxBR,CRIT:cfg.maxCRIT,HP:cfg.maxHP,MP:cfg.maxMP,DUR:null,PARRY:cfg.maxPARRY,FREEZE:cfg.maxFREEZE}[type]??(Number(S.blueTypeMaxima?.[blueCatalogKey()]?.[type])>0?Number(S.blueTypeMaxima[blueCatalogKey()][type]):null);}
 // v4.6: soronként külön állítható modellmaximum. Üres mezőnél öröklődik a CAP statmaximum.
 // Ez feltételezett összehasonlítási alap, nem igazolt Sailor statplafon.
 function effectiveRowMax(row,cfg=currentCfg()){
@@ -1360,7 +1360,26 @@ function overviewTable(){
  </section>`;
 }
 function setView(){return shellCards()+`<nav class="wheel-jumps" aria-label="Gyors ugrás a kalkulátor részeihez"><a href="#wheel-items">⚔ Wheel-sorok</a><a href="#wheel-balance">⚖ Balance</a><a href="#wheel-target">🎯 Célsegéd</a><a href="#wheel-optimize">🧠 Optimalizáló</a><a href="#wheel-compare">🔁 SET-ek</a></nav>`+balancePanel()+`<div class="content" id="wheel-items">${itemList()}${editPanel()}</div>${balanceTargetPanel()}${optimizerPanel()}${blueTypeCountPanel()}${overviewTable()}${setComparePanel()}${backupReminderPanel()}<div class="notice">Az egyedi célszázalékok és a sorok automatikusan mentődnek. Biztonsági mentéshez használd a <b>Mentés JSON-ba</b> gombot.</div>`;}
-function chancesComplete(cfg=currentCfg()){let p=cfg.chances||{};let vals=Object.keys({STR:1,INT:1,AR:1,BR:1,CRIT:1,OTHER:1}).map(k=>p[k]);return vals.every(v=>v!==''&&v!=null&&Number.isFinite(Number(v))&&num(v)>=0)&&Math.abs(vals.reduce((a,b)=>a+num(b),0)-100)<.00001;}
+function chanceWeightsFor(id=S.active,cfg=currentCfg()){
+ return S.blueChanceProfiles?.[blueCatalogKey()]?.[id]||cfg.chances||{};
+}
+function ensureChanceWeights(id=S.active,cfg=currentCfg()){
+ S.blueChanceProfiles??={};
+ const key=blueCatalogKey();S.blueChanceProfiles[key]??={};
+ if(!S.blueChanceProfiles[key][id]){
+  const old=chanceWeightsFor(id,cfg);
+  S.blueChanceProfiles[key][id]=Object.fromEntries(blueTypesFor(id).map(t=>[t,old[t]??'']));
+ }
+ return S.blueChanceProfiles[key][id];
+}
+function chancesComplete(cfg=currentCfg(),id=S.active){
+ const types=blueTypesFor(id),p=chanceWeightsFor(id,cfg);
+ if(!types.length)return false;
+ const vals=types.map(t=>p[t]);
+ return vals.every((v,i)=>v!==''&&v!=null&&Number.isFinite(Number(v))&&Number(v)>=0&&Number(v)<=100 &&
+  (Number(v)===0||types[i]==='DUR'||Number(rowMax(types[i],cfg))>0))&&
+  Math.abs(vals.reduce((a,b)=>a+Number(b),0)-100)<.00001;
+}
 // v4.9.7 – One-Blue conditional Feather Pen model; unverified uniform assumptions.
 function penOneBlueEstimate(id=S.active,obj=itm(id),cfg=currentCfg()){
  const c=check(id,obj,cfg,weaponId());
