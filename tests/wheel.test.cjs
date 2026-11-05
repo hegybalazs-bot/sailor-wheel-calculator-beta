@@ -6,7 +6,7 @@ const path=require('node:path');
 const vm=require('node:vm');
 
 const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
-const script=html.match(/<script[^>]*>([\s\S]*?)<\/script>/i)?.[1];
+const script=html.match(/<script>([\s\S]*?)<\/script>/i)?.[1];
 assert.ok(script,'The application must have an inline JavaScript module');
 
 const plain=html=>html.replace(/<[^>]*>/g,'');
@@ -1290,7 +1290,7 @@ test('v5 icon foundation: matching requires exact outfit family, region, degree,
  const chest=s.sets[90].chest;
  const icons=hooks.VERIFIED_ICON_ASSETS;
  const mk=(degree,path,grade=null)=>({
-  slot:'chest',region:'ch',equipmentType:'garment',weaponType:null,
+  category:'equipment',slot:'chest',region:'ch',equipmentType:'garment',weaponType:null,
   degree,grade,path,verified:true
  });
  icons.push(mk(9,'assets/icons/ch/garment/chest-9.png'),
@@ -1310,10 +1310,10 @@ test('v5 icon foundation: sprite paths and match verification are not trusted im
  const {hooks}=boot(),s=hooks.state();
  s.apparelStyle='ch_protector';
  hooks.VERIFIED_ICON_ASSETS.push({
-  slot:'head',region:'ch',equipmentType:'protector',weaponType:null,
+  category:'equipment',slot:'head',region:'ch',equipmentType:'protector',weaponType:null,
   degree:9,grade:null,path:'javascript:alert(1)',verified:true
  },{
-  slot:'head',region:'ch',equipmentType:'protector',weaponType:null,
+  category:'equipment',slot:'head',region:'ch',equipmentType:'protector',weaponType:null,
   degree:9,grade:null,path:'assets/icons/ch/protector/head9.png',verified:false
  });
  assert.equal(hooks.verifiedIconFor('head'),null);
@@ -1355,11 +1355,38 @@ test('v5 icon foundation: existing manual icon still takes precedence over futur
  const {hooks}=boot(),s=hooks.state();
  s.apparelStyle='ch_garment';
  hooks.VERIFIED_ICON_ASSETS.push({
-  slot:'chest',region:'ch',equipmentType:'garment',weaponType:null,
+  category:'equipment',slot:'chest',region:'ch',equipmentType:'garment',weaponType:null,
   degree:9,grade:null,path:'assets/icons/ch/garment/chest.png',verified:true
  });
  assert.ok(hooks.setUserIcon('chest','data:image/png;base64,AA=='));
  const html=hooks.uiIcon('item','chest');
  assert.match(html,/data:image\/png;base64,AA==/);
  assert.doesNotMatch(html,/assets\/icons/);
+});
+
+test('v5 icon foundation: never assign a named item sprite to unrelated item codes',()=>{
+ const {hooks}=boot(),s=hooks.state();
+ s.apparelStyle='ch_garment';
+ const obj=s.sets[90].chest;
+ hooks.VERIFIED_ICON_ASSETS.push({
+  category:'equipment',slot:'chest',region:'ch',equipmentType:'garment',weaponType:null,
+  degree:9,grade:null,itemCode:'ITEM_CH_M_GARMENT_09',
+  path:'assets/icons/ch/garment/chest-specific.png',verified:true
+ });
+ assert.equal(hooks.verifiedIconFor('chest'),null,'item-specific art must not become a generic fallback');
+ obj.iconItemCode='ITEM_CH_M_GARMENT_09';
+ assert.match(hooks.uiIcon('item','chest'),/chest-specific.png/);
+ obj.iconItemCode='ITEM_CH_M_GARMENT_10';
+ assert.equal(hooks.verifiedIconFor('chest'),null);
+});
+
+test('v5 icon foundation: ambiguous verified matches fail closed',()=>{
+ const {hooks}=boot(),s=hooks.state();
+ s.apparelStyle='ch_garment';
+ hooks.VERIFIED_ICON_ASSETS.push(...['a.png','b.png'].map(file=>({
+  category:'equipment',slot:'chest',region:'ch',equipmentType:'garment',
+  degree:9,grade:null,itemCode:null,verified:true,path:'assets/icons/ch/garment/'+file
+ })));
+ assert.equal(hooks.verifiedIconFor('chest'),null);
+ assert.match(hooks.itemLabel('chest'),/helyettesítő/);
 });
