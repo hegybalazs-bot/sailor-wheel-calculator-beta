@@ -696,7 +696,7 @@ test('v4.9.7: Blue overrides are CAP/Degree-specific, restorable and preserve ro
 
 test('v4.9.7: catalog-aware row options keep legacy blue type without data loss',()=>{
  const {hooks}=boot(),s=hooks.state(),obj=s.sets[90].hands;
- obj.count=1;obj.rows=[{type:'HP',value:100,modelMax:600}];
+ s.active='hands';obj.count=1;obj.rows=[{type:'HP',value:100,modelMax:600}];
  hooks.paint();
  const editor=hooks.editPanel();
  assert.ok(editor.includes('data-row-type="0"'));
