@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="hu"><head><meta name="robots" content="noindex,nofollow"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Sailor Wheel – Béta visszajelzés</title>
+<style>
+:root{color-scheme:dark;font-family:Inter,Segoe UI,Arial,sans-serif}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top left,#123a2d,#080f16 50%,#050a0d);color:#ecfff7;line-height:1.55}.wrap{max-width:900px;margin:0 auto;padding:28px 18px 50px}h1{font-size:26px;margin:5px 0}h2{font-size:17px;margin-top:25px;color:#8dffcc}.box{background:#101f22;border:1px solid #2d6e59;border-radius:14px;padding:18px;margin:16px 0}.tip{border-color:#b59c53;background:#282516;color:#ffe5a8}.subtitle{color:#abc9c0;font-size:13px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}label{display:grid;gap:5px;color:#b8e2d4;font-weight:650;font-size:14px}input,select,textarea{width:100%;border-radius:9px;border:1px solid #427564;background:#071813;padding:10px 12px;color:white;font:inherit}textarea{min-height:105px;resize:vertical}button,a.link{border-radius:10px;border:1px solid #43a888;background:#137a57;color:white;padding:12px 18px;font:inherit;font-weight:750;cursor:pointer;text-decoration:none;display:inline-block}button:hover,a.link:hover{background:#198c67}a{color:#91ffe0}.actions{display:flex;flex-wrap:wrap;gap:9px}.status{min-height:1.4em;color:#74ffc1;font-weight:750;margin-top:10px}@media(max-width:640px){.grid{grid-template-columns:1fr}h1{font-size:23px}}
+</style></head><body><main class="wrap">
+<div class="subtitle">ITW1NKY · EMERALD BETA TEST</div><h1>⚔ Sailor Wheel Calculator – Visszajelzés</h1>
+<p>Segíts ellenőrizni a Sailor Online statmaximumait, a Wheel-sorok értékeit és a kalkulátor működését! Nem kell regisztrálni, ez az űrlap <b>nem küld adatokat szerverre</b>: a jelentést kimásolhatod és elküldheted Discordon.</p>
+<div class="box tip"><b>Fontos:</b> Az 1–11 STR/INT, a SoS/SoM/Sun sorlimitek, a CAP-maximumok és a pörgetési esélyek egy része még tesztelendő. Ha tudsz biztos játékbeli értéket, írd le, és lehetőleg küldj külön képernyőképet is a Discordon.</div>
+<div class="box">
+<h2>1. Hol találtad?</h2><div class="grid">
+<label>CAP<select id="cap"><option>90</option><option>100</option><option>110</option><option>120</option><option>125</option><option>130</option><option>140</option><option>Más / nem számít</option></select></label>
+<label>Item<select id="item"><option>Kézvédő (Hands)</option><option>Shoulder</option><option>Foot</option><option>Head</option><option>Chest</option><option>Legs</option><option>Nyaklánc</option><option>Fülbevaló</option><option>Gyűrű 1</option><option>Gyűrű 2</option><option>Fegyver</option><option>Shield</option><option>Teljes SET / általános</option></select></label>
+<label>Grade<select id="grade"><option>SoS</option><option>SoM</option><option>Sun</option><option>Normal</option><option>Nem számít</option></select></label>
+<label>Visszajelzés típusa<select id="type"><option>Hibajelentés</option><option>Statmaximum / sorlimit pontosítás</option><option>Hiányzó funkció</option><option>Felhasználói felület / mobil</option><option>Pozitív visszajelzés</option></select></label>
+</div>
+<h2>2. Mit tapasztaltál?</h2><label>Jelenlegi eredmény / stat / hiba<textarea id="current" placeholder="Pl. 130 CAP, Sun nyaklánc, Freezing +16, a kalkulátor 80%-nak mutatja..."></textarea></label>
+<div style="height:14px"></div><label>Mi lenne a helyes érték vagy működés?<textarea id="expected" placeholder="Pl. a játékbeli maximum 20%, amit szerveres képpel tudok igazolni..."></textarea></label>
+<div style="height:14px"></div><label>Milyen további funkciót szeretnél? (opcionális)<textarea id="idea" placeholder="Pl. ékszerösszehasonlítás, mentés exportja, több SET statisztika..." style="min-height:70px"></textarea></label>
+</div>
+<div class="actions"><button id="copy" type="button">📋 Jelentés másolása Discordra</button><a class="link" href="index.html">⚔ Vissza a kalkulátorhoz</a></div><p id="status" class="status" aria-live="polite"></p>
+<p class="subtitle">Nincs automatikus beküldés és nincs központi adattárolás. Ha fontos a hiba, másold be a jelentést a közösség Discord-csatornájára, és mellékelj képernyőképet. Ne küldj jelszót vagy bejelentkezési adatot.</p>
+</main><script>
+'use strict';const g=id=>document.getElementById(id).value.trim();
+document.getElementById('copy').onclick=async()=>{
+const data=`⚔ Sailor Wheel Calculator – BÉTA visszajelzés\nCAP: ${g('cap')}\nItem: ${g('item')}\nGrade: ${g('grade')}\nTípus: ${g('type')}\nTapasztalat: ${g('current')||'(nincs kitöltve)'}\nElvárt / hiteles adat: ${g('expected')||'(nincs kitöltve)'}\nÖtlet: ${g('idea')||'—'}\nKépernyőkép: Discordon külön csatolom.\nBéta verzió: Emerald v4.5`;
+try{await navigator.clipboard.writeText(data);document.getElementById('status').textContent='✓ Másolva! Most illeszd be a Discordra.';}catch(err){let t=document.createElement('textarea');t.value=data;document.body.append(t);t.select();const ok=document.execCommand('copy');t.remove();document.getElementById('status').textContent=ok?'✓ Másolva! Most illeszd be a Discordra.':'Nem sikerült automatikusan másolni. Próbáld meg PC-n, vagy írd ki kézzel.';}
+};
+</script></body></html>
