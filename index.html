@@ -1479,6 +1479,19 @@ function paint(){topControls();$('#root').innerHTML=S.tab==='chance'?chanceView(
 function toast(txt){let old=$('.toast');if(old)old.remove();let x=document.createElement('div');x.className='toast';x.textContent=txt;document.body.append(x);clearTimeout(toastTimer);toastTimer=setTimeout(()=>x.remove(),2700);}
 function adjustState(){let id=S.active,ob=itm(id),lim=itemLimit(ob);if(ob.count>lim){ob.count=lim;ob.rows=ob.rows.slice(0,lim);toast('Figyelem: a grade maximumára csökkent a sorok száma!');}if(ob.count<0)ob.count=0;while(ob.rows.length<ob.count)ob.rows.push({type:'',value:''});}
 function bindRendered(){
+ document.querySelectorAll('[data-blue-type]').forEach(el=>el.onchange=()=>{
+  const selected=new Set(blueTypesFor(S.active));
+  if(el.checked)selected.add(el.dataset.blueType);else selected.delete(el.dataset.blueType);
+  if(!setBlueTypes(S.active,[...selected])){toast('Legalább egy Blue-típus maradjon.');paint();return;}
+  lastSim=null;save();paint();const panel=document.querySelector('.blue-catalog');if(panel)panel.open=true;
+ });
+ const resetBlue=$('#resetBlueCatalog');if(resetBlue)resetBlue.onclick=()=>{
+  resetBlueTypes(S.active);lastSim=null;save();paint();const panel=document.querySelector('.blue-catalog');if(panel)panel.open=true;
+ };
+ document.querySelectorAll('[data-open-blue-item]').forEach(el=>el.onclick=()=>{
+  S.active=el.dataset.openBlueItem;S.tab='set';lastSim=null;save();paint();
+  const panel=document.querySelector('.blue-catalog');if(panel)panel.open=true;
+ });
  // Read real Silkroad icons from user-provided, already converted PNG/WebP, not external hotlinks.
  const paintPreservingIconPanel=()=>{
   const panel=document.querySelector('.user-icons-panel'),wasOpen=Boolean(panel?.open);
