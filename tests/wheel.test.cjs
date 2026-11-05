@@ -52,7 +52,7 @@ function boot(){
  vm.createContext(sandbox);
  vm.runInContext(script+`
 ;globalThis.hooks={
- state:()=>S,html:()=>document.querySelector('#root').innerHTML,translateText,translateMarkup,setUiLanguage,helpViewEnglish,validServerState,profileCaps,
+ state:()=>S,html:()=>document.querySelector('#root').innerHTML,translateText,translateMarkup,setUiLanguage,helpViewEnglish,promptUI,confirmUI,alertUI,validServerState,profileCaps,
  save,paint,createSet,selectSet,recordWheelSnapshot,
  wheelHistoryStats,wheelComparison,optimizedLinePlan,balanceTargetAdvice,
  getSetComparison,balanceThreshold,balanceMetrics,qualifiedWheelStats,chooseCap,rowValueEditor,itemBlueInventory,blueInventoryView,addServerProfile,renameServerProfile,switchServerProfile,currentServerName,exportAllProfiles,importAllProfiles,applyFixedStatLimits,switchDegreeModel,blueTypesFor,blueCatalogKey,BLUE_BASE,setBlueTypes,resetBlueTypes,blueCatalogWarnings,blueCatalogPanel,blueTypeCountPanel,visiblePlanTypes,chanceWeightsFor,ensureChanceWeights,chancesComplete,rowMax,penOneBlueEstimate,keepOrRerollAdvice,keepOrRerollPanel,validUserIconData,setUserIcon,clearUserIcon,userIconPanel,uiIcon,itemLabel,statLabel,itemList,editPanel,autoWheelEstimate,autoWheelChancePanel,chanceView,shellCards,parryWheelOverview,parryWheelOverviewCell,overviewValidWheelStats,overviewItemView,overviewSummary,overviewTable,check,total,noteBackupExport,backupReminderState
@@ -1229,4 +1229,46 @@ test('v4.10.0: feedback page offers English/Hungarian text and no duplicated cal
  const code=feedback.match(/<script>([\s\S]*?)<\/script>/)?.[1];
  assert.ok(code,'Feedback page must have a script');
  assert.doesNotThrow(()=>new Function(code));
+});
+
+test('v4.10.0: all four default English views contain no Hungarian accented UI fragments',()=>{
+ const {hooks}=boot();
+ assert.equal(hooks.setUiLanguage('en'),true);
+ for(const tab of ['set','chance','rules','help']){
+  hooks.state().tab=tab;hooks.paint();
+  const textNodes=[...hooks.html().matchAll(/>([^<>]{2,450})</g)].map(x=>x[1].trim());
+  const untranslated=textNodes.filter(x=>/[áéíóöőúüűÁÉÍÓÖŐÚÜŰ]/.test(x));
+  assert.deepEqual(untranslated,[],tab+' still has untranslated HU UI labels');
+ }
+ assert.equal(hooks.setUiLanguage('hu'),true);
+ hooks.state().tab='set';hooks.paint();
+ assert.match(hooks.html(),/Felszerelés/);
+});
+
+test('v4.10.0: English translation avoids word fragments and translates safety confirmations',()=>{
+ const {hooks}=boot();
+ assert.equal(hooks.translateText('sorok','en'),'sorok','do not produce lineok');
+ assert.equal(hooks.translateText('sor','en'),'line');
+ assert.equal(hooks.translateText('Nem ígér jobb rollt','en'),'Nem ígér jobb rollt','do not produce mixed No ígér');
+ const msg='Betöltöd a teljes mentést? A jelenlegi v4-es adatok felülíródnak. Előbb érdemes JSON-ba menteni.';
+ assert.match(hooks.translateText(msg,'en'),/Import the full backup/);
+ assert.match(hooks.translateText('A SET neve nem lehet üres.','en'),/Set name cannot be empty/);
+ assert.match(hooks.translateText('Csak 1 és 200 közötti egész CAP adható meg.','en'),/whole-number CAP/);
+ assert.match(hooks.translateText('V4.10.0 BÉTA JSON-export indítva, ellenőrizd a letöltött fájlt.','en'),/JSON export started/);
+});
+
+test('v4.10.0: switching language survives server creation and JSON round trip',()=>{
+ const {hooks,store}=boot();
+ hooks.setUiLanguage('en');
+ assert.equal(hooks.addServerProfile('New Silkroad server'),true);
+ assert.equal(hooks.chooseCap(140),true);
+ const backup=JSON.parse(JSON.stringify(hooks.exportAllProfiles()));
+ assert.equal(backup.serverProfiles.entries.length,2);
+ assert.equal(hooks.importAllProfiles(backup),true);
+ assert.equal(hooks.state().cap,140);
+ assert.equal(store['wheel-calculator-language-v1'],'en');
+ assert.match(hooks.html(),/Equipment/);
+ hooks.setUiLanguage('hu');
+ assert.equal(store['wheel-calculator-language-v1'],'hu');
+ assert.match(hooks.html(),/Felszerelés/);
 });
