@@ -349,8 +349,8 @@ function check(id,obj=itm(id),cfg=currentCfg(),weapon=weaponId()){
    if(typ && v<0)issues.push(`${i+1}. sor: negatív érték.`);
    if(['STR','INT','AR','BR','CRIT','FREEZE'].includes(typ) && row.value!=='' && row.value!=null && v<1)issues.push(`${i+1}. sor: ${typ} minimum +1.`);
    if(m!=null && v>m)issues.push(`${i+1}. sor: ${typ} maximum ${m}.`);
-   if(typ==='STR'){str+=v;stats+=v;statRows++;strRows++;strPotential+=(m||0);}
-   if(typ==='INT'){int+=v;stats+=v;statRows++;intRows++;intPotential+=(m||0);}
+   if(typ==='STR'&&row.value!==''&&row.value!=null&&Number.isInteger(v)&&v>=1&&m!=null&&m>=v){str+=v;stats+=v;statRows++;strRows++;strPotential+=m;}
+   if(typ==='INT'&&row.value!==''&&row.value!=null&&Number.isInteger(v)&&v>=1&&m!=null&&m>=v){int+=v;stats+=v;statRows++;intRows++;intPotential+=m;}
    if(typ==='AR'){arSum+=v;arRows++;if(Number(cfg.maxAR)>0&&v>=Number(m))arPerfect++;}
    if(typ==='BR'){brSum+=v;brRows++;if(v>=Math.min(Number(m)||Infinity,Number(id==='shield'?cfg.maxBR:cfg.weaponMinBlockValue)||Infinity))brPerfect++;}
    if(typ==='CRIT')critRows++;
@@ -409,7 +409,7 @@ function check(id,obj=itm(id),cfg=currentCfg(),weapon=weaponId()){
 // 4.8/cycle 1 – manually saved Wheel observations, not server-detected spins.
 function recordWheelSnapshot(id,obj=itm(id),at=new Date()){
  const result=check(id,obj),cfg=currentCfg();
- if(result.count===0)return null;
+ if(result.count===0||!result.complete||!result.wheelComplete||result.issues.length)return null;
  const rows=copyJSON((obj.rows||[]).slice(0,result.count)).map(row=>({
   ...row,...(row.modelMax==null&&effectiveRowMax(row,cfg)!=null?{modelMax:effectiveRowMax(row,cfg)}:{})
  }));
@@ -933,7 +933,7 @@ function bindRendered(){
    lastSim=null;save();paint();
  });
  document.querySelectorAll('[data-prob]').forEach(el=>el.onchange=()=>{currentCfg().chances[el.dataset.prob]=el.value===''?'':Math.max(0,Math.min(100,num(el.value)));lastSim=null;save();paint();});
- let snap=$('#snapshotBtn');if(snap)snap.onclick=()=>{let v=check(S.active),o=itm(S.active);if(v.count===0){toast('Adj meg legalább 1 sort!');return;}recordWheelSnapshot(S.active,o);save();paint();toast('Wheel-állapot rögzítve a naplóban.');};
+ let snap=$('#snapshotBtn');if(snap)snap.onclick=()=>{let v=check(S.active),o=itm(S.active);if(v.count===0){toast('Adj meg legalább 1 sort!');return;}if(!recordWheelSnapshot(S.active,o)){toast('Csak teljesen kitöltött, hibamentes Wheel-állapot menthető.');return;}save();paint();toast('Wheel-állapot rögzítve a naplóban.');};
  let reset=$('#resetItemBtn');if(reset)reset.onclick=()=>{if(confirm(`Törlöd a ${NAMES[S.active]} összes eredményét és előzményeit ezen a CAP-on?`)){if(S.active==='weapon')S.weaponInventory[S.cap][weaponId()]=freshItem('weapon');else items()[S.active]=freshItem(S.active);lastSim=null;save();paint();}};
  let cr=$('#critReqSel');if(cr)cr.onchange=()=>{S.critOverrides[S.cap][weaponId()]=cr.value==='yes';lastSim=null;save();paint();};
  let go=$('#goChance');if(go)go.onclick=()=>{S.tab='chance';paint();};
