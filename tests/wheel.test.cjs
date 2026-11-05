@@ -55,7 +55,7 @@ function boot(){
  state:()=>S,html:()=>document.querySelector('#root').innerHTML,translateText,translateMarkup,setUiLanguage,helpViewEnglish,promptUI,confirmUI,alertUI,validServerState,profileCaps,
  save,paint,createSet,selectSet,recordWheelSnapshot,
  wheelHistoryStats,wheelComparison,optimizedLinePlan,balanceTargetAdvice,
- getSetComparison,balanceThreshold,balanceMetrics,qualifiedWheelStats,chooseCap,rowValueEditor,itemBlueInventory,blueInventoryView,addServerProfile,renameServerProfile,switchServerProfile,currentServerName,exportAllProfiles,importAllProfiles,applyFixedStatLimits,switchDegreeModel,blueTypesFor,blueCatalogKey,BLUE_BASE,setBlueTypes,resetBlueTypes,blueCatalogWarnings,blueCatalogPanel,blueTypeCountPanel,visiblePlanTypes,chanceWeightsFor,ensureChanceWeights,chancesComplete,rowMax,penOneBlueEstimate,keepOrRerollAdvice,keepOrRerollPanel,validUserIconData,setUserIcon,clearUserIcon,userIconPanel,uiIcon,itemLabel,statLabel,itemList,editPanel,autoWheelEstimate,autoWheelChancePanel,chanceView,shellCards,parryWheelOverview,parryWheelOverviewCell,overviewValidWheelStats,overviewItemView,overviewSummary,overviewTable,check,total,noteBackupExport,backupReminderState
+ getSetComparison,balanceThreshold,balanceMetrics,qualifiedWheelStats,chooseCap,rowValueEditor,itemBlueInventory,blueInventoryView,addServerProfile,renameServerProfile,switchServerProfile,currentServerName,exportAllProfiles,importAllProfiles,applyFixedStatLimits,switchDegreeModel,blueTypesFor,blueCatalogKey,BLUE_BASE,setBlueTypes,resetBlueTypes,blueCatalogWarnings,blueCatalogPanel,blueTypeCountPanel,visiblePlanTypes,chanceWeightsFor,ensureChanceWeights,chancesComplete,rowMax,penOneBlueEstimate,keepOrRerollAdvice,keepOrRerollPanel,validUserIconData,setUserIcon,clearUserIcon,userIconPanel,uiIcon,itemLabel,statLabel,itemList,editPanel,iconIdentity,verifiedIconFor,VERIFIED_ICON_ASSETS,normalizeApparelStyle,autoWheelEstimate,autoWheelChancePanel,chanceView,shellCards,parryWheelOverview,parryWheelOverviewCell,overviewValidWheelStats,overviewItemView,overviewSummary,overviewTable,check,total,noteBackupExport,backupReminderState
 };`,sandbox,{timeout:5000});
  return {hooks:sandbox.hooks,document,store,inputs};
 }
@@ -1271,4 +1271,95 @@ test('v4.10.0: switching language survives server creation and JSON round trip',
  hooks.setUiLanguage('hu');
  assert.equal(store['wheel-calculator-language-v1'],'hu');
  assert.match(hooks.html(),/Felszerelés/);
+});
+
+
+test('v5 icon foundation: legacy SETs stay unidentified and use safe placeholders',()=>{
+ const {hooks}=boot(),s=hooks.state();
+ assert.equal(s.apparelStyle,'unknown');
+ assert.equal(hooks.iconIdentity('chest').equipmentType,null);
+ assert.equal(hooks.verifiedIconFor('chest'),null);
+ assert.match(hooks.itemLabel('chest'),/Stilizált helyettesítő/);
+ assert.match(hooks.html(),/Ikon Degree/);
+ assert.match(hooks.html(),/Ruhatípus/);
+});
+
+test('v5 icon foundation: matching requires exact outfit family, region, degree, slot and verification',()=>{
+ const {hooks}=boot(),s=hooks.state();
+ s.apparelStyle='ch_garment';
+ const chest=s.sets[90].chest;
+ const icons=hooks.VERIFIED_ICON_ASSETS;
+ const mk=(degree,path,grade=null)=>({
+  slot:'chest',region:'ch',equipmentType:'garment',weaponType:null,
+  degree,grade,path,verified:true
+ });
+ icons.push(mk(9,'assets/icons/ch/garment/chest-9.png'),
+            mk(11,'assets/icons/ch/garment/chest-11.webp'));
+ assert.equal(hooks.iconIdentity('chest').degree,9);
+ assert.equal(hooks.verifiedIconFor('chest').path,'assets/icons/ch/garment/chest-9.png');
+ chest.iconDegree=11;
+ assert.equal(hooks.verifiedIconFor('chest').path,'assets/icons/ch/garment/chest-11.webp');
+ assert.match(hooks.uiIcon('item','chest'),/data-icon-source="verified"/);
+ s.apparelStyle='ch_armor';
+ assert.equal(hooks.verifiedIconFor('chest'),null,'garment must not become armor');
+ s.apparelStyle='eu_robe';
+ assert.equal(hooks.verifiedIconFor('chest'),null,'Chinese icon must not be European icon');
+});
+
+test('v5 icon foundation: sprite paths and match verification are not trusted implicitly',()=>{
+ const {hooks}=boot(),s=hooks.state();
+ s.apparelStyle='ch_protector';
+ hooks.VERIFIED_ICON_ASSETS.push({
+  slot:'head',region:'ch',equipmentType:'protector',weaponType:null,
+  degree:9,grade:null,path:'javascript:alert(1)',verified:true
+ },{
+  slot:'head',region:'ch',equipmentType:'protector',weaponType:null,
+  degree:9,grade:null,path:'assets/icons/ch/protector/head9.png',verified:false
+ });
+ assert.equal(hooks.verifiedIconFor('head'),null);
+ assert.ok(!hooks.uiIcon('item','head').includes('<img'));
+});
+
+test('v5 icon foundation: weapon and rings identify the actual item family',()=>{
+ const {hooks}=boot(),s=hooks.state();
+ s.weaponByCap[90]='eu_staff';
+ const weapon=hooks.iconIdentity('weapon');
+ assert.equal(weapon.region,'eu');
+ assert.equal(weapon.weaponType,'eu_staff');
+ assert.equal(weapon.equipmentType,'weapon');
+ assert.equal(hooks.iconIdentity('shield').equipmentType,'shield');
+ assert.equal(hooks.iconIdentity('ring1').slot,'ring');
+ assert.equal(hooks.iconIdentity('ring2').slot,'ring');
+});
+
+test('v5 icon foundation: apparel style is preserved per SET and independently per CAP',()=>{
+ const {hooks,document}=boot(),s=hooks.state();
+ const first=s.setBank[90].activeId;
+ const picker=document.querySelector('#apparelStyleSel');
+ picker.onchange({target:{value:'ch_garment'}});
+ assert.equal(s.apparelStyle,'ch_garment');
+ hooks.createSet(false);
+ assert.equal(s.apparelStyle,'unknown','new SET does not inherit old item family');
+ hooks.selectSet(first);
+ assert.equal(s.apparelStyle,'ch_garment');
+ hooks.chooseCap(100);
+ assert.equal(s.apparelStyle,'unknown','a different CAP has independent settings');
+ document.querySelector('#apparelStyleSel').onchange({target:{value:'eu_robe'}});
+ hooks.chooseCap(90);
+ assert.equal(s.apparelStyle,'ch_garment');
+ hooks.chooseCap(100);
+ assert.equal(s.apparelStyle,'eu_robe');
+});
+
+test('v5 icon foundation: existing manual icon still takes precedence over future verified asset',()=>{
+ const {hooks}=boot(),s=hooks.state();
+ s.apparelStyle='ch_garment';
+ hooks.VERIFIED_ICON_ASSETS.push({
+  slot:'chest',region:'ch',equipmentType:'garment',weaponType:null,
+  degree:9,grade:null,path:'assets/icons/ch/garment/chest.png',verified:true
+ });
+ assert.ok(hooks.setUserIcon('chest','data:image/png;base64,AA=='));
+ const html=hooks.uiIcon('item','chest');
+ assert.match(html,/data:image\/png;base64,AA==/);
+ assert.doesNotMatch(html,/assets\/icons/);
 });
