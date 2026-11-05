@@ -413,7 +413,7 @@ test('v4.9.4: separate validated Wheel and manual stat totals without duplicate 
  hands.bonusStats.PARRY=30;
  const shield=s.sets[90].shield;shield.count=1;shield.rows=[{type:'STR',value:11,modelMax:11}];
  hooks.save();hooks.paint();
- const stats=hooks.overviewSummary(['shoulder','hands','shield'].map(hooks.overviewItemView));
+ const stats=hooks.overviewSummary(['shoulder','hands','shield'].map(id=>hooks.overviewItemView(id)));
  assert.equal(stats.str,5,'unused spear shield must not add STR');
  assert.equal(stats.int,4);
  assert.equal(stats.ar,20,'invalid AR 99/40 should not be counted');
@@ -460,7 +460,7 @@ test('v4.9.4: out-of-model manual values are flagged rather than inflating total
  hands.count=1;hands.rows=[{type:'HP',value:400,modelMax:600}];
  hands.bonusStats.HP=999; // model cap for 90 is 600
  hooks.save();hooks.paint();
- const summary=hooks.overviewSummary(['hands'].map(hooks.overviewItemView));
+ const summary=hooks.overviewSummary(['hands'].map(id=>hooks.overviewItemView(id)));
  assert.equal(summary.hpWheel,400);
  assert.equal(summary.hpManual,0,'invalid manual over-cap must not inflate estimated SET totals');
  assert.match(hooks.overviewTable(),/\+999 \/ \+600 \(166[,.]5%\) ⚠/);
