@@ -445,6 +445,42 @@ function wheelStatsPanel(id,obj=itm(id)){
   <p class="info">A gombbal kézzel rögzített Wheel-állapotok száma, <b>nem a szerver valódi pörgetésszáma vagy drop-esélye</b>. Az összesítés csak az itt elmentett eredményeket vizsgálja.</p>
  </section>`;
 }
+// 4.8/cycle 2 – compare last saved Wheel outcome with the unsaved current result.
+function wheelComparison(id,obj=itm(id)){
+ const log=Array.isArray(obj.history)?obj.history:[];
+ if(!log.length)return null;
+ const prev=snapshotMetrics(log[log.length-1],id,obj);
+ const current=check(id,obj);
+ const past=log.length>1?snapshotMetrics(log[log.length-2],id,obj):null;
+ const beforeLast=past&&prev?{str:past.str,int:past.int,total:past.total,quality:past.quality}:null;
+ const now={str:current.str,int:current.int,total:current.stats,quality:current.itemPct};
+ const compare=(a,b)=>({
+  str:b.str-a.str,int:b.int-a.int,total:b.total-a.total,
+  quality:a.quality!=null&&b.quality!=null?b.quality-a.quality:null
+ });
+ return {current:now,last:prev,delta:compare(prev,now),
+  preceding:past,previousDelta:beforeLast?compare(beforeLast,prev):null};
+}
+function wheelComparePanel(id,obj=itm(id)){
+ const result=wheelComparison(id,obj);
+ if(!result)return `<div class="notice">🔁 Régi/új Wheel összehasonlítás: először az <b>Aktuális pörgetés mentése</b> gombbal rögzíts egy kiinduló állapotot. Ezután módosítsd a sorokat: rögtön látod a különbséget a mentés előtt.</div>`;
+ const {current,last,delta,previousDelta}=result;
+ const signed=x=>(x>0?'+':'')+r2(x);
+ const color=x=>x>0?'var(--green)':x<0?'var(--red)':'var(--muted)';
+ const quality=(x)=>x==null?'—':percent(x);
+ return `<section class="wheel-compare panel" style="margin:15px 0;border-color:#356c6a;padding:14px">
+   <h3>🔁 Régi Wheel ↔ jelenlegi Wheel</h3>
+   <p class="info">Utolsó mentett eredmény (${esc(last.time)}) és a most látható, <b>még nem mentett</b> állapot. Plusz: javulás, mínusz: romlás.</p>
+   <div class="stats">
+    <div class="stat"><small>STR</small><strong style="color:${color(delta.str)}">${signed(delta.str)}</strong><small>${r2(last.str)} → ${r2(current.str)}</small></div>
+    <div class="stat"><small>INT</small><strong style="color:${color(delta.int)}">${signed(delta.int)}</strong><small>${r2(last.int)} → ${r2(current.int)}</small></div>
+    <div class="stat"><small>Összes STR+INT</small><strong style="color:${color(delta.total)}">${signed(delta.total)}</strong><small>${r2(last.total)} → ${r2(current.total)}</small></div>
+    <div class="stat"><small>Teljes Wheel-minőség</small><strong style="color:${delta.quality==null?'var(--muted)':color(delta.quality)}">${delta.quality==null?'—':signed(delta.quality)+' százalékpont'}</strong><small>${quality(last.quality)} → ${quality(current.quality)}</small></div>
+   </div>
+   <p class="info">${previousDelta==null?'Még nincs két elmentett állapot egymáshoz hasonlításra.':`Előző két mentés változása: STR ${signed(previousDelta.str)}, INT ${signed(previousDelta.int)}, együtt ${signed(previousDelta.total)}.`}
+   A minőségi eltérés a rögzített sormaximumokon alapul; a szerver pörgetési valószínűségét nem mutatja.</p>
+ </section>`;
+}
 function percent(x){return x==null?'—':r2(x)+'%';}
 function pill(text,style=''){return `<span class="pill ${style}">${esc(text)}</span>`;}
 function statusP(v){return pill(v.status,v.color==='green'?'good':v.color==='yellow'?'warn':v.color==='red'?'bad':'');}
@@ -591,7 +627,8 @@ ${v.issues.length?`<div class="warnbox"><b>Adathiba:</b> ${v.issues.map(esc).joi
 ${v.count>0&&(!v.complete||!v.wheelComplete)?`<div class="warnbox">Néhány sor típusa vagy értéke még hiányzik, esetleg a CAP-hoz nincs megadva maximum. A teljes Wheel-minőség csak kitöltött, ismert maximumú sorokkal lesz végleges.</div>`:''}
 ${v.count>0&&v.extra.length?`<div class="warnbox"><b>Nem teljesülő feltételek:</b> ${v.extra.map(esc).join(' · ')}</div>`:''}
 <div class="actions"><button class="primary" id="snapshotBtn">✓ Aktuális pörgetés mentése</button><button id="goChance">🎲 Esélyek erre az itemre</button><button class="danger" id="resetItemBtn">Item törlése</button></div>
-${wheelStatsPanel(id,ob)}
+${wheelComparePanel(id,ob)}
+ ${wheelStatsPanel(id,ob)}
  ${ob.history?.length?`<h3>Korábbi pörgetések (${ob.history.length})</h3><div class="history">${ob.history.slice().reverse().slice(0,10).map(h=>`<div>${esc(h.time)} · ${h.count} sor · STR +${h.str}, INT +${h.int} · Attack ${h.ar} / Block ${h.br} · ${esc(h.status)}</div>`).join('')}</div>`:'<p class="info">Még nem mentettél el korábbi pörgetést. A jelenlegi sorok ettől függetlenül automatikusan mentődnek.</p>'}
 </section>`;}
 function overviewTable(){return `<section class="panel set-overview"><h2>🧾 Teljes szett – célértékek és állapotok</h2><div style="overflow-x:auto"><table class="tinytable status-table"><thead><tr><th>Item</th><th>Grade</th><th>Wheel</th><th>STR</th><th>INT</th><th>STR roll%</th><th>INT roll%</th><th>HP saját / max</th><th>MP saját / max</th><th>Parry saját / max</th><th>Freezing saját / max</th><th>Teljes Wheel %</th><th>Saját cél</th><th>STR/INT célhiány</th><th>Jelzés</th></tr></thead><tbody>${IDS.map(id=>{const o=itm(id),v=check(id);return `<tr class="item-${v.color} ${!isEquipped(id)?'unequipped':''}" data-overview-row="${id}"><td><button class="linklike" data-item="${id}">${esc(NAMES[id])}</button></td><td>${esc(o.grade)}</td><td>${v.count}/${v.limit}</td><td>+${r2(v.str)}</td><td>+${r2(v.int)}</td><td>${percent(v.strQuality)}</td><td>${percent(v.intQuality)}</td>${['HP','MP','PARRY','FREEZE'].map((k)=>{let r=num(currentCfg()[{HP:'maxHP',MP:'maxMP',PARRY:'maxPARRY',FREEZE:'maxFREEZE'}[k]]),b=ensureBonusStats(o)[k];return `<td>${b===''||b==null?'—':`+${r2(num(b))} / ${r?'+'+r2(r):'?'} (${percent(r?num(b)/r*100:null)})`}</td>`}).join('')}<td><b>${percent(v.itemPct)}</b></td><td><b>${percent(v.goalPct)}</b></td><td>${v.missingPoints==null?'—':'+'+v.missingPoints}</td><td>${statusP(v)}${id==='weapon'||id==='shield'?`<div class="tiny">${v.extra.length?'⚠ Külön feltétel hiányzik':'✓ Rate/Critical feltételek rendben'}</div>`:''}</td></tr>`}).join('')}</tbody></table></div><p class="info">A fehér sor semleges, a piros 20% alatti eredményt, a sárga a céltól legfeljebb 10 százalékponttal elmaradó itemet, a zöld a teljesült %-os célt jelöli. A hiányos/hibás sorokat a jobb oldali részleteknél ellenőrizheted.</p></section>`;}
