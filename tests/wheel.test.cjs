@@ -912,7 +912,7 @@ test('v4.9.8: fixed +11 STR/INT maxima across CAPs, preserving legacy over-cap r
  assert.equal(hooks.qualifiedWheelStats(obj).stats,0);
  assert.ok(hooks.check('shoulder').issues.some(x=>x.includes('maximum 11')));
  assert.equal(obj.rows[0].value,40,'old rows retained for correction');
- assert.ok(hooks.rowValueEditor(obj.rows[0],0).includes('max="'));
+ assert.ok(hooks.rowValueEditor(obj.rows[0],0).includes('1–11'),'fixed ceiling must be shown in the row value selector');
  assert.ok(hooks.rowValueEditor(obj.rows[0],0).includes('határon kívül'));
  obj.rows=[{type:'STR',value:11,modelMax:45},{type:'INT',value:11,modelMax:32}];
  hooks.save();hooks.paint();
