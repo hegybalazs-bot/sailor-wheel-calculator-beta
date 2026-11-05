@@ -101,3 +101,15 @@ A teljes SET-táblázatban a korábbi két Parry-oszlop helyett **egyetlen „Pa
 - Meglévő Wheel-adatok, SET-ek, CAP/DG modellek és JSON-exportok változatlan adattárolási formátumban megmaradnak. A vizuális változások nem jelentenek igazolt Sailor szerveresélyeket.
 
 **Tesztek:** `node --test tests/wheel.test.cjs` (24 regressziós teszt); a fizikai Android/iOS böngészős ellenőrzés ettől külön feladat.
+
+## Emerald v4.9.5 – 9DG Chinese Garment ikonstílus
+
+A vizuális téma alapja a klasszikus **9th Degree (9DG) Chinese Garment**, különösen a Mad Sky Storm itemcsalád. A választott tematika **nem változtatja meg** a CAP / Degree beállításokat, a Wheel-sorok maximumát, a fegyvertípust vagy a mentett SET-eket.
+
+- **Felszerelések:** a Shoulder, Hands, Foot, Head, Chest és Legs sorok külön, Garment-ihletésű, offline vektorikont kapnak. Az ékszerek, fegyver és Shield saját, megkülönböztethető díszítő piktogramot kapnak. Minden ikon mellett megmarad a kiírt itemnév.
+- **Statok:** STR = **piros erő**, INT = **kék mana/kristály**, HP = szív, MP = kék vízcsepp, Parry = keresztezett pengék, AR = támadás, BR = pajzs, Critical = célkereszt, Freeze = hópehely. Tooltip minden ikon mellett. A statértékek és a már rögzített megnevezések változatlanok.
+- Az ikonok a 12 elemes itemlistában, a szerkesztő fejlécében, a Wheel-soroknál, a statmezőknél, a SET végső táblázatában és a mobilos itemkártyákon jelennek meg.
+- **Fontos jogi és technikai különbség:** a beépített SVG-piktogramok **saját, stilizált grafikai elemek**, **nem eredeti Silkroad Online kliens- vagy inventory-iconfájlok**. A 9DG témát a [9th Degree Chinese Garment itemek](https://sroway.com/threads/silkroad-online-chinese-garment-list-lv-1-101.1400/) alapján neveztük el. Eredeti fájlokat csak megfelelő jogosultságú, megbízható forrásból szabad később a helyükre tenni.
+- A piktogramok közvetlenül az egyfájlos HTML-ben vannak; **nincs külső ikon-CDN**, így az offline jelleg és a JSON-mentés megmarad.
+
+Tesztelés: a `node --test tests/wheel.test.cjs` regressziós tesztek ellenőrzik a 12 item ikonját, a piros STR/kék INT színét, a neveket és a számítások változatlanságát. Valódi mobilböngészős megjelenítési teszt külön feladat.
