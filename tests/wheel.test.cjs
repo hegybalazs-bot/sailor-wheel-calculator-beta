@@ -55,7 +55,7 @@ function boot(){
  state:()=>S,html:()=>document.querySelector('#root').innerHTML,
  save,paint,createSet,selectSet,recordWheelSnapshot,
  wheelHistoryStats,wheelComparison,optimizedLinePlan,balanceTargetAdvice,
- getSetComparison,balanceThreshold,balanceMetrics,qualifiedWheelStats,blueTypesFor,blueCatalogKey,BLUE_BASE,setBlueTypes,resetBlueTypes,blueCatalogWarnings,blueCatalogPanel,blueTypeCountPanel,visiblePlanTypes,penOneBlueEstimate,keepOrRerollAdvice,keepOrRerollPanel,validUserIconData,setUserIcon,clearUserIcon,userIconPanel,uiIcon,itemLabel,statLabel,itemList,editPanel,autoWheelEstimate,autoWheelChancePanel,chanceView,shellCards,parryWheelOverview,parryWheelOverviewCell,overviewValidWheelStats,overviewItemView,overviewSummary,overviewTable,check,total,noteBackupExport,backupReminderState
+ getSetComparison,balanceThreshold,balanceMetrics,qualifiedWheelStats,blueTypesFor,blueCatalogKey,BLUE_BASE,setBlueTypes,resetBlueTypes,blueCatalogWarnings,blueCatalogPanel,blueTypeCountPanel,visiblePlanTypes,chanceWeightsFor,ensureChanceWeights,chancesComplete,rowMax,penOneBlueEstimate,keepOrRerollAdvice,keepOrRerollPanel,validUserIconData,setUserIcon,clearUserIcon,userIconPanel,uiIcon,itemLabel,statLabel,itemList,editPanel,autoWheelEstimate,autoWheelChancePanel,chanceView,shellCards,parryWheelOverview,parryWheelOverviewCell,overviewValidWheelStats,overviewItemView,overviewSummary,overviewTable,check,total,noteBackupExport,backupReminderState
 };`,sandbox,{timeout:5000});
  return {hooks:sandbox.hooks,document,store,inputs};
 }
@@ -766,4 +766,75 @@ test('v4.9.7: a met item goal yields KEEP advice even with high improvement chan
  assert.equal(a.estimate.goalMet,true);
  assert.match(hooks.keepOrRerollPanel('shoulder'),/Inkább megtartás/);
  assert.match(hooks.chanceView(),/Megtartsam vagy újrapörgessem/);
+});
+
+test('v4.9.7: full Wheel simulation lists only the selected item Blue pool',()=>{
+ const {hooks}=boot(),s=hooks.state();
+ s.active='shoulder';
+ let html=hooks.chanceView();
+ assert.equal((html.match(/data-prob="/g)||[]).length,4);
+ assert.match(html,/data-prob="STR"/);
+ assert.match(html,/data-prob="INT"/);
+ assert.match(html,/data-prob="PARRY"/);
+ assert.match(html,/data-prob="DUR"/);
+ assert.doesNotMatch(html,/data-prob="AR"/);
+ assert.doesNotMatch(html,/data-prob="CRIT"/);
+ s.active='head';
+ html=hooks.chanceView();
+ assert.equal((html.match(/data-prob="/g)||[]).length,6);
+ assert.match(html,/data-prob="HP"/);
+ assert.match(html,/data-prob="MP"/);
+ s.active='ring1';
+ html=hooks.chanceView();
+ assert.equal((html.match(/data-prob="/g)||[]).length,10);
+ assert.match(html,/data-prob="DISEASE"/);
+ assert.match(html,/data-prob="SLEEP"/);
+ assert.match(html,/data-prob="FEAR"/);
+});
+
+test('v4.9.7: manually assumed type weights are slot-specific and must total 100',()=>{
+ const {hooks,store}=boot(),s=hooks.state();
+ let p=hooks.ensureChanceWeights('shoulder');
+ Object.assign(p,{STR:25,INT:25,PARRY:25,DUR:25});
+ assert.equal(hooks.chancesComplete(),true);
+ assert.equal(hooks.chancesComplete(s.cfg[90],'shoulder'),true);
+ assert.equal(hooks.chancesComplete(s.cfg[90],'head'),false);
+ p.PARRY=24;
+ assert.equal(hooks.chancesComplete(),false);
+ p.PARRY=25;
+ hooks.save();
+ assert.equal(JSON.parse(store['sailor-wheel-calculator-v4']).blueChanceProfiles['90_9'].shoulder.STR,25);
+ s.cfg[90].degree=10;
+ assert.equal(hooks.chancesComplete(),false);
+ assert.equal(hooks.ensureChanceWeights('shoulder').STR,'');
+ s.cfg[90].degree=9;
+ assert.equal(hooks.chancesComplete(),true);
+});
+
+test('v4.9.7: unknown status Blue maximum must be entered for positive chance weight',()=>{
+ const {hooks}=boot(),s=hooks.state();
+ s.active='ring1';
+ const p=hooks.ensureChanceWeights('ring1');
+ for(const k of hooks.blueTypesFor('ring1'))p[k]=0;
+ p.DISEASE=100;
+ assert.equal(hooks.chancesComplete(),false);
+ assert.match(hooks.chanceView(),/data-blue-chance-max="DISEASE"/);
+ s.blueTypeMaxima={'90_9':{DISEASE:10}};
+ assert.equal(hooks.rowMax('DISEASE'),10);
+ assert.equal(hooks.chancesComplete(),true);
+ s.blueTypeMaxima['90_9'].DISEASE=0;
+ assert.equal(hooks.chancesComplete(),false);
+});
+
+test('v4.9.7: legacy global chance assumptions are not erased by per-item profiles',()=>{
+ const {hooks}=boot(),s=hooks.state();
+ s.cfg[90].chances={STR:30,INT:70,AR:0,BR:0,CRIT:0,OTHER:0};
+ const shoulder=hooks.ensureChanceWeights('shoulder');
+ assert.equal(shoulder.STR,30);
+ assert.equal(shoulder.INT,70);
+ assert.equal(shoulder.PARRY,'');
+ assert.equal(shoulder.DUR,'');
+ shoulder.PARRY=0;shoulder.DUR=0;
+ assert.equal(hooks.chancesComplete(),true);
+ assert.deepEqual(JSON.parse(JSON.stringify(s.cfg[90].chances)),{STR:30,INT:70,AR:0,BR:0,CRIT:0,OTHER:0});
 });
