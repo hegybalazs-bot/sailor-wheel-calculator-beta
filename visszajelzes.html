@@ -3,7 +3,10 @@
 <style>
 :root{color-scheme:dark;font-family:Inter,Segoe UI,Arial,sans-serif}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top left,#123a2d,#080f16 50%,#050a0d);color:#ecfff7;line-height:1.55}.wrap{max-width:900px;margin:0 auto;padding:28px 18px 50px}h1{font-size:26px;margin:5px 0}h2{font-size:17px;margin-top:25px;color:#8dffcc}.box{background:#101f22;border:1px solid #2d6e59;border-radius:14px;padding:18px;margin:16px 0}.tip{border-color:#b59c53;background:#282516;color:#ffe5a8}.subtitle{color:#abc9c0;font-size:13px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}label{display:grid;gap:5px;color:#b8e2d4;font-weight:650;font-size:14px}input,select,textarea{width:100%;border-radius:9px;border:1px solid #427564;background:#071813;padding:10px 12px;color:white;font:inherit}textarea{min-height:105px;resize:vertical}button,a.link{border-radius:10px;border:1px solid #43a888;background:#137a57;color:white;padding:12px 18px;font:inherit;font-weight:750;cursor:pointer;text-decoration:none;display:inline-block}button:hover,a.link:hover{background:#198c67}a{color:#91ffe0}.actions{display:flex;flex-wrap:wrap;gap:9px}.status{min-height:1.4em;color:#74ffc1;font-weight:750;margin-top:10px}@media(max-width:640px){.grid{grid-template-columns:1fr}h1{font-size:23px}}
 </style></head><body><main class="wrap">
-<div class="subtitle">ITW1NKY · EMERALD BETA TEST</div><h1>⚔ Wheel Calculator Calculator – Visszajelzés</h1>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap">
+<div class="subtitle">ITW1NKY · EMERALD BETA TEST</div>
+<label style="display:flex;align-items:center;gap:10px;font-size:12px">🌐 Language / Nyelv <select style="width:auto" id="feedbackLanguage" aria-label="Language / Nyelv"><option value="hu">Magyar</option><option value="en">English</option></select></label>
+</div><h1>⚔ Wheel Calculator – Visszajelzés</h1>
 <p>Segíts ellenőrizni a Sailor Online statmaximumait, a Wheel-sorok értékeit és a kalkulátor működését! Nem kell regisztrálni, ez az űrlap <b>nem küld adatokat szerverre</b>: a jelentést kimásolhatod és elküldheted Discordon.</p>
 <div class="box tip"><b>Fontos:</b> Az 1–11 STR/INT, a SoS/SoM/Sun sorlimitek, a CAP-maximumok és a pörgetési esélyek egy része még tesztelendő. Ha tudsz biztos játékbeli értéket, írd le, és lehetőleg küldj külön képernyőképet is a Discordon.</div>
 <div class="box">
@@ -20,9 +23,45 @@
 <div class="actions"><button id="copy" type="button">📋 Jelentés másolása Discordra</button><a class="link" href="index.html">⚔ Vissza a kalkulátorhoz</a></div><p id="status" class="status" aria-live="polite"></p>
 <p class="subtitle">Nincs automatikus beküldés és nincs központi adattárolás. Ha fontos a hiba, másold be a jelentést a közösség Discord-csatornájára, és mellékelj képernyőképet. Ne küldj jelszót vagy bejelentkezési adatot.</p>
 </main><script>
-'use strict';const g=id=>document.getElementById(id).value.trim();
+'use strict';
+const FB_LANG_KEY='wheel-calculator-language-v1';
+const FB_EN=[["Segíts ellenőrizni a Sailor Online statmaximumait, a Wheel-sorok értékeit és a kalkulátor működését! Nem kell regisztrálni, ez az űrlap","Help verify Sailor Online stat limits, Wheel line values, and how the calculator works! Registration is not required. This form"],["Az 1–11 STR/INT, a SoS/SoM/Sun sorlimitek, a CAP-maximumok és a pörgetési esélyek egy része még tesztelendő.","Some grade line limits, CAP-dependent maxima, and roll probabilities still require verification. STR/INT are fixed at +11."],["Ha fontos a hiba, másold be a jelentést a közösség Discord-csatornájára, és mellékelj képernyőképet.","If the issue matters, paste your report into your community Discord channel and attach a screenshot."],["Ha tudsz biztos játékbeli értéket, írd le, és lehetőleg küldj külön képernyőképet is a Discordon.","If you know a verified in-game value, describe it and send a screenshot separately on Discord if possible."],["Nem sikerült automatikusan másolni. Próbáld meg PC-n, vagy írd ki kézzel.","Could not copy automatically. Try again on a desktop device or copy the message manually."],["Pl. 130 CAP, Sun nyaklánc, Freezing +16, a kalkulátor 80%-nak mutatja...","Example: 130 CAP, Sun necklace, Freezing +16, calculator shows 80%..."],["Pl. a játékbeli maximum 20%, amit szerveres képpel tudok igazolni...","Example: in-game maximum is 20%, verified by a screenshot..."],["Pl. ékszerösszehasonlítás, mentés exportja, több SET statisztika...","Example: jewelry comparison, exporting backups, more set statistics..."],["Nincs automatikus beküldés és nincs központi adattárolás.","There is no automatic submission or centralized data storage."],["a jelentést kimásolhatod és elküldheted Discordon.","you can copy the report and send it on Discord."],["Milyen további funkciót szeretnél? (opcionális)","What other feature would you like? (optional)"],["Ne küldj jelszót vagy bejelentkezési adatot.","Do not send passwords or login credentials."],["✓ Másolva! Most illeszd be a Discordra.","✓ Copied! Paste it into Discord."],["Mi lenne a helyes érték vagy működés?","What should the correct value or behavior be?"],["⚔ Wheel Calculator – Visszajelzés","⚔ Wheel Calculator – Feedback"],["Statmaximum / sorlimit pontosítás","Stat limit / line limit correction"],["Jelenlegi eredmény / stat / hiba","Current result / stat / bug"],["📋 Jelentés másolása Discordra","📋 Copy report for Discord"],["Felhasználói felület / mobil","Interface / mobile"],["nem küld adatokat szerverre","does not send data to a server"],["Discordon külön csatolom.","I'll attach it separately on Discord."],["⚔ Vissza a kalkulátorhoz","⚔ Back to calculator"],["Teljes SET / általános","Full set / general"],["Elvárt / hiteles adat","Expected / verified data"],["2. Mit tapasztaltál?","2. What did you observe?"],["Pozitív visszajelzés","Positive feedback"],["Visszajelzés típusa","Feedback type"],["1. Hol találtad?","1. Where did you find it?"],["Más / nem számít","Other / not relevant"],["(nincs kitöltve)","(not supplied)"],["Hiányzó funkció","Missing feature"],["Kézvédő (Hands)","Gloves (Hands)"],["Hibajelentés","Bug report"],["Visszajelzés","Feedback"],["Tapasztalat","Observation"],["Képernyőkép","Screenshot"],["Nem számít","Not relevant"],["Fülbevaló","Earring"],["Nyaklánc","Necklace"],["Gyűrű 1","Ring 1"],["Gyűrű 2","Ring 2"],["Fegyver","Weapon"],["Fontos:","Important:"],["Típus","Type"],["Ötlet","Suggestion"]];
+let fbLanguage='hu';
+try{fbLanguage=localStorage.getItem(FB_LANG_KEY)==='en'?'en':'hu';}catch(_){}
+const FB_NODES=new WeakMap(),FB_ATTRS=new WeakMap();
+function fbTr(text){
+ if(fbLanguage!=='en')return text;
+ let out=String(text);
+ for(const [hu,en] of FB_EN)if(out.includes(hu))out=out.split(hu).join(en);
+ return out;
+}
+function fbLocalize(){
+ const select=document.getElementById('feedbackLanguage');
+ select.value=fbLanguage;
+ document.documentElement.lang=fbLanguage;
+ const walk=document.createTreeWalker(document.querySelector('.wrap'),NodeFilter.SHOW_TEXT);
+ let n;
+ while((n=walk.nextNode())){
+  if(n.parentElement?.closest?.('#feedbackLanguage'))continue;
+  if(!FB_NODES.has(n))FB_NODES.set(n,n.nodeValue);
+  n.nodeValue=fbTr(FB_NODES.get(n));
+ }
+ document.querySelectorAll('.wrap [placeholder], .wrap [aria-label]').forEach(el=>{
+  if(!FB_ATTRS.has(el))FB_ATTRS.set(el,Object.fromEntries(['placeholder','aria-label'].filter(a=>el.hasAttribute(a)).map(a=>[a,el.getAttribute(a)])));
+  for(const [k,v] of Object.entries(FB_ATTRS.get(el)))el.setAttribute(k,fbTr(v));
+ });
+ document.title=fbLanguage==='en'?'Wheel Calculator – Beta feedback':'Wheel Calculator – Béta visszajelzés';
+}
+document.getElementById('feedbackLanguage').onchange=e=>{
+ fbLanguage=e.target.value==='en'?'en':'hu';
+ try{localStorage.setItem(FB_LANG_KEY,fbLanguage);}catch(_){}
+ fbLocalize();
+};
+fbLocalize();
+
+const g=id=>document.getElementById(id).value.trim();
 document.getElementById('copy').onclick=async()=>{
-const data=`⚔ Wheel Calculator Calculator – BÉTA visszajelzés\nCAP: ${g('cap')}\nItem: ${g('item')}\nGrade: ${g('grade')}\nTípus: ${g('type')}\nTapasztalat: ${g('current')||'(nincs kitöltve)'}\nElvárt / hiteles adat: ${g('expected')||'(nincs kitöltve)'}\nÖtlet: ${g('idea')||'—'}\nKépernyőkép: Discordon külön csatolom.\nBéta verzió: Emerald v4.9.9`;
-try{await navigator.clipboard.writeText(data);document.getElementById('status').textContent='✓ Másolva! Most illeszd be a Discordra.';}catch(err){let t=document.createElement('textarea');t.value=data;document.body.append(t);t.select();const ok=document.execCommand('copy');t.remove();document.getElementById('status').textContent=ok?'✓ Másolva! Most illeszd be a Discordra.':'Nem sikerült automatikusan másolni. Próbáld meg PC-n, vagy írd ki kézzel.';}
+const data=fbLanguage==='en' ? `⚔ Wheel Calculator – BETA feedback\nCAP: ${g('cap')}\nItem: ${g('item')}\nGrade: ${g('grade')}\nType: ${g('type')}\nObserved: ${g('current')||'(not supplied)'}\nExpected / verified data: ${g('expected')||'(not supplied)'}\nSuggestion: ${g('idea')||'—'}\nScreenshot: I will attach it on Discord.\nBeta version: Emerald v4.10.0` : `⚔ Wheel Calculator – BÉTA visszajelzés\nCAP: ${g('cap')}\nItem: ${g('item')}\nGrade: ${g('grade')}\nTípus: ${g('type')}\nTapasztalat: ${g('current')||'(nincs kitöltve)'}\nElvárt / hiteles adat: ${g('expected')||'(nincs kitöltve)'}\nÖtlet: ${g('idea')||'—'}\nKépernyőkép: Discordon külön csatolom.\nBéta verzió: Emerald v4.10.0`;
+try{await navigator.clipboard.writeText(data);document.getElementById('status').textContent=fbTr('✓ Másolva! Most illeszd be a Discordra.');}catch(err){let t=document.createElement('textarea');t.value=data;document.body.append(t);t.select();const ok=document.execCommand('copy');t.remove();document.getElementById('status').textContent=fbTr(ok?'✓ Másolva! Most illeszd be a Discordra.':'Nem sikerült automatikusan másolni. Próbáld meg PC-n, vagy írd ki kézzel.');}
 };
 </script></body></html>
