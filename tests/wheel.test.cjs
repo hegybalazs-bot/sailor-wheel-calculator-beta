@@ -864,14 +864,14 @@ test('v4.9.8: each configured 90–140 CAP accepts independent Wheel rows and pe
   assert.equal(s.cap,cap);
   assert.equal(document.querySelector('#capQuick').value,String(cap));
   const shoulder=s.sets[cap].shoulder;
-  shoulder.count=1;shoulder.rows=[{type:'STR',value:cap/10,modelMax:20}];
+  shoulder.count=1;shoulder.rows=[{type:'STR',value:Math.floor(cap/10),modelMax:20}];
   hooks.save();hooks.paint();
-  assert.equal(hooks.qualifiedWheelStats(shoulder).str,cap/10);
-  assert.equal(JSON.parse(store['sailor-wheel-calculator-v4']).sets[cap].shoulder.rows[0].value,cap/10);
+  assert.equal(hooks.qualifiedWheelStats(shoulder).str,Math.floor(cap/10));
+  assert.equal(JSON.parse(store['sailor-wheel-calculator-v4']).sets[cap].shoulder.rows[0].value,Math.floor(cap/10));
  }
  for(const cap of caps){
   assert.equal(hooks.chooseCap(cap),true);
-  assert.equal(hooks.state().sets[cap].shoulder.rows[0].value,cap/10,'CAP data must not leak or reset');
+  assert.equal(hooks.state().sets[cap].shoulder.rows[0].value,Math.floor(cap/10),'CAP data must not leak or reset');
  }
 });
 
