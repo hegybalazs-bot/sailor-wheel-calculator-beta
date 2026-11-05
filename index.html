@@ -62,6 +62,19 @@
 .balance-reference-values strong{display:block;margin-top:5px;font-size:21px;color:#afffd5}
 @media(max-width:800px){.balance-reference-values{grid-template-columns:repeat(2,minmax(0,1fr))}.balance-reference-values strong{font-size:19px}}
 
+/* v4.9.8 – every possible Blue visibly represented in the final overview */
+.set-overview .blue-inventory-overview{min-width:180px;max-width:420px;padding:5px;border:1px solid #315d55;border-radius:8px;background:#0a1c1f}
+.set-overview .blue-inventory-overview summary{cursor:pointer;color:#b7fce0;font-weight:700;font-size:12px;white-space:normal}
+.set-overview .blue-inventory-grid{margin-top:8px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+.set-overview .blue-inventory-line{padding:7px;background:#112c2b;border:1px solid #31594e;border-radius:7px;overflow-wrap:anywhere}
+.set-overview .blue-inventory-line.missing{opacity:.7;border-color:#2e4646;background:#111e21}
+.set-overview .blue-inventory-line.unexpected{border-color:#9c7741}
+.set-overview .blue-inventory-line small{display:block;font-size:11px;margin-top:4px;color:#b7dacf}
+.set-overview .blue-inventory-line .sro-icon{width:15px;height:15px}
+.set-overview .blue-inventory-line .sro-stat-label{font-size:11px}
+.set-overview .overview-item-card .blue-inventory-overview{max-width:none;min-width:0}
+.set-overview .overview-item-card .blue-inventory-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(max-width:500px){.set-overview .blue-inventory-grid,.set-overview .overview-item-card .blue-inventory-grid{grid-template-columns:1fr}}
 /* v4.9.4: compact SET totals, readable table and mobile item cards */
 .set-overview .overview-kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:12px 0 16px}
 .set-overview .overview-kpi{background:#091f21;border:1px solid #315b51;border-radius:11px;padding:12px;min-width:0}
@@ -1340,6 +1353,42 @@ function overviewTotalsPanel(sum){
  ${sum.invalid?'<b>⚠ '+sum.invalid+' érvénytelen rate / STR-INT sor kimaradt az összesítésből.</b>':''}
  A kézzel beírt HP/MP/Parry értékeket nem adjuk automatikusan a Wheel-sorokhoz.</p>`;
 }
+/* v4.9.8 – complete per-item Blue inventory: allowed types + recorded values.
+   Display-only: never synthesizes Wheel lines or changes any scoring. */
+function itemBlueInventory(id,obj=itm(id),cfg=currentCfg()){
+ const legal=blueTypesFor(id);
+ const rows=(Array.isArray(obj.rows)?obj.rows:[]).slice(0,Math.max(0,Math.floor(num(obj.count))));
+ const extras=[...new Set(rows.map(row=>row?.type).filter(type=>type&&type!=='OTHER'&&!legal.includes(type)))];
+ const types=[...legal,...extras];
+ const records=types.map(type=>{
+  const matches=rows.filter(row=>row?.type===type);
+  const shown=matches.map(row=>{
+   if(type==='DUR')return row.value===''||row.value==null?'Nem pontozott':'+'+r2(num(row.value))+' · nem pontozott';
+   if(row.value===''||row.value==null)return '⚠ Érték hiányzik';
+   const v=Number(row.value),max=effectiveRowMax(row,cfg);
+   if(!Number.isFinite(v)||v<0)return '⚠ Hibás érték';
+   if(max==null||!Number.isFinite(Number(max))||Number(max)<=0)return '+'+r2(v)+' / ? (MAX szükséges)';
+   if(v>Number(max)||!Number.isInteger(v* (type==='FREEZE'?10:1)))return '⚠ +'+r2(v)+' / +'+r2(Number(max));
+   return '+'+r2(v)+' / +'+r2(Number(max))+' ('+percent(v/Number(max)*100)+')';
+  });
+  return {type,label:TYPES[type]||type,possible:legal.includes(type),count:matches.length,values:shown};
+ });
+ const present=records.filter(r=>r.possible&&r.count>0).length;
+ return {available:legal.length,present,extra:extras.length,records};
+}
+function blueInventoryView(id,obj=itm(id),cfg=currentCfg(),startOpen=false){
+ const catalog=itemBlueInventory(id,obj,cfg);
+ return `<details class="blue-inventory-overview" ${startOpen?'open':''}>
+  <summary>${catalog.present}/${catalog.available} Blue-fajta felvéve${catalog.extra?' · ⚠ '+catalog.extra+' extra':''}</summary>
+  <div class="blue-inventory-grid">
+  ${catalog.records.map(entry=>`<div class="blue-inventory-line ${entry.count?'present':'missing'} ${entry.possible?'':'unexpected'}">
+     <span>${statLabel(entry.type,entry.label)}</span>
+     <small>${entry.count?esc(entry.values.join(' · ')):'— Nincs az itemen'}${entry.possible?'':' · ⚠ nem szerepel a listában'}</small>
+   </div>`).join('')}
+  </div>
+  <p class="overview-sub">Ez az összes lehetséges Blue-fajtát és a már rögzített értékeket mutatja; nem új Wheel-sor és nem külön összegzés. A kézi maximumok szerverfüggők.</p>
+ </details>`;
+}
 function overviewTable(){
  const items=IDS.map(id=>overviewItemView(id)),summary=overviewSummary(items);
  const row=item=>{
@@ -1353,6 +1402,7 @@ function overviewTable(){
    <td><div>${statLabel("HP","HP")} ${hp}</div><div>${statLabel("MP","MP")} ${mp}</div></td>
    ${parryWheelOverviewCell(item.obj,item.cfg)}
    <td class="overview-sub">${rate}</td>
+   <td>${blueInventoryView(item.id,item.obj,item.cfg)}</td>
    <td><b>${percent(v.itemPct)}</b></td>
    <td>${percent(v.goalPct)}<div class="overview-sub">${v.missingPoints==null?'—':'+'.concat(v.missingPoints)+' STR/INT hiány'}</div></td>
    <td class="overview-status">${statusP(v)}<details><summary>Részletek</summary>${overviewItemDetails(item)}</details></td>
@@ -1369,14 +1419,15 @@ function overviewTable(){
     <div><small>${statLabel("PARRY","Parry Rate")}</small>${parryWheelOverviewHtml(item.obj,item.cfg)}</div>
     <div><small>${statLabel("HP","HP")} / ${statLabel("MP","MP")} kézi</small><strong>${overviewManualText(item,'HP')} / ${overviewManualText(item,'MP')}</strong></div>
    </div>
+   <div class="overview-card-extra">${blueInventoryView(item.id,item.obj,item.cfg)}</div>
    <details class="overview-card-extra"><summary>Mutasd a többi statot</summary>${overviewItemDetails(item)}</details>
   </article>`;
  };
  return `<section class="panel set-overview" id="wheel-overview">
-  <h2>🧾 Teljes SET – átlátható statisztika</h2>
+  <h2>🧾 Teljes SET – Blue-k és statok</h2><p class="info">A <b>Blue-típusok</b> oszlopban minden lehetséges Blue látható, a hiányzók is. Kattints az item sorában a Blue-számra a teljes listához.</p>
   ${overviewTotalsPanel(summary)}
   <div class="overview-table-wrap"><table class="tinytable status-table" aria-label="Teljes SET összesítő">
-   <thead><tr><th>Item</th><th>Wheel</th><th>${statLabel("STR","STR")} / ${statLabel("INT","INT")}</th><th>${statLabel("HP","HP")} / ${statLabel("MP","MP")} (kézi)</th><th>${statLabel("PARRY","Parry Rate")}</th><th>Rate: ${statLabel("AR","AR")} / ${statLabel("BR","BR")} / ${statLabel("CRIT","Crit")}</th><th>Wheel %</th><th>Cél / hiány</th><th>Állapot</th></tr></thead>
+   <thead><tr><th>Item</th><th>Wheel</th><th>${statLabel("STR","STR")} / ${statLabel("INT","INT")}</th><th>${statLabel("HP","HP")} / ${statLabel("MP","MP")} (kézi)</th><th>${statLabel("PARRY","Parry Rate")}</th><th>Rate: ${statLabel("AR","AR")} / ${statLabel("BR","BR")} / ${statLabel("CRIT","Crit")}</th><th>Összes Blue-típus</th><th>Wheel %</th><th>Cél / hiány</th><th>Állapot</th></tr></thead>
    <tbody>${items.map(row).join('')}</tbody>
   </table></div>
   <div class="overview-cards" aria-label="SET itemek mobilnézete">${items.map(card).join('')}</div>
