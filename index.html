@@ -945,7 +945,7 @@ function parryWheelOverviewHtml(obj,cfg=currentCfg()){
  const ref=Number(cfg.maxPARRY);
  const validManual=manualPresent&&Number.isFinite(manual)&&manual>=0;
  const wheelLine=p.best==null?
-  (p.count?'<div class="tiny" title="A Parry Wheel-sor hibás vagy meghaladja a sormaximumot">⚠ Hibás Wheel-sor</div>':''):
+  (p.count?'<div class="tiny" title="A Parry Wheel-sor hibás vagy meghaladja a sormaximumot">⚠ Hibás sor (Wheel)</div>':''):
   `<div><b>Wheel:</b> +${r2(p.best)} / +${r2(p.max)} (${percent(p.quality)})${p.validCount>1?` · ${p.validCount} sorból a legjobb`:''}${p.validCount<p.count?' ⚠':''}</div>`;
  const manualLine=validManual?
   `<div class="tiny"><b>Kézi:</b> +${r2(manual)} / ${ref>0?'+'+r2(ref):'?'} (${percent(ref>0?manual/ref*100:null)})${ref>0&&manual>ref?' ⚠':''}</div>`:
