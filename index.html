@@ -534,6 +534,57 @@ function balancePanel(t=total()){
   <div class="info">Az alapértékeket külön mentjük SET-enként. Az aktuális Wheel-sorok, SET vagy CAP változása automatikusan frissíti a Balance-kijelzést.</div>
  </section>`;
 }
+// 4.8/cycle 3 – target assistant uses actual STR/INT lines and user-set row ceilings.
+function availableStatImprovements(type){
+ const result=[];
+ if(type!=='STR'&&type!=='INT')return result;
+ for(const id of IDS){
+  if(!isEquipped(id))continue;
+  const obj=itm(id),validation=check(id);
+  if(validation.issues.length)continue;
+  const count=Math.max(0,Math.min(num(obj.count),Array.isArray(obj.rows)?obj.rows.length:0));
+  for(let i=0;i<count;i++){
+   const row=obj.rows[i],max=effectiveRowMax(row);
+   if(row?.type!==type||max==null||!(max>0)||row.value===''||row.value==null)continue;
+   const current=Number(row.value),gain=Math.max(0,max-current);
+   if(!Number.isFinite(current)||current<0||gain<=0)continue;
+   result.push({id,name:NAMES[id],row:i+1,type,current,max,gain});
+  }
+ }
+ return result;
+}
+function balanceTargetAdvice(){
+ const balance=balanceMetrics(),out={};
+ for(const [type,missing,needed] of [
+   ['STR',balance.strMissing,balance.phy],['INT',balance.intMissing,balance.mag]
+ ]){
+  const lines=availableStatImprovements(type),capacity=lines.reduce((a,x)=>a+x.gain,0);
+  out[type]={missing,target:needed,capacity,lines,
+   possible:missing!=null&&capacity>=missing,
+   covered:missing==null?null:Math.min(missing,capacity)};
+ }
+ return {balance,out};
+}
+function balanceTargetPanel(){
+ const {balance,out}=balanceTargetAdvice();
+ return `<section class="panel" style="margin:0 0 16px;border-color:#316c57">
+   <h3>🎯 120% Balance célsegéd – a jelenlegi Wheel-sorokkal</h3>
+   <div class="info">A CAP-hez tartozó ${balance.phy} STR és ${balance.mag} INT célértékhez viszonyít. A még elérhető statpontokat <b>csak a már meglévő STR/INT sorok</b> és azok kézzel beállított maximumai alapján számolja. Nem ígér jobb rollt vagy új sorokat.</div>
+   <div class="stats">${[['STR','💪 Physical'],['INT','🪄 Magical']].map(([type,title])=>{
+      const x=out[type];
+      const msg=x.missing==null?'Add meg az alap '+type+' karakterstatot':
+       x.missing===0?'✓ 120% Balance-cél elérve':
+       x.possible?'Elméletben elérhető a jelenlegi '+type+' sorok jobb értékeivel.':
+       'A jelenlegi '+type+' sorok maximálásával sem érhető el; más sorösszetétel vagy további bónusz kellhet.';
+      return `<div class="stat"><small>${title} cél</small>
+       <strong>${x.missing==null?'—':x.missing===0?'Kész':'+'+r2(x.missing)+' hiány'}</strong>
+       <small>Maximum javítható a rögzített sorokon: <b>+${r2(x.capacity)}</b> · ${x.lines.length} fejleszthető sor</small>
+       <small style="margin-top:7px;color:var(--text)">${msg}</small>
+       </div>`;
+   }).join('')}</div>
+   <p class="info">Az ismeretlen vagy üres Wheel-sorokat nem tekintjük automatikusan STR/INT-nek. Ez az elméleti fejlesztési keret nem valós pörgetési esély.</p>
+  </section>`;
+}
 function optionList(map,selected){return Object.entries(map).map(([v,l])=>`<option value="${esc(v)}" ${String(v)===String(selected)?'selected':''}>${esc(l)}</option>`).join('');}
 function rowValueEditor(row,i){
   if(['STR','INT','CRIT'].includes(row.type)){
@@ -632,7 +683,7 @@ ${wheelComparePanel(id,ob)}
  ${ob.history?.length?`<h3>Korábbi pörgetések (${ob.history.length})</h3><div class="history">${ob.history.slice().reverse().slice(0,10).map(h=>`<div>${esc(h.time)} · ${h.count} sor · STR +${h.str}, INT +${h.int} · Attack ${h.ar} / Block ${h.br} · ${esc(h.status)}</div>`).join('')}</div>`:'<p class="info">Még nem mentettél el korábbi pörgetést. A jelenlegi sorok ettől függetlenül automatikusan mentődnek.</p>'}
 </section>`;}
 function overviewTable(){return `<section class="panel set-overview"><h2>🧾 Teljes szett – célértékek és állapotok</h2><div style="overflow-x:auto"><table class="tinytable status-table"><thead><tr><th>Item</th><th>Grade</th><th>Wheel</th><th>STR</th><th>INT</th><th>STR roll%</th><th>INT roll%</th><th>HP saját / max</th><th>MP saját / max</th><th>Parry saját / max</th><th>Freezing saját / max</th><th>Teljes Wheel %</th><th>Saját cél</th><th>STR/INT célhiány</th><th>Jelzés</th></tr></thead><tbody>${IDS.map(id=>{const o=itm(id),v=check(id);return `<tr class="item-${v.color} ${!isEquipped(id)?'unequipped':''}" data-overview-row="${id}"><td><button class="linklike" data-item="${id}">${esc(NAMES[id])}</button></td><td>${esc(o.grade)}</td><td>${v.count}/${v.limit}</td><td>+${r2(v.str)}</td><td>+${r2(v.int)}</td><td>${percent(v.strQuality)}</td><td>${percent(v.intQuality)}</td>${['HP','MP','PARRY','FREEZE'].map((k)=>{let r=num(currentCfg()[{HP:'maxHP',MP:'maxMP',PARRY:'maxPARRY',FREEZE:'maxFREEZE'}[k]]),b=ensureBonusStats(o)[k];return `<td>${b===''||b==null?'—':`+${r2(num(b))} / ${r?'+'+r2(r):'?'} (${percent(r?num(b)/r*100:null)})`}</td>`}).join('')}<td><b>${percent(v.itemPct)}</b></td><td><b>${percent(v.goalPct)}</b></td><td>${v.missingPoints==null?'—':'+'+v.missingPoints}</td><td>${statusP(v)}${id==='weapon'||id==='shield'?`<div class="tiny">${v.extra.length?'⚠ Külön feltétel hiányzik':'✓ Rate/Critical feltételek rendben'}</div>`:''}</td></tr>`}).join('')}</tbody></table></div><p class="info">A fehér sor semleges, a piros 20% alatti eredményt, a sárga a céltól legfeljebb 10 százalékponttal elmaradó itemet, a zöld a teljesült %-os célt jelöli. A hiányos/hibás sorokat a jobb oldali részleteknél ellenőrizheted.</p></section>`;}
-function setView(){return shellCards()+balancePanel()+`<div class="content">${itemList()}${editPanel()}</div>${overviewTable()}<div class="notice">Az egyedi célszázalékok és a sorok automatikusan mentődnek. Biztonsági mentéshez használd a <b>Mentés JSON-ba</b> gombot.</div>`;}
+function setView(){return shellCards()+balancePanel()+balanceTargetPanel()+`<div class="content">${itemList()}${editPanel()}</div>${overviewTable()}<div class="notice">Az egyedi célszázalékok és a sorok automatikusan mentődnek. Biztonsági mentéshez használd a <b>Mentés JSON-ba</b> gombot.</div>`;}
 function chancesComplete(cfg=currentCfg()){let p=cfg.chances||{};let vals=Object.keys({STR:1,INT:1,AR:1,BR:1,CRIT:1,OTHER:1}).map(k=>p[k]);return vals.every(v=>v!==''&&v!=null&&Number.isFinite(Number(v))&&num(v)>=0)&&Math.abs(vals.reduce((a,b)=>a+num(b),0)-100)<.00001;}
 function chanceView(){let c=currentCfg(),id=S.active,v=check(id),p=c.chances||{},sum=['STR','INT','AR','BR','CRIT','OTHER'].reduce((a,k)=>a+num(p[k]),0);return `<div class="layout2"><section class="panel"><h2>🎲 Következő Wheel / Feather Pen</h2><p class="info">Aktív item: <b>${esc(NAMES[id])}</b>. A valós Sailor esélyek nem nyilvánosak vagy nem igazoltak. Ez az <b>állítható feltételezésekkel működő matematikai becslés</b>, nem hivatalos dropráta.</p><div class="rulehint">A modell minden sor típusát az általad beállított eséllyel húzza ki, majd az értékét egyenletesen választja 1 és az aktuális CAP-maximum között. Ez nem tükrözi a lehetséges 5/10/20/30/40 Attack Rate lépcsőket. Ez <b>feltételezés</b>, nem a Sailor szerver algoritmusa.</div><h3>Soronkénti típus-esélyek (%)</h3><div class="grid3">${[['STR','STR'],['INT','INT'],['AR','Attack Rate'],['BR','Blocking Rate'],['CRIT','Critical'],['OTHER','Egyéb']].map(([k,n])=>`<label>${n}<input type="number" min="0" max="100" step="0.1" placeholder="ismeretlen" data-prob="${k}" value="${esc(p[k]??'')}"></label>`).join('')}</div><div class="actions"><button id="evenModel">Példaeloszlás (nem hivatalos)</button><button id="clearModel">Esélyek törlése</button></div><p class="info">Összeg: <b>${r2(sum)}%</b> / 100%. A példaértékek csak demonstrációk, nem valódi szerveradatok.</p><label style="max-width:350px">Következő pörgetés sorainak száma<select id="lineMode">${optionList({fixed:'Ugyanannyi sor, mint most',random:'1…grade maximum – egyenletesen (becslés)'},c.lineMode)}</select></label><div class="actions"><button class="primary" id="simulateBtn" ${chancesComplete(c)?'':'disabled'}>▶ 30 000 próbadobás futtatása</button></div>${!chancesComplete(c)?`<div class="warnbox">A százalékok összegének pontosan 100%-nak kell lennie, és minden mezőt ki kell tölteni. Addig nem mutatunk kitalált sikeresélyt.</div>`:''}</section>
 <section class="panel"><h2>📈 Valós / becsült haladás</h2><div class="stats"><div class="stat"><small>Jelenlegi STR+INT</small><strong>+${r2(v.stats)}</strong></div><div class="stat"><small>Jelenlegi sorok</small><strong>${v.count}</strong></div><div class="stat"><small>Átlagos STR/INT</small><strong>${percent(v.statQuality)}</strong></div><div class="stat"><small>Cél / aktuális</small><strong style="font-size:15px">${percent(v.itemPct)} / ${percent(v.goalPct)}</strong></div></div><div id="simResult">${lastSim&&lastSim.cap===S.cap&&lastSim.id===id?lastSim.html:`<div class="notice">Tölts ki egy valódi itemet, add meg a feltételezett sor-esélyeket, és futtasd a modellt. Itt jelenik meg a következő teljes újrapörgetés javulási esélye.</div>`}</div><h3 style="margin-top:18px">Mit jelent az esély?</h3><p class="feature muted">• <b>STR+INT javulás:</b> hány szimulált pörgetés adott több összes statpontot, mint a jelenlegi item.<br>• <b>Saját cél teljesítése:</b> hány próbadobás éri el a kiválasztott itemen megadott %-ot. A fegyver/Shield kötelező feltételei külön számítanak.<br>• <b>CAP / grade váltás:</b> nem jelent automatikus valós tárgyfejlesztést; minden CAP-nak külön adatlapja van.</p><div class="notice"><b>Aktuális item:</b> STR +${r2(v.str)} (${percent(v.strQuality)} maxérték, ${percent(v.strShare)} részarány) · INT +${r2(v.int)} (${percent(v.intQuality)} maxérték, ${percent(v.intShare)} részarány) · közös rollminőség: <b>${percent(v.statQuality)}</b>.</div></section></div>`;}
