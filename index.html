@@ -410,7 +410,7 @@ function check(id,obj=itm(id),cfg=currentCfg(),weapon=weaponId()){
 // 4.8/cycle 1 – manually saved Wheel observations, not server-detected spins.
 function recordWheelSnapshot(id,obj=itm(id),at=new Date()){
  const result=check(id,obj),cfg=currentCfg();
- if(result.count===0||!result.complete||!result.wheelComplete||result.issues.length)return null;
+ if(result.count===0||!result.complete||result.issues.length||(result.qualityRows>0&&!result.wheelComplete))return null;
  const rows=copyJSON((obj.rows||[]).slice(0,result.count)).map(row=>({
   ...row,...(row.modelMax==null&&effectiveRowMax(row,cfg)!=null?{modelMax:effectiveRowMax(row,cfg)}:{})
  }));
