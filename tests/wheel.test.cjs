@@ -55,7 +55,7 @@ function boot(){
  state:()=>S,html:()=>document.querySelector('#root').innerHTML,
  save,paint,createSet,selectSet,recordWheelSnapshot,
  wheelHistoryStats,wheelComparison,optimizedLinePlan,balanceTargetAdvice,
- getSetComparison,balanceThreshold,balanceMetrics,qualifiedWheelStats,validUserIconData,setUserIcon,clearUserIcon,userIconPanel,uiIcon,itemLabel,statLabel,itemList,editPanel,autoWheelEstimate,autoWheelChancePanel,chanceView,shellCards,parryWheelOverview,parryWheelOverviewCell,overviewValidWheelStats,overviewItemView,overviewSummary,overviewTable,check,total,noteBackupExport,backupReminderState
+ getSetComparison,balanceThreshold,balanceMetrics,qualifiedWheelStats,blueTypesFor,blueCatalogKey,BLUE_BASE,setBlueTypes,resetBlueTypes,blueCatalogWarnings,blueCatalogPanel,blueTypeCountPanel,visiblePlanTypes,penOneBlueEstimate,keepOrRerollAdvice,keepOrRerollPanel,validUserIconData,setUserIcon,clearUserIcon,userIconPanel,uiIcon,itemLabel,statLabel,itemList,editPanel,autoWheelEstimate,autoWheelChancePanel,chanceView,shellCards,parryWheelOverview,parryWheelOverviewCell,overviewValidWheelStats,overviewItemView,overviewSummary,overviewTable,check,total,noteBackupExport,backupReminderState
 };`,sandbox,{timeout:5000});
  return {hooks:sandbox.hooks,document,store,inputs};
 }
@@ -591,8 +591,8 @@ test('v4.9.6: perfect shoulder cannot improve under same-types uniform-value mod
  for(const word of ['Javulás','Változatlan','Romlás','Nem javul','Nem valós Sailor szerveresély']){
   assert.ok(hooks.autoWheelChancePanel('shoulder').includes(word),word);
  }
- assert.ok(hooks.editPanel().includes('Automatikus javulásbecslés'));
- assert.ok(hooks.chanceView().includes('Automatikus javulásbecslés'));
+ assert.ok(hooks.editPanel().includes('Minden sor értékének újrahúzása'));
+ assert.ok(hooks.chanceView().includes('Minden sor értékének újrahúzása'));
 });
 
 test('v4.9.6: low-value shoulder cannot worsen and model follows changes',()=>{
@@ -641,4 +641,129 @@ test('v4.9.6: incomplete and invalid item does not get invented percentages',()=
  assert.equal(hooks.autoWheelEstimate('shoulder').ready,false);
  o.rows=[{type:'OTHER',value:''},{type:'DUR',value:''}];
  assert.equal(hooks.autoWheelEstimate('shoulder').ready,false);
+});
+
+test('v4.9.7: distinct Blue catalog per slot, not Wheel line count',()=>{
+ const {hooks}=boot();
+ const expected={
+  shoulder:4,hands:4,foot:4,head:6,legs:6,chest:7,
+  necklace:8,earring:8,ring1:10,ring2:10,weapon:6,shield:5
+ };
+ for(const [id,count] of Object.entries(expected)){
+  const types=hooks.blueTypesFor(id);
+  assert.equal(types.length,count,id);
+  assert.equal(new Set(types).size,count,id+' no duplicate blue types');
+ }
+ assert.ok(hooks.blueTypesFor('head').includes('HP'));
+ assert.ok(!hooks.blueTypesFor('hands').includes('HP'));
+ assert.ok(hooks.blueTypesFor('chest').includes('HPMP_REC'));
+ assert.ok(hooks.blueTypesFor('shield').includes('CRIT_RESIST'));
+ assert.ok(!hooks.blueTypesFor('shield').includes('CRIT'));
+ assert.ok(hooks.blueTypesFor('ring1').includes('DISEASE'));
+ assert.equal((hooks.blueTypeCountPanel().match(/data-open-blue-item="/g)||[]).length,12);
+ assert.match(hooks.blueCatalogPanel('shoulder'),/4 típus/);
+ assert.match(hooks.blueCatalogPanel('ring1'),/10 típus/);
+ assert.match(hooks.blueCatalogPanel('ring1'),/nem a Wheel-en megjelenő sorok maximuma/);
+});
+
+test('v4.9.7: Blue overrides are CAP/Degree-specific, restorable and preserve rows',()=>{
+ const {hooks,store}=boot(),s=hooks.state();
+ const ob=s.sets[90].shoulder;
+ ob.count=1;ob.rows=[{type:'HP',value:100,modelMax:600}];
+ const preserved=JSON.stringify(ob.rows);
+ assert.deepEqual(Array.from(hooks.blueCatalogWarnings('shoulder',ob)),['1. sor: HP']);
+ assert.ok(hooks.blueCatalogPanel('shoulder').includes('1. sor: HP'));
+ assert.equal(hooks.setBlueTypes('shoulder',['STR','INT','HP']),true);
+ assert.equal(hooks.blueTypesFor('shoulder').length,3);
+ assert.equal(hooks.blueCatalogWarnings('shoulder',ob).length,0);
+ assert.equal(JSON.stringify(ob.rows),preserved);
+ assert.ok(hooks.blueCatalogPanel('shoulder').includes('Egyedi lista aktív'));
+ hooks.save();
+ const exported=JSON.parse(store['sailor-wheel-calculator-v4']);
+ assert.equal(exported.blueCatalogOverrides['90_9'].shoulder[2],'HP');
+ s.cfg[90].degree=10;
+ assert.equal(hooks.blueTypesFor('shoulder').length,4);
+ s.cfg[90].degree=9;
+ assert.equal(hooks.blueTypesFor('shoulder').length,3);
+ s.cap=100;
+ assert.equal(hooks.blueTypesFor('shoulder').length,4);
+ s.cap=90;
+ assert.equal(hooks.resetBlueTypes('shoulder'),true);
+ assert.equal(hooks.blueTypesFor('shoulder').length,4);
+ assert.equal(hooks.blueCatalogWarnings('shoulder',ob).length,1);
+ assert.equal(hooks.setBlueTypes('shoulder',[]),false);
+});
+
+test('v4.9.7: catalog-aware row options keep legacy blue type without data loss',()=>{
+ const {hooks}=boot(),s=hooks.state(),obj=s.sets[90].hands;
+ obj.count=1;obj.rows=[{type:'HP',value:100,modelMax:600}];
+ hooks.paint();
+ const editor=hooks.editPanel();
+ assert.ok(editor.includes('data-row-type="0"'));
+ assert.ok(editor.includes('value="HP" selected'));
+ assert.ok(editor.includes('data-plan-type="HP"'));
+ assert.ok(hooks.visiblePlanTypes('hands',obj).includes('HP'));
+ assert.ok(hooks.visiblePlanTypes('hands',obj).includes('PARRY'));
+ assert.ok(!hooks.visiblePlanTypes('hands',obj).includes('HPMP_REC'));
+ assert.ok(hooks.blueCatalogPanel('hands').includes('HP'));
+ assert.equal(obj.rows[0].value,100);
+});
+
+test('v4.9.7: one-Pen math for perfect and minimum Shoulder STR',()=>{
+ const {hooks}=boot(),s=hooks.state(),obj=s.sets[90].shoulder;
+ obj.count=1;obj.rows=[{type:'STR',value:11,modelMax:11}];
+ let estimate=hooks.penOneBlueEstimate('shoulder');
+ assert.equal(estimate.ready,true);
+ assert.equal(estimate.better,0);
+ assert.ok(Math.abs(estimate.same-100/11)<1e-6);
+ assert.ok(Math.abs(estimate.worse-1000/11)<1e-6);
+ assert.equal(estimate.notBetter,100);
+ assert.equal(hooks.keepOrRerollAdvice('shoulder').tone,'keep');
+ obj.rows[0].value=1;
+ estimate=hooks.penOneBlueEstimate('shoulder');
+ assert.equal(estimate.worse,0);
+ assert.ok(Math.abs(estimate.better-1000/11)<1e-6);
+ assert.equal(hooks.keepOrRerollAdvice('shoulder').tone,'reroll');
+ assert.match(hooks.keepOrRerollPanel('shoulder'),/Újrapörgetés mérlegelhető/);
+});
+
+test('v4.9.7: Pen changes one blue, preserves unscored DUR without false improvement',()=>{
+ const {hooks}=boot(),s=hooks.state(),obj=s.sets[90].shoulder;
+ obj.count=2;obj.rows=[
+  {type:'STR',value:1,modelMax:11},
+  {type:'DUR',value:''}
+ ];
+ const p=hooks.penOneBlueEstimate('shoulder');
+ assert.equal(p.ready,true);
+ assert.ok(Math.abs(p.better-500/11)<1e-6);
+ assert.ok(Math.abs(p.same-(100/11+100)/2)<1e-6);
+ assert.equal(p.worse,0);
+ assert.ok(Math.abs(p.better+p.same+p.worse-100)<1e-7);
+ assert.match(hooks.keepOrRerollPanel('shoulder'),/Feather Pen/);
+ assert.match(hooks.keepOrRerollPanel('shoulder'),/nem igazolt Sailor szerveresély/);
+});
+
+test('v4.9.7: Pen estimate refuses missing/unsupported Blue limits',()=>{
+ const {hooks}=boot(),s=hooks.state(),obj=s.sets[90].ring1;
+ obj.count=1;obj.rows=[{type:'DISEASE',value:5}];
+ let p=hooks.penOneBlueEstimate('ring1');
+ assert.equal(p.ready,false);
+ assert.match(hooks.keepOrRerollPanel('ring1'),/döntés|adat|maximum/i);
+ obj.rows[0].modelMax=10;
+ p=hooks.penOneBlueEstimate('ring1');
+ assert.equal(p.ready,true);
+ assert.ok(p.better>0&&p.worse>0);
+ obj.rows=[{type:'OTHER',value:''}];
+ assert.equal(hooks.penOneBlueEstimate('ring1').ready,false);
+});
+
+test('v4.9.7: a met item goal yields KEEP advice even with high improvement chance',()=>{
+ const {hooks}=boot(),s=hooks.state(),obj=s.sets[90].shoulder;
+ obj.count=1;obj.rows=[{type:'STR',value:8,modelMax:11}];obj.goalPct=50;
+ const a=hooks.keepOrRerollAdvice('shoulder');
+ assert.equal(a.ready,true);
+ assert.equal(a.tone,'keep');
+ assert.equal(a.estimate.goalMet,true);
+ assert.match(hooks.keepOrRerollPanel('shoulder'),/Inkább megtartás/);
+ assert.match(hooks.chanceView(),/Megtartsam vagy újrapörgessem/);
 });
