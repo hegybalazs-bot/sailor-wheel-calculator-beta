@@ -1411,3 +1411,20 @@ test('v5 Wheel icon registry: only unique verified Wheel/Feather Pen art is rend
  });
  assert.equal(hooks.verifiedWheelIconFor('feather_pen'),null,'ambiguous wheel role must use fallback');
 });
+
+
+test('v5 icon foundation: JSON backup roundtrip preserves icon metadata without changing Wheel scores',()=>{
+ const original=boot(),s=original.hooks.state(),chest=s.sets[90].chest;
+ s.apparelStyle='ch_garment';
+ chest.iconDegree=10;chest.iconItemCode='ITEM_CH_M_GARMENT_10';
+ chest.count=1;chest.target=1;chest.rows=[{type:'STR',value:7,modelMax:11}];
+ original.hooks.save();
+ const before=original.hooks.total().str;
+ const backup=JSON.parse(JSON.stringify(original.hooks.exportAllProfiles()));
+ const restored=boot();
+ assert.equal(restored.hooks.importAllProfiles(backup),true);
+ assert.equal(restored.hooks.state().apparelStyle,'ch_garment');
+ assert.equal(restored.hooks.state().sets[90].chest.iconDegree,10);
+ assert.equal(restored.hooks.state().sets[90].chest.iconItemCode,'ITEM_CH_M_GARMENT_10');
+ assert.equal(restored.hooks.total().str,before);
+});
