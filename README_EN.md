@@ -1,0 +1,60 @@
+# Wheel Calculator — Emerald v4.10.0 Beta
+
+**Offline Hungarian / English Silkroad Wheel calculator** for Sailor Online and other customizable Silkroad servers.
+
+[Open the app](https://sailor-wheel-calculator-beta.onrender.com/) · [Report a bug or share a verified stat](https://sailor-wheel-calculator-beta.onrender.com/visszajelzes.html)
+
+## English interface
+
+Switch **Language / Nyelv → English** in the top toolbar. The choice is saved in your browser separately from your server/SET data. The feedback form follows the same choice, and its Discord-ready report can be copied in English.
+
+The app supports independent **server profiles** (one starts as "Sailor Online"), and each profile has separate CAP, Degree, SETs, Wheel lines, Blue-type catalogs, goals, and simulated roll assumptions. Language selection does **not** translate or modify stored stat data, item IDs, or JSON backups.
+
+## Quick start
+
+1. Back up existing work with **Export JSON**. JSON exports contain **all server profiles**, not just the active profile. Keep an offline copy; there is no automatic account/cloud sync.
+2. Select or create a server profile. Choose a CAP from the standard presets (90, 100, 110, 120, 125, 130, 140) or enter your own integer CAP between 1 and 200.
+3. Choose Degree and weapon, then select an equipment item such as Shoulder, Hands, Foot, Head, Chest, Legs, necklace, earrings, rings, weapon, or shield.
+4. Enter the actual Wheel-line count, Blue types, and each line's value. Use **Wheel line composition** to enter several lines of the same type more quickly.
+5. For each item, set a personal target percentage. View the **Full set – Blues & stats** comparison: all potential Blue types are listed, including absent types, with recorded values and maxima.
+6. View **120% Balance**, the optimizer, the Wheel journal, saved-set comparison, and the **Keep or reroll?** conditional estimator.
+
+## Player-supplied reference limits
+
+| Stat | Applicable CAP | Default upper limit |
+| --- | --- | --- |
+| STR / INT | All CAPs | +11 per line |
+| Durability | All CAPs | 200%, excluded from Wheel quality |
+| HP | 130 CAP and higher | 2300 |
+| Parry Rate | 130 CAP and higher | 60 |
+| MP | 130 and 140 CAP | 2300 reference (140 currently inherits 130) |
+
+The **140 CAP Wheel reference currently matches 130 CAP**, as the player reports no relevant intervening game update. Character-level Balance targets remain level-specific; 130 CAP and 140 CAP Balance are not identical.
+
+Other Blue types, rate values, status resistances, per-grade line limits, and percentages can be **server-dependent or provisional**. Confirm with actual in-game evidence. Existing saved values over a fixed limit are preserved for correction, but are not counted as valid stats.
+
+## Two different roll models
+
+**Feather Pen decision helper:** a mathematical model of changing the **value of one** existing Blue line. It assumes a uniformly selected line and uniformly sampled legal value. It reports improvement, unchanged, worsening, and non-improvement odds for that *assumed* model and suggests keeping vs. considering a reroll.
+
+**Wheel of Fortune / entire Wheel:** the full-reroll model can also change **Blue types**. It only runs with a manually entered assumed probability distribution that totals 100%. **The number of possible Blue types does not establish their occurrence rates.**
+
+**Neither model exposes verified server odds, guarantees better rolls, or computes the actual Gold/Silk cost.** Displayed percentages are conditional estimates. Unknown Blue maxima are not silently invented.
+
+## Inventory icons
+
+By default, the app uses **original stylized vectors inspired by 9DG Chinese Garment**, not authentic game sprite images. Under Equipment → Original Silkroad icons, users can choose local PNG/WebP images (up to 96 KB each). These replace the illustration while preserving the item name and are included in JSON backups. The app does not distribute or automatically fetch original Silkroad artwork.
+
+## Data safety
+
+- Data are saved locally in the browser. Export JSON periodically and before major changes.
+- Import supports all-server backups and older Sailor-only backups.
+- Invalid, duplicate, or incomplete multi-server profiles are rejected before data replacement; CAP lists are isolated between different server profiles.
+- Existing saved items and manually provided server values are not silently translated or overwritten.
+- If localStorage is unavailable or full, use Export JSON and avoid relying on automatic saving alone.
+
+## Tests and limitations
+
+Node-based regression tests: `node --test tests/wheel.test.cjs`. GitHub Actions runs the same checks on the main branch and pull requests.
+
+The product is still **Beta**, not final v5.0. Remaining release requirements: independent gameplay evidence for the Blue/drop distributions; legal authentic 9DG inventory sprites if desired; full mobile and desktop browser visual testing; explicit verification of static-site auto-deployment and backup recovery on real devices. Do not claim these are complete without evidence.
