@@ -54,7 +54,7 @@ function boot(){
  state:()=>S,html:()=>document.querySelector('#root').innerHTML,
  save,paint,createSet,selectSet,recordWheelSnapshot,
  wheelHistoryStats,wheelComparison,optimizedLinePlan,balanceTargetAdvice,
- getSetComparison,balanceThreshold,balanceMetrics,qualifiedWheelStats,check,total,noteBackupExport,backupReminderState
+ getSetComparison,balanceThreshold,balanceMetrics,qualifiedWheelStats,parryWheelOverview,parryWheelOverviewCell,overviewTable,check,total,noteBackupExport,backupReminderState
 };`,sandbox,{timeout:5000});
  return {hooks:sandbox.hooks,document,store,inputs};
 }
@@ -285,4 +285,59 @@ test('v4.9.1: CAP change updates mini-guide, level override still works',()=>{
  assert.equal(b.refPhy,661);
  assert.equal(b.refMag,610);
  assert.equal(b.source,'képlet');
+});
+
+test('v4.9.2: Parry from Wheel rows is shown in final SET overview',()=>{
+ const {hooks}=boot(),s=hooks.state(),item=s.sets[90].shoulder;
+ item.count=3;item.rows=[
+  {type:'STR',value:5,modelMax:11},
+  {type:'PARRY',value:32,modelMax:40},
+  {type:'INT',value:4,modelMax:11}
+ ];
+ hooks.save();hooks.paint();
+ const p=hooks.parryWheelOverview(item);
+ assert.equal(p.best,32);
+ assert.equal(p.max,40);
+ assert.equal(p.quality,80);
+ assert.equal(p.count,1);
+ const table=hooks.overviewTable();
+ assert.match(table,/Parry Rate \(Wheel\)/);
+ assert.match(table,/Parry külön \(kézi\) \/ max/);
+ const row=table.match(/data-overview-row="shoulder"[\s\S]*?<\/tr>/)?.[0];
+ assert.ok(row,'shoulder row missing');
+ assert.match(row,/\+32 \/ \+40 \(80%\)/);
+ assert.ok(row.includes('>—</td>'),'manual Parry column should remain empty until separately specified');
+});
+
+test('v4.9.2: manually entered Parry and Wheel Parry are separate, not added',()=>{
+ const {hooks}=boot(),s=hooks.state(),item=s.sets[90].hands;
+ item.count=1;item.rows=[{type:'PARRY',value:33,modelMax:50}];
+ item.bonusStats.PARRY=35;
+ hooks.save();hooks.paint();
+ const row=hooks.overviewTable().match(/data-overview-row="hands"[\s\S]*?<\/tr>/)?.[0];
+ assert.ok(row);
+ assert.match(row,/\+33 \/ \+50 \(66%\)/);
+ assert.match(row,/\+35 \/ \+40 \(87[,.]5%\)/);
+ assert.doesNotMatch(row,/\+68 \/ /,'manual and Wheel Parry must not be summed');
+});
+
+test('v4.9.2: multi-line Parry uses best valid row maximum; invalid values are warned',()=>{
+ const {hooks}=boot(),s=hooks.state(),obj=s.sets[90].head;
+ obj.count=3;obj.rows=[
+  {type:'PARRY',value:25,modelMax:40},
+  {type:'PARRY',value:39,modelMax:50},
+  {type:'PARRY',value:99,modelMax:40}
+ ];
+ let p=hooks.parryWheelOverview(obj);
+ assert.equal(p.count,3);
+ assert.equal(p.validCount,2);
+ assert.equal(p.best,39);
+ assert.equal(p.max,50);
+ assert.equal(p.quality,78);
+ assert.match(hooks.parryWheelOverviewCell(obj),/\+39 \/ \+50 \(78%\)/);
+ assert.match(hooks.parryWheelOverviewCell(obj),/⚠/);
+ obj.rows=[{type:'PARRY',value:99,modelMax:40}];obj.count=1;
+ p=hooks.parryWheelOverview(obj);
+ assert.equal(p.best,null);
+ assert.match(hooks.parryWheelOverviewCell(obj),/Hibás sor/);
 });
