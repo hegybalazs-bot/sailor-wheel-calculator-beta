@@ -350,7 +350,7 @@ test('v4.9.4: 9 headers align with row cells and Parry does not duplicate',()=>{
  const thead=html.match(/<thead>([\s\S]*?)<\/thead>/)?.[1]??'';
  const headerCount=(thead.match(/<th>/g)||[]).length;
  assert.equal(headerCount,9);
- assert.equal((thead.match(/Parry Rate/g)||[]).length,1);
+ assert.equal([...thead.matchAll(/<th>[\s\S]*?<\/th>/g)].filter(m=>plain(m[0]).trim()==='Parry Rate').length,1,'one visible Parry header');
  for(const name of ['shoulder','hands','weapon']){
   const row=html.match(new RegExp('data-overview-row="'+name+'"[\\s\\S]*?<\\/tr>'))?.[0];
   assert.ok(row,name+' row must exist');
