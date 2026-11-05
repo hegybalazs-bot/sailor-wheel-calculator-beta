@@ -513,13 +513,22 @@ function translateText(value,language=UI_LANG){
 }
 function translateMarkup(markup,language=UI_LANG){
  if(language!=='en')return markup;
- return String(markup).split(/(<[^>]*>)/g).map(part=>{
+ let result=String(markup).split(/(<[^>]*>)/g).map(part=>{
   if(part.startsWith('<')){
    if(!/^<\/?[a-z]/i.test(part))return part;
    return part.replace(/\b(aria-label|title|placeholder)="([^"]*)"/g,(_,name,val)=>name+'="'+translateText(val,language)+'"');
   }
   return translateText(part,language);
  }).join('');
+ // A few nested legacy fragments need a final exact text-node correction.
+ const fixes=[
+  ['Teljes SoS sorlimit elméleti STR/INT maximum:','Theoretical STR/INT ceiling for full SoS line limit:'],
+  ['Külön rögzítve; nem added a Wheelhez','Recorded separately; not added to Wheel totals'],
+  ['A shield nincs használatban ennél a fegyvernél','Shield is not equipped with this weapon']
+ ];
+ let clean=result;
+ for(const [hu,en] of fixes)clean=clean.split('>'+hu+'<').join('>'+en+'<');
+ return clean;
 }
 const SHELL_TEXT_BASE=new WeakMap(),SHELL_ATTR_BASE=new WeakMap();
 function localizeShell(){
@@ -1993,7 +2002,7 @@ $('#goalSel').onchange=e=>{S.goal=Math.max(1,Math.min(100,num(e.target.value)||7
 $('#applyGoalAll').onclick=()=>{if(confirmUI(`Az összes ${S.cap} CAP-os item célját ${percent(S.goal)} értékre állítsam?`)){for(const id of IDS)itm(id).goalPct=S.goal;lastSim=null;save();paint();toast('Az összes item saját célja frissítve.');}};
 document.querySelectorAll('[data-tab]').forEach(el=>el.onclick=()=>{S.tab=el.dataset.tab;save();paint();});
 function downloadBlob(name,contents,type='application/json'){let url=URL.createObjectURL(new Blob([contents],{type}));let a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),3000);}
-$('#exportBtn').onclick=()=>{downloadBlob('Wheel_Calculator_Backup_'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify(exportAllProfiles(),null,2));noteBackupExport();paint();toast('V4.9.8 BÉTA JSON-export indítva, ellenőrizd a letöltött fájlt.');};
+$('#exportBtn').onclick=()=>{downloadBlob('Wheel_Calculator_Backup_'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify(exportAllProfiles(),null,2));noteBackupExport();paint();toast('V4.10.0 BÉTA JSON-export indítva, ellenőrizd a letöltött fájlt.');};
 $('#importBtn').onclick=()=>$('#importFile').click();
 $('#importFile').onchange=async e=>{let file=e.target.files?.[0];if(!file)return;
 try{let data=JSON.parse(await file.text());if(!data||!data.cfg||!data.sets||!data.cfg[90]||!data.sets[90])throw Error('Nem érvényes Wheel Calculator mentés.');
