@@ -52,7 +52,7 @@ function boot(){
  vm.createContext(sandbox);
  vm.runInContext(script+`
 ;globalThis.hooks={
- state:()=>S,html:()=>document.querySelector('#root').innerHTML,
+ state:()=>S,html:()=>document.querySelector('#root').innerHTML,translateText,translateMarkup,setUiLanguage,helpViewEnglish,promptUI,confirmUI,alertUI,validServerState,profileCaps,
  save,paint,createSet,selectSet,recordWheelSnapshot,
  wheelHistoryStats,wheelComparison,optimizedLinePlan,balanceTargetAdvice,
  getSetComparison,balanceThreshold,balanceMetrics,qualifiedWheelStats,chooseCap,rowValueEditor,itemBlueInventory,blueInventoryView,addServerProfile,renameServerProfile,switchServerProfile,currentServerName,exportAllProfiles,importAllProfiles,applyFixedStatLimits,switchDegreeModel,blueTypesFor,blueCatalogKey,BLUE_BASE,setBlueTypes,resetBlueTypes,blueCatalogWarnings,blueCatalogPanel,blueTypeCountPanel,visiblePlanTypes,chanceWeightsFor,ensureChanceWeights,chancesComplete,rowMax,penOneBlueEstimate,keepOrRerollAdvice,keepOrRerollPanel,validUserIconData,setUserIcon,clearUserIcon,userIconPanel,uiIcon,itemLabel,statLabel,itemList,editPanel,autoWheelEstimate,autoWheelChancePanel,chanceView,shellCards,parryWheelOverview,parryWheelOverviewCell,overviewValidWheelStats,overviewItemView,overviewSummary,overviewTable,check,total,noteBackupExport,backupReminderState
@@ -1104,4 +1104,171 @@ test('v4.9.9: explicit 140 MP overrides and existing Wheel rows are not silently
  assert.equal(hooks.state().cfg[140].maxMP,2100);
  assert.equal(hooks.chooseCap(130),true);
  assert.equal(hooks.state().cfg[130].maxMP,2300,'130 CAP independent from 140 override');
+});
+
+
+test('v4.10.0: language switch persists EN without modifying SET values or stored server data',()=>{
+ const {hooks,store}=boot(),s=hooks.state();
+ const o=s.sets[90].shoulder;
+ o.count=1;o.rows=[{type:'STR',value:7,modelMax:11}];
+ hooks.save();
+ const before=JSON.stringify(s.cfg),beforeItem=JSON.stringify(o.rows);
+ assert.equal(hooks.setUiLanguage('en'),true);
+ assert.equal(store['wheel-calculator-language-v1'],'en');
+ const root=hooks.html();
+ assert.match(root,/Equipment/);
+ assert.match(root,/Overall Wheel quality/);
+ assert.match(root,/All Blue types|Full set/);
+ assert.equal(JSON.stringify(s.cfg),before);
+ assert.equal(JSON.stringify(o.rows),beforeItem);
+ assert.equal(hooks.setUiLanguage('hu'),true);
+ assert.equal(store['wheel-calculator-language-v1'],'hu');
+ assert.match(hooks.html(),/Felszerelés/);
+ assert.equal(hooks.setUiLanguage('invalid'),false);
+});
+
+test('v4.10.0: HTML localizer translates visible text, alt/title and placeholders but not item stat input values',()=>{
+ const {hooks}=boot();
+ const src='<div title="Fegyver típusa"><span>Mentés</span><input value="Mentés" placeholder="Fegyver típusa" aria-label="Hibajelentés / ötlet"></div>';
+ const en=hooks.translateMarkup(src,'en');
+ assert.match(en,/>Save<\/span>/);
+ assert.match(en,/title="Weapon type"/);
+ assert.match(en,/placeholder="Weapon type"/);
+ assert.match(en,/aria-label="Bug report \/ suggestion"/);
+ assert.match(en,/value="Mentés"/);
+ assert.equal(hooks.translateMarkup(src,'hu'),src);
+ assert.equal(hooks.translateText('STR összesen','en'),'Total STR');
+});
+
+test('v4.10.0: English guide covers instructions, backups, assumptions and 140 CAP rules',()=>{
+ const {hooks}=boot();
+ assert.equal(hooks.setUiLanguage('en'),true);
+ hooks.state().tab='help';hooks.paint();
+ const markup=hooks.html();
+ assert.match(markup,/Guide \/ known limitations/);
+ assert.match(markup,/JSON backup/);
+ assert.match(markup,/STR and INT each have a fixed maximum of \+11/);
+ assert.match(markup,/140 CAP Wheel reference matches the 130 CAP/);
+ assert.match(markup,/conditional mathematical estimates, not verified server probabilities/);
+ assert.match(markup,/language/i);
+ hooks.setUiLanguage('hu');
+ assert.match(hooks.html(),/Útmutató \/ ismert korlátok/);
+});
+
+test('v4.10.0: static text changes language in place and restores Hungarian on switch',()=>{
+ const {hooks,document}=boot();
+ const n={nodeValue:'Aktív szerver',parentElement:{closest:()=>false}};
+ const originalQuery=document.querySelector;
+ document.querySelector=s=>s==='.shell'?{}:originalQuery(s);
+ document.querySelectorAll=()=>[];
+ document.createTreeWalker=()=>({nextNode:(()=>{let read=false;return ()=>read?null:(read=true,n);})()});
+ document.documentElement={lang:'hu'};
+ assert.equal(hooks.setUiLanguage('en'),true);
+ assert.equal(n.nodeValue,'Active server');
+ assert.equal(document.documentElement.lang,'en');
+ assert.equal(hooks.setUiLanguage('hu'),true);
+ assert.equal(n.nodeValue,'Aktív szerver');
+ assert.equal(document.documentElement.lang,'hu');
+});
+
+test('v4.10.0: custom CAP in one server does not leak into newly created or restored other servers',()=>{
+ const {hooks}=boot();
+ assert.equal(hooks.chooseCap(175),true);
+ assert.ok(hooks.profileCaps(hooks.state()).includes(175));
+ assert.equal(hooks.addServerProfile('Second server'),true);
+ assert.equal(hooks.currentServerName(),'Second server');
+ assert.equal(hooks.profileCaps(hooks.state()).includes(175),false);
+ assert.equal(hooks.chooseCap(180),true);
+ assert.equal(hooks.profileCaps(hooks.state()).includes(180),true);
+ const snapshot=hooks.exportAllProfiles();
+ const first=snapshot.serverProfiles.entries.find(e=>e.name==='Sailor Online');
+ const second=snapshot.serverProfiles.entries.find(e=>e.name==='Second server');
+ assert.equal(hooks.switchServerProfile(first.id),true);
+ assert.equal(hooks.profileCaps(hooks.state()).includes(175),true);
+ assert.equal(hooks.profileCaps(hooks.state()).includes(180),false);
+ assert.equal(hooks.switchServerProfile(second.id),true);
+ assert.equal(hooks.profileCaps(hooks.state()).includes(180),true);
+ assert.equal(hooks.profileCaps(hooks.state()).includes(175),false);
+});
+
+test('v4.10.0: corrupt multi-server import is rejected atomically with all previous data intact',()=>{
+ const {hooks,store}=boot();
+ const stable=obj=>JSON.stringify(obj,(key,value)=>key==='updatedAt'?undefined:value);
+ assert.equal(hooks.addServerProfile('English server'),true);
+ assert.equal(hooks.chooseCap(140),true);
+ hooks.state().sets[140].shoulder.count=1;
+ hooks.state().sets[140].shoulder.rows=[{type:'STR',value:11,modelMax:11}];
+ hooks.save();
+ const baseline=stable(hooks.exportAllProfiles());
+ const active=hooks.currentServerName();
+ const beforeStored=store['sailor-wheel-calculator-v4'];
+ const invalid=JSON.parse(baseline);
+ delete invalid.serverProfiles.entries[0].data.cfg[130];
+ assert.throws(()=>hooks.importAllProfiles(invalid),/Sérült|hiányos|szerverprofil/);
+ assert.equal(hooks.currentServerName(),active);
+ assert.equal(stable(hooks.exportAllProfiles()),baseline);
+ assert.equal(store['sailor-wheel-calculator-v4'],beforeStored);
+ const duplicate=JSON.parse(baseline);
+ duplicate.serverProfiles.entries[1].id=duplicate.serverProfiles.entries[0].id;
+ assert.throws(()=>hooks.importAllProfiles(duplicate),/Sérült|ismétlődő/);
+ assert.equal(stable(hooks.exportAllProfiles()),baseline);
+ const badActive=JSON.parse(baseline);
+ badActive.serverProfiles.activeId='missing';
+ assert.throws(()=>hooks.importAllProfiles(badActive),/aktív szerverprofilja hiányzik/);
+ assert.equal(stable(hooks.exportAllProfiles()),baseline);
+});
+
+test('v4.10.0: feedback page offers English/Hungarian text and no duplicated calculator name',()=>{
+ const feedback=fs.readFileSync(path.join(__dirname,'..','visszajelzes.html'),'utf8');
+ assert.match(feedback,/id="feedbackLanguage"/);
+ assert.match(feedback,/BETA feedback/);
+ assert.match(feedback,/BÉTA visszajelzés/);
+ assert.match(feedback,/function fbLocalize/);
+ assert.match(feedback,/localStorage\.setItem\(FB_LANG_KEY,fbLanguage\)/);
+ assert.doesNotMatch(feedback,/Wheel Calculator Calculator/);
+ const code=feedback.match(/<script>([\s\S]*?)<\/script>/)?.[1];
+ assert.ok(code,'Feedback page must have a script');
+ assert.doesNotThrow(()=>new Function(code));
+});
+
+test('v4.10.0: all four default English views contain no Hungarian accented UI fragments',()=>{
+ const {hooks}=boot();
+ assert.equal(hooks.setUiLanguage('en'),true);
+ for(const tab of ['set','chance','rules','help']){
+  hooks.state().tab=tab;hooks.paint();
+  const textNodes=[...hooks.html().matchAll(/>([^<>]{2,450})</g)].map(x=>x[1].trim());
+  const untranslated=textNodes.filter(x=>/[áéíóöőúüűÁÉÍÓÖŐÚÜŰ]/.test(x));
+  assert.deepEqual(untranslated,[],tab+' still has untranslated HU UI labels');
+ }
+ assert.equal(hooks.setUiLanguage('hu'),true);
+ hooks.state().tab='set';hooks.paint();
+ assert.match(hooks.html(),/Felszerelés/);
+});
+
+test('v4.10.0: English translation avoids word fragments and translates safety confirmations',()=>{
+ const {hooks}=boot();
+ assert.equal(hooks.translateText('sorok','en'),'sorok','do not produce lineok');
+ assert.equal(hooks.translateText('sor','en'),'line');
+ assert.equal(hooks.translateText('Nem ígér jobb rollt','en'),'Nem ígér jobb rollt','do not produce mixed No ígér');
+ const msg='Betöltöd a teljes mentést? A jelenlegi v4-es adatok felülíródnak. Előbb érdemes JSON-ba menteni.';
+ assert.match(hooks.translateText(msg,'en'),/Import the full backup/);
+ assert.match(hooks.translateText('A SET neve nem lehet üres.','en'),/Set name cannot be empty/);
+ assert.match(hooks.translateText('Csak 1 és 200 közötti egész CAP adható meg.','en'),/whole-number CAP/);
+ assert.match(hooks.translateText('V4.10.0 BÉTA JSON-export indítva, ellenőrizd a letöltött fájlt.','en'),/JSON export started/);
+});
+
+test('v4.10.0: switching language survives server creation and JSON round trip',()=>{
+ const {hooks,store}=boot();
+ hooks.setUiLanguage('en');
+ assert.equal(hooks.addServerProfile('New Silkroad server'),true);
+ assert.equal(hooks.chooseCap(140),true);
+ const backup=JSON.parse(JSON.stringify(hooks.exportAllProfiles()));
+ assert.equal(backup.serverProfiles.entries.length,2);
+ assert.equal(hooks.importAllProfiles(backup),true);
+ assert.equal(hooks.state().cap,140);
+ assert.equal(store['wheel-calculator-language-v1'],'en');
+ assert.match(hooks.html(),/Equipment/);
+ hooks.setUiLanguage('hu');
+ assert.equal(store['wheel-calculator-language-v1'],'hu');
+ assert.match(hooks.html(),/Felszerelés/);
 });

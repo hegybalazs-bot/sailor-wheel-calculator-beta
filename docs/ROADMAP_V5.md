@@ -1,0 +1,27 @@
+# Wheel Calculator — verified v5.0 release checklist
+
+Updated for the v4.10.0 bilingual beta.
+
+## Must pass before declaring v5.0
+
+- [ ] **Authentic equipment icons:** obtain clearly matched 9DG Chinese Garment inventory PNG/WebP files with appropriate reuse permission; verify Head, Shoulder, Chest, Hands, Legs, Foot, Weapon, Shield, Necklace, Earring, and Rings. Current drawings remain labeled as stylized placeholders.
+- [ ] **Gameplay-proven Blue catalogs:** verify each item slot's possible Blue types for Sailor and other user-selected servers; distinguish the number of possible types from the maximum lines visible on one item. Document server and date of evidence.
+- [ ] **Real roll probabilities:** obtain measured/server-documented distribution for Wheel of Fortune line types and value ranges, Feather Pen line selection and value outcomes. Until verified, show conditional assumptions only; never invent odds.
+- [ ] **Full CAP/degree references:** validate at least 90, 100, 110, 120, 125, 130 and 140 CAP with in-game screenshots. Preserve +11 STR/INT, Durability 200, HP 2300 / Parry 60 at 130+, and current 130=140 Wheel baseline. Check other server-specific Rate, Critical, status resistances and grade line limits.
+- [ ] **Physical desktop and mobile E2E:** test Chrome/Chromium and Android/iOS portrait + landscape, Hungarian/English switching, all four tabs, custom icons, settings, set comparison, and imported backup flows. Record screenshots, observed bugs, and device/browser versions.
+- [ ] **Backup recovery:** export multiple server profiles and item history, import in a new browser, verify every CAP/SET value, including old Sailor-only files, malformed backup rejection, and storage quota warnings.
+- [ ] **Render auto-deploy:** verify that a new GitHub main commit triggers its own deploy without a manual deploy call; compare exact commit SHAs, then close GitHub issue #4 only after independent proof.
+- [ ] **Accessibility and English text QA:** keyboard navigation, icon+label semantics, input errors, dialogs, English feedback form, untranslatable user-entered names, and complete language coverage of populated (not only empty) items.
+- [ ] **Documentation and release:** update English/Hungarian changelog, pin a release commit/tag, archive tested JSON backups and publish beta caveats.
+
+## Current completed foundations
+
+- [x] Offline HU/EN interface and English feedback/help (v4.10.0).
+- [x] Independently named server profiles with safe CAPS and guarded imports.
+- [x] Blue catalog per equipment slot and expandable full-set Blue breakdown.
+- [x] CAP select and manual entry with preserved separate set histories.
+- [x] Fixed, user-supplied STR/INT +11 and Durability 200%; 130+ HP 2300, Parry 60; current 140 uses 130 Wheel reference.
+- [x] Separate conditional Feather Pen, full Wheel simulation and their limitations.
+- [x] JSON backup export including all server profiles, older Sailor-only import support.
+
+**Do not mark user-facing production readiness PASS solely from Node regression tests.** Real browser and game-data verification remain necessary.
