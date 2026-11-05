@@ -711,7 +711,7 @@ test('v4.9.7: catalog-aware row options keep legacy blue type without data loss'
 
 test('v4.9.7: one-Pen math for perfect and minimum Shoulder STR',()=>{
  const {hooks}=boot(),s=hooks.state(),obj=s.sets[90].shoulder;
- obj.count=1;obj.rows=[{type:'STR',value:11,modelMax:11}];
+ obj.count=1;obj.target=1;obj.rows=[{type:'STR',value:11,modelMax:11}];
  let estimate=hooks.penOneBlueEstimate('shoulder');
  assert.equal(estimate.ready,true);
  assert.equal(estimate.better,0);
@@ -837,4 +837,20 @@ test('v4.9.7: legacy global chance assumptions are not erased by per-item profil
  shoulder.PARRY=0;shoulder.DUR=0;
  assert.equal(hooks.chancesComplete(),true);
  assert.deepEqual(JSON.parse(JSON.stringify(s.cfg[90].chances)),{STR:30,INT:70,AR:0,BR:0,CRIT:0,OTHER:0});
+});
+
+test('v4.9.7: do not recommend Feather Pen when required Blue line type/count is missing',()=>{
+ const {hooks}=boot(),s=hooks.state(),ob=s.sets[90].shoulder;
+ ob.count=1;ob.target=7;ob.rows=[{type:'STR',value:1,modelMax:11}];
+ const p=hooks.penOneBlueEstimate('shoulder');
+ assert.equal(p.ready,true);
+ assert.ok(p.better>80);
+ const a=hooks.keepOrRerollAdvice('shoulder');
+ assert.equal(a.ready,true);
+ assert.equal(a.tone,'review');
+ assert.match(a.decision,/Blue-összetétel/);
+ assert.match(a.reason,/Feather Pen/);
+ assert.match(a.reason,/Wheel of Fortune/);
+ ob.target=1;
+ assert.equal(hooks.keepOrRerollAdvice('shoulder').tone,'reroll');
 });
