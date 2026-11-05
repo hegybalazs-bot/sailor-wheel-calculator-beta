@@ -500,11 +500,10 @@ function translateText(value,language=UI_LANG){
  let out=value;
  for(const [source,target] of EN_UI_SORTED){
   if(!out.includes(source))continue;
-  // Guard word boundaries to avoid partly translated compounds, e.g. "sorok" -> "lineok".
-  const escapeRx=str=>str.replace(/[.*+?^${}()|[\]\\]/g,'\\for(const [source,target] of EN_UI_SORTED)if(out.includes(source))out=out.split(source).join(target);');
-  const start=/^[\\p{L}\\p{N}]/u.test(source)?'(?<![\\p{L}\\p{N}])':'';
-  const end=/[\\p{L}\\p{N}]$/u.test(source)?'(?![\\p{L}\\p{N}])':'';
-  out=out.replace(new RegExp(start+escapeRx(source)+end,'gu'),()=>target);
+  const escapeRegex=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  const boundaryStart=/[\p{L}\p{N}]/u.test(source[0])?'(?<![\\p{L}\\p{N}])':'';
+  const boundaryEnd=/[\p{L}\p{N}]/u.test(source[source.length-1])?'(?![\\p{L}\\p{N}])':'';
+  out=out.replace(new RegExp(boundaryStart+escapeRegex(source)+boundaryEnd,'gu'),()=>target);
  }
  return out;
 }
