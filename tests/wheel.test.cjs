@@ -55,7 +55,7 @@ function boot(){
  state:()=>S,html:()=>document.querySelector('#root').innerHTML,
  save,paint,createSet,selectSet,recordWheelSnapshot,
  wheelHistoryStats,wheelComparison,optimizedLinePlan,balanceTargetAdvice,
- getSetComparison,balanceThreshold,balanceMetrics,qualifiedWheelStats,blueTypesFor,blueCatalogKey,BLUE_BASE,setBlueTypes,resetBlueTypes,blueCatalogWarnings,blueCatalogPanel,blueTypeCountPanel,visiblePlanTypes,chanceWeightsFor,ensureChanceWeights,chancesComplete,rowMax,penOneBlueEstimate,keepOrRerollAdvice,keepOrRerollPanel,validUserIconData,setUserIcon,clearUserIcon,userIconPanel,uiIcon,itemLabel,statLabel,itemList,editPanel,autoWheelEstimate,autoWheelChancePanel,chanceView,shellCards,parryWheelOverview,parryWheelOverviewCell,overviewValidWheelStats,overviewItemView,overviewSummary,overviewTable,check,total,noteBackupExport,backupReminderState
+ getSetComparison,balanceThreshold,balanceMetrics,qualifiedWheelStats,chooseCap,rowValueEditor,blueTypesFor,blueCatalogKey,BLUE_BASE,setBlueTypes,resetBlueTypes,blueCatalogWarnings,blueCatalogPanel,blueTypeCountPanel,visiblePlanTypes,chanceWeightsFor,ensureChanceWeights,chancesComplete,rowMax,penOneBlueEstimate,keepOrRerollAdvice,keepOrRerollPanel,validUserIconData,setUserIcon,clearUserIcon,userIconPanel,uiIcon,itemLabel,statLabel,itemList,editPanel,autoWheelEstimate,autoWheelChancePanel,chanceView,shellCards,parryWheelOverview,parryWheelOverviewCell,overviewValidWheelStats,overviewItemView,overviewSummary,overviewTable,check,total,noteBackupExport,backupReminderState
 };`,sandbox,{timeout:5000});
  return {hooks:sandbox.hooks,document,store,inputs};
 }
@@ -853,4 +853,67 @@ test('v4.9.7: do not recommend Feather Pen when required Blue line type/count is
  assert.match(a.reason,/Wheel of Fortune/);
  ob.target=1;
  assert.equal(hooks.keepOrRerollAdvice('shoulder').tone,'reroll');
+});
+
+test('v4.9.8: each configured 90–140 CAP accepts independent Wheel rows and persists',()=>{
+ const {hooks,document,store}=boot();
+ const caps=[90,100,110,120,125,130,140];
+ for(const cap of caps){
+  assert.equal(hooks.chooseCap(cap),true,'switch to '+cap);
+  const s=hooks.state();
+  assert.equal(s.cap,cap);
+  assert.equal(document.querySelector('#capQuick').value,String(cap));
+  const shoulder=s.sets[cap].shoulder;
+  shoulder.count=1;shoulder.rows=[{type:'STR',value:cap/10,modelMax:20}];
+  hooks.save();hooks.paint();
+  assert.equal(hooks.qualifiedWheelStats(shoulder).str,cap/10);
+  assert.equal(JSON.parse(store['sailor-wheel-calculator-v4']).sets[cap].shoulder.rows[0].value,cap/10);
+ }
+ for(const cap of caps){
+  assert.equal(hooks.chooseCap(cap),true);
+  assert.equal(hooks.state().sets[cap].shoulder.rows[0].value,cap/10,'CAP data must not leak or reset');
+ }
+});
+
+test('v4.9.8: typeable 100/110/120/125/130/140 CAP and adding custom CAP without changing old items',()=>{
+ const {hooks,document}=boot();
+ const manual=document.querySelector('#capQuick'),apply=document.querySelector('#capApply');
+ assert.equal(typeof apply.onclick,'function');
+ assert.equal(typeof manual.onkeydown,'function');
+ assert.equal(hooks.chooseCap('100'),true);
+ assert.equal(hooks.chooseCap('110'),true);
+ manual.value='120';apply.onclick();assert.equal(hooks.state().cap,120);
+ manual.value='125';apply.onclick();assert.equal(hooks.state().cap,125);
+ manual.value='130';apply.onclick();assert.equal(hooks.state().cap,130);
+ manual.value='140';apply.onclick();assert.equal(hooks.state().cap,140);
+ assert.equal(hooks.chooseCap('150'),true);
+ assert.equal(hooks.state().cap,150);
+ assert.equal(hooks.state().cfg[150].degree,9);
+ assert.equal(hooks.chooseCap('90'),true);
+ assert.equal(hooks.state().cfg[90].degree,9);
+ assert.equal(hooks.chooseCap('200'),true);
+ assert.equal(hooks.chooseCap('201'),false);
+ assert.equal(hooks.chooseCap('100.5'),false);
+ assert.equal(hooks.chooseCap('nope'),false);
+ assert.equal(hooks.state().cap,200);
+});
+
+test('v4.9.8: STR/INT 100%-maximum above 11 works on higher CAP and editable rows',()=>{
+ const {hooks,document}=boot();
+ assert.equal(hooks.chooseCap(130),true);
+ const s=hooks.state();
+ s.cfg[130].maxSTR=45;s.cfg[130].maxINT=32;
+ const item=s.sets[130].shoulder;
+ item.count=2;item.rows=[{type:'STR',value:40},{type:'INT',value:30}];
+ hooks.save();hooks.paint();
+ assert.equal(hooks.check('shoulder').str,40);
+ assert.equal(hooks.check('shoulder').int,30);
+ assert.equal(hooks.qualifiedWheelStats(item).stats,70);
+ assert.ok(hooks.rowValueEditor(item.rows[0],0).includes('max="45"'));
+ assert.ok(hooks.rowValueEditor(item.rows[0],0).includes('type="number"'));
+ assert.ok(hooks.rowValueEditor(item.rows[1],1).includes('max="32"'));
+ const ui=hooks.html();
+ assert.ok(ui.includes('STR (kézzel állítható)'));
+ assert.ok(ui.includes('max="99999" data-config="maxSTR"'));
+ assert.equal(document.querySelector('#capQuick').value,'130');
 });
