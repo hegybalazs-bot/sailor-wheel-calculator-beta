@@ -479,7 +479,7 @@ const WEAPON_GROUPS={
 const WEAPONS=Object.fromEntries(Object.values(WEAPON_GROUPS).flat().map(([id,label,shield,crit])=>[id,{label,shield,crit}]));
 function normalizeWeapon(id){return WEAPONS[id]?id:({onehand:'ch_blade',spear:'ch_spear',twohand:'eu_twohand',other:'ch_bow'}[id]||'ch_spear');}
 
-const CAPS=[90,100,110,120,125,130,140];const DEFAULT_DEGREE={90:9,100:10,110:11,120:12,125:13,130:14,140:15};
+const BUILTIN_CAPS=[90,100,110,120,125,130,140];const CAPS=BUILTIN_CAPS.slice();const DEFAULT_DEGREE={90:9,100:10,110:11,120:12,125:13,130:14,140:15};
 // A felhasználó által megadott, ideiglenesen 100%-nak tekintett CAP-referenciák.
 const BONUS_HP_MP_REF={90:600,100:860,110:1300,120:1300,125:2100,130:2300,140:2300}; // 140 CAP currently inherits the unchanged 130 CAP Wheel reference.
 // A 40/60 átmenet CAP-ja egyelőre feltételezés: 90=40, 100+-on 60; minden CAP szerkeszthető.
@@ -761,35 +761,52 @@ function serverStateSnapshot(){
  syncActiveSet();snapshotDegreeModel(currentCfg());
  return copyJSON(S);
 }
+// Validate a server snapshot BEFORE switching so a damaged import cannot overwrite SETs.
+function validServerState(data){
+ if(!data||typeof data!=='object'||!data.cfg||!data.sets||
+ typeof data.cfg!=='object'||typeof data.sets!=='object')return false;
+ const caps=Object.keys(data.cfg).map(Number);
+ if(caps.some(cap=>!Number.isInteger(cap)||cap<1||cap>200))return false;
+ return BUILTIN_CAPS.every(cap=>data.cfg[cap]&&typeof data.cfg[cap]==='object'&&
+  data.sets[cap]&&typeof data.sets[cap]==='object');
+}
+function profileCaps(data){
+ return [...new Set([...BUILTIN_CAPS,...Object.keys(data.cfg).map(Number)])].sort((a,b)=>a-b);
+}
 function restoreServerState(data){
- if(!data||!data.cfg||!data.sets)throw Error('Hibás szerverprofil adat.');
- S=copyJSON(data);
- if(!CAPS.includes(Number(S.cap))&&Number.isInteger(Number(S.cap))&&Number(S.cap)>=1&&Number(S.cap)<=200)CAPS.push(Number(S.cap));
- for(const cap of Object.keys(S.cfg||{}).map(Number)){
-  if(Number.isInteger(cap)&&cap>=1&&cap<=200&&!CAPS.includes(cap))CAPS.push(cap);
+ if(!validServerState(data))throw Error('Hibás vagy hiányos szerverprofil-adat.');
+ const prior=S,priorCaps=CAPS.slice();
+ try{
+  S=copyJSON(data);
+  CAPS.splice(0,CAPS.length,...profileCaps(S));
+  normalizeGoals();applyStrIntChoiceRange();applyBonusReferenceV42();applyRateRulesV43();
+  initializeDegreeModels();applyFixedStatLimits();normalizeSetBank();
+  if(!CAPS.includes(Number(S.cap)))S.cap=90;
+  else S.cap=Number(S.cap);
+  if(!IDS.includes(S.active))S.active='shoulder';
+ }catch(err){
+  S=prior;CAPS.splice(0,CAPS.length,...priorCaps);
+  throw err;
  }
- CAPS.sort((a,b)=>a-b);
- normalizeGoals();applyStrIntChoiceRange();applyBonusReferenceV42();applyRateRulesV43();
- initializeDegreeModels();applyFixedStatLimits();normalizeSetBank();
- if(!CAPS.includes(S.cap))S.cap=90;
- if(!IDS.includes(S.active))S.active='shoulder';
 }
 function switchServerProfile(id){
- const target=P.entries.find(x=>x.id===id);
+ const target=P.entries.find(entry=>entry.id===id);
  if(!target)return false;
  if(target.id===P.activeId)return true;
- if(!target.data||!target.data.cfg||!target.data.sets)return false;
- activeServerProfile().data=serverStateSnapshot();
- const newState=copyJSON(target.data);
+ if(!validServerState(target.data))return false;
+ const oldState=serverStateSnapshot(),priorCaps=CAPS.slice();
+ try{restoreServerState(target.data);}catch(_){CAPS.splice(0,CAPS.length,...priorCaps);return false;}
+ activeServerProfile().data=oldState;
  target.data=null;
  P.activeId=id;
- restoreServerState(newState);
- lastSim=null;save();paint();return true;
+ lastSim=null;save();paint();
+ return true;
 }
 function addServerProfile(name){
  const label=String(name??'').trim().slice(0,60);
  if(!label||P.entries.length>=30)return false;
  activeServerProfile().data=serverStateSnapshot();
+ CAPS.splice(0,CAPS.length,...BUILTIN_CAPS);
  const id='srv_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7);
  P.entries.push({id,name:label,data:null});P.activeId=id;
  S=initial();normalizeGoals();applyStrIntChoiceRange();applyBonusReferenceV42();applyRateRulesV43();
@@ -809,21 +826,36 @@ function exportAllProfiles(){
  }))}};
 }
 function importAllProfiles(data){
- if(!data||!data.cfg||!data.sets||!data.cfg[90]||!data.sets[90])throw Error('Nem érvényes Wheel Calculator mentés.');
+ if(!validServerState(data))throw Error('Nem érvényes Wheel Calculator mentés.');
  const raw=data.serverProfiles;
- const active={...data};delete active.serverProfiles;
- if(raw&&Array.isArray(raw.entries)&&raw.entries.length&&raw.entries.length<=30){
-  const entries=raw.entries.filter(e=>e&&typeof e.id==='string'&&typeof e.name==='string'&&e.data&&e.data.cfg&&e.data.sets);
-  if(!entries.length)throw Error('Sérült szerverprofil-mentés.');
-  const selected=entries.find(e=>e.id===raw.activeId)||entries[0];
-  P={activeId:selected.id,entries:entries.map(e=>({id:e.id,name:e.name.slice(0,60),data:e.id===selected.id?null:e.data}))};
-  restoreServerState(selected.data);
- }else{
-  // Old Sailor-only exports restore the active profile, retaining other profiles.
-  restoreServerState(active);
+ const active=copyJSON(data);delete active.serverProfiles;
+ const oldS=copyJSON(S),oldP=copyJSON(P),oldCaps=CAPS.slice();
+ try{
+  if(raw!=null){
+   if(!Array.isArray(raw.entries)||!raw.entries.length||raw.entries.length>30)
+    throw Error('A szerverprofilok száma hibás.');
+   const ids=new Set();
+   for(const entry of raw.entries){
+    if(!entry||typeof entry.id!=='string'||!entry.id.trim()||
+       typeof entry.name!=='string'||!entry.name.trim()||!validServerState(entry.data)||
+       ids.has(entry.id))throw Error('Sérült vagy ismétlődő szerverprofil a mentésben.');
+    ids.add(entry.id);
+   }
+   const selected=raw.entries.find(e=>e.id===raw.activeId);
+   if(!selected)throw Error('A mentés aktív szerverprofilja hiányzik.');
+   restoreServerState(selected.data);
+   P={activeId:selected.id,entries:raw.entries.map(e=>({
+    id:e.id,name:e.name.slice(0,60),data:e.id===selected.id?null:copyJSON(e.data)
+   }))};
+  }else{
+   // Importing older Sailor-only files changes only the current server profile.
+   restoreServerState(active);
+  }
+  lastSim=null;save();paint();return true;
+ }catch(err){
+  S=oldS;P=oldP;CAPS.splice(0,CAPS.length,...oldCaps);
+  throw err;
  }
- lastSim=null;save();paint();
- return true;
 }
 initServerProfiles();
 function makeSetName(defaultName,question){const answer=prompt(question,defaultName);if(answer===null)return null;let name=safeSetName(answer);if(!name){alert('A SET neve nem lehet üres.');return null;}return name;}
