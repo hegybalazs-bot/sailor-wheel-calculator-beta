@@ -1025,6 +1025,8 @@ function overviewSummary(items){
   str:sum(x=>x.valid.str),int:sum(x=>x.valid.int),
   ar:rate('AR'),br:rate('BR'),crit:sum(x=>x.extra.totals.CRIT.count),
   hpWheel:rate('HP'),mpWheel:rate('MP'),
+  hpWheelCount:sum(x=>x.extra.totals.HP.count),mpWheelCount:sum(x=>x.extra.totals.MP.count),
+  arCount:sum(x=>x.extra.totals.AR.count),brCount:sum(x=>x.extra.totals.BR.count),
   hpManual:manualSum('HP'),mpManual:manualSum('MP'),
   hpManualCount:manualCount('HP'),mpManualCount:manualCount('MP'),
   parryLines:sum(x=>x.extra.totals.PARRY.count),
@@ -1034,12 +1036,13 @@ function overviewSummary(items){
  };
 }
 function overviewTotalsPanel(sum){
+ const optional=(value,count)=>count>0?'+'+r2(value):'—';
  const cells=[
  ['💪 STR / INT','+'+r2(sum.str)+' / +'+r2(sum.int),'Csak érvényes, felszerelt Wheel-sorok'],
- ['⚔ Attack / Block','+'+r2(sum.ar)+' / +'+r2(sum.br),'Wheel-sorok összege; nem karakteres rate'],
+ ['⚔ Attack / Block',optional(sum.ar,sum.arCount)+' / '+optional(sum.br,sum.brCount),'Wheel-sorok összege; nem karakteres rate'],
  ['🎯 Critical / Parry',sum.crit+' / '+sum.parryLines,'Wheel-sorok száma; nem összeadott Parry stat'],
- ['💚 HP / MP Wheel','+'+r2(sum.hpWheel)+' / +'+r2(sum.mpWheel),'Csak a Wheel-sorokból'],
- ['🧾 HP / MP kézi','+'+r2(sum.hpManual)+' / +'+r2(sum.mpManual),'Külön rögzítve; nem hozzáadva a Wheelhez']
+ ['💚 HP / MP Wheel',optional(sum.hpWheel,sum.hpWheelCount)+' / '+optional(sum.mpWheel,sum.mpWheelCount),'Csak a Wheel-sorokból'],
+ ['🧾 HP / MP kézi',optional(sum.hpManual,sum.hpManualCount)+' / '+optional(sum.mpManual,sum.mpManualCount),'Külön rögzítve; nem hozzáadva a Wheelhez']
  ];
  return `<div class="overview-kpis" aria-label="SET statösszesítés">${cells.map(([name,value,hint])=>`<div class="overview-kpi"><small>${name}</small><strong>${value}</strong><em>${hint}</em></div>`).join('')}</div>
  <p class="info">Felszerelt itemek: ${sum.active}, cél teljesítve: ${sum.ready}, befejezett és érvényes Wheel: ${sum.filled}. Átlagos Wheel-minőség: <b>${percent(sum.qualityAvg)}</b>.
