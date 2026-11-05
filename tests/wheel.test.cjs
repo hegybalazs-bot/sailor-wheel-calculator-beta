@@ -479,7 +479,7 @@ test('v4.9.4: missing HP/MP/Rate data show a dash instead of pretend +0',()=>{
  assert.match(plain(overview),/Attack \/ Block— \/ —/);
 });
 
-test('v4.9.5: all six armor slots use 9DG Garment-inspired original icons and retain text',()=>{
+test('v4.9.5: all six armor slots keep original SVG placeholders and readable text',()=>{
  const {hooks}=boot();
  const cases=[
   ['shoulder','Shoulder','Mad Sky Storm Talisman'],
@@ -490,11 +490,11 @@ test('v4.9.5: all six armor slots use 9DG Garment-inspired original icons and re
   ['legs','Legs','Mad Sky Storm Trousers']
  ];
  const html=hooks.itemList();
- for(const [key,label,reference] of cases){
+ for(const [key,label] of cases){
   const block=hooks.itemLabel(key);
   assert.match(block,/class="sro-item-label"/);
   assert.match(block,/<svg/);
-  assert.match(block,new RegExp(reference));
+  assert.match(block,/Stilizált helyettesítő/);
   assert.ok(plain(block).includes(label));
   assert.ok(html.includes(block),'The item list must show the item icon + readable name');
  }
@@ -532,7 +532,7 @@ test('v4.9.5: icon and text in desktop/mob SET overview; data are unchanged',()=
  assert.ok(desktop&&mobile);
  for(const section of [desktop,mobile]){
   assert.match(section,/sro-icon--item/);
-  assert.match(section,/Mad Sky Storm Talisman/);
+  assert.match(section,/Stilizált helyettesítő/);
   assert.match(section,/stat-str/);
   assert.match(section,/stat-int/);
  }
@@ -573,7 +573,7 @@ test('v4.9.6: PNG/WebP upload restrictions, clearing and labelled inputs',()=>{
  const panel=hooks.userIconPanel();
  assert.equal((panel.match(/data-custom-icon="/g)||[]).length,12);
  assert.ok(panel.includes('Media.pk2'));
- assert.ok(panel.includes('9DG Garment'));
+ assert.ok(panel.includes('felszerelési helyenként'));
 });
 
 test('v4.9.6: perfect shoulder cannot improve under same-types uniform-value model',()=>{
@@ -1275,13 +1275,13 @@ test('v4.10.0: switching language survives server creation and JSON round trip',
 
 
 test('v5 icon foundation: legacy SETs stay unidentified and use safe placeholders',()=>{
- const {hooks}=boot(),s=hooks.state();
+ const {hooks,document}=boot(),s=hooks.state();
  assert.equal(s.apparelStyle,'unknown');
  assert.equal(hooks.iconIdentity('chest').equipmentType,null);
  assert.equal(hooks.verifiedIconFor('chest'),null);
  assert.match(hooks.itemLabel('chest'),/Stilizált helyettesítő/);
  assert.match(hooks.html(),/Ikon Degree/);
- assert.match(hooks.html(),/Ruhatípus/);
+ assert.match(document.querySelector('#apparelStyleSel').innerHTML,/Chinese/);
 });
 
 test('v5 icon foundation: matching requires exact outfit family, region, degree, slot and verification',()=>{
