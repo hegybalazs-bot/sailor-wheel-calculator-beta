@@ -1067,6 +1067,7 @@ test('v4.9.9: 140 CAP Wheel maxima match 130 CAP including MP, Balance remains l
  assert.equal(c.maxMP,2300);
  hooks.switchDegreeModel(16);
  assert.equal(c.maxMP,2300,'new Degree keeps the 130 CAP MP reference');
+ hooks.state().tab='rules';hooks.paint();
  assert.match(hooks.html(),/140 CAP MP-referenciája jelenleg a 130 CAP-éval egyezik/);
 });
 
