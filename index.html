@@ -534,27 +534,50 @@ function balanceMetrics(cap=S.cap,setTotals=total(),base=S.balanceBases?.[cap]){
 }
 function balancePanel(t=total()){
  const b=balanceMetrics(S.cap,t),base=S.balanceBases?.[S.cap]||freshBalanceBase();
- function tile(kind,label,score,current,missing,goal,gear,stat){
+ const readObserved=key=>{
+  const raw=base[key];if(raw==null||raw==='')return null;
+  const n=Number(raw);return Number.isFinite(n)&&n>=0&&n<=120?n:null;
+ };
+ const tile=(kind,label,score,current,missing,goal,gear,extra,stat,observed)=>{
   const present=score!=null,bar=present?Math.max(0,Math.min(100,score/120*100)):0;
-  return `<div class="balance-result ${kind}"><small>${label}</small>
+  const delta=observed==null||!present?null:score-observed;
+  const comparison=delta==null?'Add meg a játékban látott értéket az ellenőrzéshez.':
+   'Eltérés (számolt − játék): '+(delta>0?'+':'')+r2(delta)+' százalékpont'+
+   (Math.abs(delta)<=0.5?' · közel egyezik':' · ellenőrizd az alapstatokat és az egyéb bónuszokat');
+  return `<div class="balance-result ${kind}">
+   <small>${label}</small>
    <strong>${present?percent(score):'—'} <small style="display:inline">/ 120%</small></strong>
    <div class="balance-meter"><span style="width:${bar}%"></span></div>
-   <small>Összes ${stat}: <b>${current==null?'—':'+'+r2(current)}</b> · SET Wheel: <b>+${r2(gear)}</b></small>
-   <small class="balance-goal">120% cél: ${goal} ${stat} · ${missing==null?'Alap '+stat+' még nincs megadva':missing===0?'✓ Elérve':'még +'+r2(missing)+' '+stat+' kell'}</small>
+   <small>Teljes ${stat}: <b>${current==null?'—':r2(current)}</b> · Wheel: +${r2(gear)} · Egyéb: +${r2(extra)}</small>
+   <small class="balance-goal">120% cél: ${goal} ${stat} · ${missing==null?'Az alap '+stat+' még hiányzik':missing===0?'✓ Elérve':'még +'+r2(missing)+' '+stat+' kell'}</small>
+   <small style="margin-top:6px">Játékban látott: <b>${observed==null?'—':percent(observed)}</b>. ${comparison}</small>
   </div>`;
- }
- return `<section class="panel balance-panel" aria-label="Karakter Balance">
-  <h2>⚖️ Physical / Magical Balance — ${S.cap} CAP</h2>
-  <div class="info">A 120%-os célpontok ${b.source==='kép'?'a korábban küldött képről származnak':'a képen megadott képletből számított értékek (nem szerepeltek a táblázatban)'}. A karaktered <b>felszerelés nélküli</b> statjaihoz a rögzített és felszerelt Wheel-sorok STR/INT bónuszait adjuk. A Balance% számított becslés, nem a játékból kiolvasott érték.</div>
+ };
+ const input=(key,label,placeholder,max,step='1')=>
+  `<label>${label}<input type="number" inputmode="${step==='1'?'numeric':'decimal'}" min="${key==='level'?1:0}" max="${max}" step="${step}" data-balance-field="${key}" aria-label="${label}" placeholder="${placeholder}" value="${esc(base[key]??'')}"></label>`;
+ return `<section id="wheel-balance" class="panel balance-panel" aria-label="Karakter Balance">
+  <h2>⚖️ Physical / Magical Balance – ${S.cap} CAP, ${b.level}. szint</h2>
+  <div class="info">A 120%-os célok a referenciaképen megadott képletből származnak (${b.source==='kép'?'a választott szinthez külön táblázati adat is tartozik':'ehhez a szinthez képletből számított célok'}).
+   A Balance% <b>nem szerveradat</b>, hanem a rögzített, ellenőrzött STR/INT sorokon alapuló becslés.</div>
   <div class="balance-inputs">
-   <label>Karakter alap STR, itemek nélkül<input type="number" inputmode="numeric" min="0" max="1000000" step="1" data-balance-base="str" placeholder="Alap STR" value="${esc(base.str??'')}"></label>
-   <label>Karakter alap INT, itemek nélkül<input type="number" inputmode="numeric" min="0" max="1000000" step="1" data-balance-base="int" placeholder="Alap INT" value="${esc(base.int??'')}"></label>
+   ${input('level','Karakter szintje (üresen: CAP)','Alap: '+S.cap,S.cap)}
+   ${input('str','Alap STR (item és egyéb bónusz nélkül)','Alap STR',1000000)}
+   ${input('int','Alap INT (item és egyéb bónusz nélkül)','Alap INT',1000000)}
+   ${input('extraStr','Egyéb +STR bónusz (nem Wheel)','Pl. +5',1000000)}
+   ${input('extraInt','Egyéb +INT bónusz (nem Wheel)','Pl. +5',1000000)}
   </div>
+  <p class="info">Ne számold kétszer ugyanazt: az <b>alap STR/INT</b> ne tartalmazza a Wheel-bónuszokat és az „Egyéb” mezőben külön megadott pontokat.</p>
+  ${b.excludedStatRows?'<div class="warnbox">⚠ '+b.excludedStatRows+' hibás vagy maximumot túllépő STR/INT sor kimaradt a SET és Balance összesítéséből. Javítsd az item-adatlapon.</div>':''}
   <div class="balance-results">
-    ${tile('phy','💪 Physical Balance',b.phy,b.str,b.strMissing,balanceThreshold(S.cap).phy,b.gearSTR,'STR')}
-    ${tile('mag','🪄 Magical Balance',b.mag,b.int,b.intMissing,balanceThreshold(S.cap).mag,b.gearINT,'INT')}
+   ${tile('phy','💪 Physical Balance',b.phy,b.str,b.strMissing,b.refPhy,b.gearSTR,b.extraSTR,'STR',readObserved('observedPhy'))}
+   ${tile('mag','🪄 Magical Balance',b.mag,b.int,b.intMissing,b.refMag,b.gearINT,b.extraINT,'INT',readObserved('observedMag'))}
   </div>
-  <div class="info">Az alapértékeket külön mentjük SET-enként. Az aktuális Wheel-sorok, SET vagy CAP változása automatikusan frissíti a Balance-kijelzést.</div>
+  <h3>🧪 Összevetés a játékban látott Balance-szal</h3>
+  <div class="balance-inputs">
+   ${input('observedPhy','Játékban látott Physical Balance (%)','Pl. 115,4',120,'0.1')}
+   ${input('observedMag','Játékban látott Magical Balance (%)','Pl. 117,2',120,'0.1')}
+  </div>
+  <p class="info">A játékban látott százalék csak <b>ellenőrzési adat</b>, nem módosítja a számítási képletet. Eltérésnél nézd át a szintet, az alapstatokat és a bónuszokat. A mezőket SET-enként mentjük.</p>
  </section>`;
 }
 // 4.8/cycle 3 – target assistant uses actual STR/INT lines and user-set row ceilings.
