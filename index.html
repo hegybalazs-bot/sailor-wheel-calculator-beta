@@ -348,6 +348,7 @@ function check(id,obj=itm(id),cfg=currentCfg(),weapon=weaponId()){
    if(typ==='FREEZE'&&!isJewelry(id))issues.push(`${i+1}. sor: Freezing csak ékszeren lehet.`);
    if(typ && v<0)issues.push(`${i+1}. sor: negatív érték.`);
    if(['STR','INT','AR','BR','CRIT','FREEZE'].includes(typ) && row.value!=='' && row.value!=null && v<1)issues.push(`${i+1}. sor: ${typ} minimum +1.`);
+   if((typ==='STR'||typ==='INT')&&row.value!==''&&row.value!=null&&!Number.isInteger(Number(row.value)))issues.push(`${i+1}. sor: ${typ} csak egész szám lehet.`);
    if(m!=null && v>m)issues.push(`${i+1}. sor: ${typ} maximum ${m}.`);
    if(typ==='STR'&&row.value!==''&&row.value!=null&&Number.isInteger(v)&&v>=1&&m!=null&&m>=v){str+=v;stats+=v;statRows++;strRows++;strPotential+=m;}
    if(typ==='INT'&&row.value!==''&&row.value!=null&&Number.isInteger(v)&&v>=1&&m!=null&&m>=v){int+=v;stats+=v;statRows++;intRows++;intPotential+=m;}
