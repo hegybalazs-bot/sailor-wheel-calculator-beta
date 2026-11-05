@@ -213,3 +213,12 @@ test('v4.9: separate SETs preserve observed and extra values on switching',()=>{
  assert.equal(s.balanceBases[90].observedMag,111.8);
  assert.equal(s.balanceBases[90].level,90);
 });
+
+test('v4.9: valid non-scored Durability/Other rows can still be journaled',()=>{
+ const {hooks}=boot(),o=hooks.state().sets[90].shoulder;
+ o.count=2;o.rows=[{type:'DUR',value:120},{type:'OTHER',value:''}];
+ const saved=hooks.recordWheelSnapshot('shoulder',o,new Date('2026-11-05T09:00:00Z'));
+ assert.ok(saved,'the manual journal should allow non-scored but complete outcomes');
+ assert.equal(o.history.length,1);
+ assert.equal(saved.count,2);
+});
