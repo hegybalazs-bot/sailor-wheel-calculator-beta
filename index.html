@@ -398,6 +398,53 @@ function check(id,obj=itm(id),cfg=currentCfg(),weapon=weaponId()){
  str,int,stats,statRows,strRows,intRows,strPotential,intPotential,strQuality,intQuality,strShare,intShare,statQuality,
  arSum,arRows,arPerfect,brSum,brRows,brPerfect,critRows,target,targetOk};
 }
+// 4.8/cycle 1 – manually saved Wheel observations, not server-detected spins.
+function recordWheelSnapshot(id,obj=itm(id),at=new Date()){
+ const result=check(id,obj),cfg=currentCfg();
+ if(result.count===0)return null;
+ const rows=copyJSON((obj.rows||[]).slice(0,result.count)).map(row=>({
+  ...row,...(row.modelMax==null&&effectiveRowMax(row,cfg)!=null?{modelMax:effectiveRowMax(row,cfg)}:{})
+ }));
+ const entry={time:at.toLocaleString('hu-HU'),timestamp:at.toISOString(),
+  count:result.count,grade:obj.grade,target:obj.target,goalPct:obj.goalPct,
+  str:result.str,int:result.int,ar:result.arSum,br:result.brSum,
+  itemPct:result.itemPct,ready:result.ready,status:result.status,rows};
+ obj.history??=[];obj.history.push(entry);return entry;
+}
+function snapshotMetrics(snapshot,id,obj=itm(id)){
+ if(!snapshot)return null;
+ const base={...obj,grade:snapshot.grade??obj.grade,
+  count:Math.max(0,Math.floor(num(snapshot.count))),target:snapshot.target??obj.target,
+  goalPct:snapshot.goalPct??obj.goalPct,
+  rows:Array.isArray(snapshot.rows)?snapshot.rows:[]};
+ const score=check(id,base);
+ return {str:score.str,int:score.int,total:score.stats,quality:score.itemPct,ready:score.ready,
+  time:snapshot.time??'korábbi mentés',count:score.count};
+}
+function wheelHistoryStats(id,obj=itm(id)){
+ const snapshots=Array.isArray(obj.history)?obj.history:[];
+ const scores=snapshots.map(s=>snapshotMetrics(s,id,obj)).filter(Boolean);
+ let improvements=0,comparisons=0;
+ for(let i=1;i<scores.length;i++){comparisons++;if(scores[i].total>scores[i-1].total)improvements++;}
+ const avg=scores.length?scores.reduce((a,x)=>a+x.total,0)/scores.length:null;
+ const best=scores.length?Math.max(...scores.map(x=>x.total)):null;
+ const last=scores.length>1?scores[scores.length-1].total-scores[scores.length-2].total:null;
+ return {count:scores.length,avg,best,last,improvements,comparisons,
+  rate:comparisons?improvements/comparisons*100:null};
+}
+function wheelStatsPanel(id,obj=itm(id)){
+ const s=wheelHistoryStats(id,obj);
+ return `<section class="feature" aria-label="Wheel megfigyelések" style="margin-top:16px;padding:12px;border:1px solid var(--border);border-radius:10px">
+  <h3>📊 Wheel-pörgetések naplója (kézi mentések)</h3>
+  <div class="stats">
+   <div class="stat"><small>Rögzített állapotok</small><strong>${s.count}</strong></div>
+   <div class="stat"><small>Átlag STR+INT</small><strong>${s.avg==null?'—':'+'+r2(s.avg)}</strong></div>
+   <div class="stat"><small>Legjobb STR+INT</small><strong>${s.best==null?'—':'+'+r2(s.best)}</strong></div>
+   <div class="stat"><small>Javuló egymás utáni mentések</small><strong>${s.comparisons?s.improvements+'/'+s.comparisons+' ('+percent(s.rate)+')':'—'}</strong></div>
+  </div>
+  <p class="info">A gombbal kézzel rögzített Wheel-állapotok száma, <b>nem a szerver valódi pörgetésszáma vagy drop-esélye</b>. Az összesítés csak az itt elmentett eredményeket vizsgálja.</p>
+ </section>`;
+}
 function percent(x){return x==null?'—':r2(x)+'%';}
 function pill(text,style=''){return `<span class="pill ${style}">${esc(text)}</span>`;}
 function statusP(v){return pill(v.status,v.color==='green'?'good':v.color==='yellow'?'warn':v.color==='red'?'bad':'');}
@@ -544,7 +591,8 @@ ${v.issues.length?`<div class="warnbox"><b>Adathiba:</b> ${v.issues.map(esc).joi
 ${v.count>0&&(!v.complete||!v.wheelComplete)?`<div class="warnbox">Néhány sor típusa vagy értéke még hiányzik, esetleg a CAP-hoz nincs megadva maximum. A teljes Wheel-minőség csak kitöltött, ismert maximumú sorokkal lesz végleges.</div>`:''}
 ${v.count>0&&v.extra.length?`<div class="warnbox"><b>Nem teljesülő feltételek:</b> ${v.extra.map(esc).join(' · ')}</div>`:''}
 <div class="actions"><button class="primary" id="snapshotBtn">✓ Aktuális pörgetés mentése</button><button id="goChance">🎲 Esélyek erre az itemre</button><button class="danger" id="resetItemBtn">Item törlése</button></div>
-${ob.history?.length?`<h3>Korábbi pörgetések (${ob.history.length})</h3><div class="history">${ob.history.slice().reverse().slice(0,10).map(h=>`<div>${esc(h.time)} · ${h.count} sor · STR +${h.str}, INT +${h.int} · Attack ${h.ar} / Block ${h.br} · ${esc(h.status)}</div>`).join('')}</div>`:'<p class="info">Még nem mentettél el korábbi pörgetést. A jelenlegi sorok ettől függetlenül automatikusan mentődnek.</p>'}
+${wheelStatsPanel(id,ob)}
+ ${ob.history?.length?`<h3>Korábbi pörgetések (${ob.history.length})</h3><div class="history">${ob.history.slice().reverse().slice(0,10).map(h=>`<div>${esc(h.time)} · ${h.count} sor · STR +${h.str}, INT +${h.int} · Attack ${h.ar} / Block ${h.br} · ${esc(h.status)}</div>`).join('')}</div>`:'<p class="info">Még nem mentettél el korábbi pörgetést. A jelenlegi sorok ettől függetlenül automatikusan mentődnek.</p>'}
 </section>`;}
 function overviewTable(){return `<section class="panel set-overview"><h2>🧾 Teljes szett – célértékek és állapotok</h2><div style="overflow-x:auto"><table class="tinytable status-table"><thead><tr><th>Item</th><th>Grade</th><th>Wheel</th><th>STR</th><th>INT</th><th>STR roll%</th><th>INT roll%</th><th>HP saját / max</th><th>MP saját / max</th><th>Parry saját / max</th><th>Freezing saját / max</th><th>Teljes Wheel %</th><th>Saját cél</th><th>STR/INT célhiány</th><th>Jelzés</th></tr></thead><tbody>${IDS.map(id=>{const o=itm(id),v=check(id);return `<tr class="item-${v.color} ${!isEquipped(id)?'unequipped':''}" data-overview-row="${id}"><td><button class="linklike" data-item="${id}">${esc(NAMES[id])}</button></td><td>${esc(o.grade)}</td><td>${v.count}/${v.limit}</td><td>+${r2(v.str)}</td><td>+${r2(v.int)}</td><td>${percent(v.strQuality)}</td><td>${percent(v.intQuality)}</td>${['HP','MP','PARRY','FREEZE'].map((k)=>{let r=num(currentCfg()[{HP:'maxHP',MP:'maxMP',PARRY:'maxPARRY',FREEZE:'maxFREEZE'}[k]]),b=ensureBonusStats(o)[k];return `<td>${b===''||b==null?'—':`+${r2(num(b))} / ${r?'+'+r2(r):'?'} (${percent(r?num(b)/r*100:null)})`}</td>`}).join('')}<td><b>${percent(v.itemPct)}</b></td><td><b>${percent(v.goalPct)}</b></td><td>${v.missingPoints==null?'—':'+'+v.missingPoints}</td><td>${statusP(v)}${id==='weapon'||id==='shield'?`<div class="tiny">${v.extra.length?'⚠ Külön feltétel hiányzik':'✓ Rate/Critical feltételek rendben'}</div>`:''}</td></tr>`}).join('')}</tbody></table></div><p class="info">A fehér sor semleges, a piros 20% alatti eredményt, a sárga a céltól legfeljebb 10 százalékponttal elmaradó itemet, a zöld a teljesült %-os célt jelöli. A hiányos/hibás sorokat a jobb oldali részleteknél ellenőrizheted.</p></section>`;}
 function setView(){return shellCards()+balancePanel()+`<div class="content">${itemList()}${editPanel()}</div>${overviewTable()}<div class="notice">Az egyedi célszázalékok és a sorok automatikusan mentődnek. Biztonsági mentéshez használd a <b>Mentés JSON-ba</b> gombot.</div>`;}
@@ -614,7 +662,7 @@ function bindRendered(){
    lastSim=null;save();paint();
  });
  document.querySelectorAll('[data-prob]').forEach(el=>el.onchange=()=>{currentCfg().chances[el.dataset.prob]=el.value===''?'':Math.max(0,Math.min(100,num(el.value)));lastSim=null;save();paint();});
- let snap=$('#snapshotBtn');if(snap)snap.onclick=()=>{let v=check(S.active),o=itm(S.active);if(v.count===0){toast('Adj meg legalább 1 sort!');return;}o.history??=[];o.history.push({time:new Date().toLocaleString('hu-HU'),count:v.count,str:v.str,int:v.int,ar:v.arSum,br:v.brSum,status:v.status,rows:JSON.parse(JSON.stringify(o.rows.slice(0,v.count)))});save();paint();toast('Pörgetés mentve az előzményekhez.');};
+ let snap=$('#snapshotBtn');if(snap)snap.onclick=()=>{let v=check(S.active),o=itm(S.active);if(v.count===0){toast('Adj meg legalább 1 sort!');return;}recordWheelSnapshot(S.active,o);save();paint();toast('Wheel-állapot rögzítve a naplóban.');};
  let reset=$('#resetItemBtn');if(reset)reset.onclick=()=>{if(confirm(`Törlöd a ${NAMES[S.active]} összes eredményét és előzményeit ezen a CAP-on?`)){if(S.active==='weapon')S.weaponInventory[S.cap][weaponId()]=freshItem('weapon');else items()[S.active]=freshItem(S.active);lastSim=null;save();paint();}};
  let cr=$('#critReqSel');if(cr)cr.onchange=()=>{S.critOverrides[S.cap][weaponId()]=cr.value==='yes';lastSim=null;save();paint();};
  let go=$('#goChance');if(go)go.onclick=()=>{S.tab='chance';paint();};
