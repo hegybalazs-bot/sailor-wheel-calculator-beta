@@ -1,6 +1,9 @@
-# Wheel Calculator – Emerald v4.9.9 BÉTA
+# Wheel Calculator – Emerald v4.10.0 BÉTA
 
 A Silkroad Online szerverekhez használható felszerelés- és Wheel-sor-kalkulátor, kipróbálásra szánt **béta verzió**. Alapértelmezett profilja: Sailor Online.
+
+**Nyelv:** magyar / angol, a felső **Nyelv / Language** kapcsolóval; a választást a böngésző helyben megőrzi. A súgó és a visszajelző oldal is kétnyelvű. [English user guide](README_EN.md) · [Ellenőrzött v5.0 kiadási lista](docs/ROADMAP_V5.md).
+
 
 ## Jellemzők
 - 120%-os **Physical és Magical Balance** célértékek CAP szerint, a korábban küldött képből
@@ -185,3 +188,13 @@ Tesztek: `node --test tests/wheel.test.cjs` – **45 automatizált teszt**, a v�
 A játékos megerősítése szerint a 140 CAP-es Wheel statrendszer egyelőre **ugyanaz, mint 130 CAP-on**, mert a játékban nem történt további releváns frissítés. A két CAP alap **STR/INT, Attack/Block/Critical, HP/MP, Durability, Parry és Freezing maximuma** megegyezik. Különösen: **140 CAP MP: 2300** (ugyanúgy, mint 130-on).
 
 A 140 CAP-re korábban elmentett **üres vagy hiányzó MP referencia** az aktív szerverprofil 130-as MP értékéből – annak hiányában 2300-ból – feltöltődik, beleértve a CAP + Degree pillanatképeket. A **szándékosan megadott eltérő, érvényes 140-es MP-értéket és valamennyi item Wheel-sorát megőrizzük**. Ez kezdeti szerveradat-referencia, nem bizonyított Wheel-esély. A karakter aktuális szintjéből számított Balance **továbbra is különbözik** 130 és 140 szinten.
+
+## Emerald v4.10.0 – magyar–angol felület és biztonságos szerverprofil-kezelés
+
+- Felül **Nyelv / Language → Magyar / English** kapcsoló. A nyelv a gépen tárolódik; nem változtatja meg az itemazonosítókat, CAP-okat, statértékeket és a JSON-mentés adatstruktúráját.
+- A négy fő fül, a SET-összesítő, a Blue-katalógus, a Pen/Wheel feltételes esélymodell, az **angol útmutató**, a megerősítő ablakok és a Discordra másolható visszajelző jelentés is elérhető angolul, internet nélkül.
+- Az önálló szerverprofilok CAP-listái most **különülnek el**: egyik szerveren beírt saját CAP nem jelenik meg automatikusan másik szerver új profiljában. Szerverváltás és mentésimport előtt az adatszerkezetet ellenőrizzük.
+- Sérült, hiányos, duplikált szerverazonosítójú vagy hiányzó aktív profillal rendelkező JSON-import **hibára fut és nem írja felül a jelenlegi profilokat**. Régi Sailor-only mentés továbbra is importálható.
+- Új fájlok: [README_EN.md](README_EN.md) – angol használati útmutató; [docs/ROADMAP_V5.md](docs/ROADMAP_V5.md) – bizonyítékalapú v5.0 kiadási lista.
+
+**Korlátok:** az eredeti 9DG játékikonok nem részei a csomagnak (csak stilizált SVG-k és saját PNG/WebP betöltés). A valódi szerveres dobási esélyek továbbra sem igazoltak. A tényleges mobil/asztali vizuális E2E és az automatikus Render-élesítés külön ellenőrzendő; a Node-tesztek nem helyettesítik őket.
