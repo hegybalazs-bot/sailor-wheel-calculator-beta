@@ -1,5 +1,12 @@
 # Wheel Calculator – Emerald v5 ADMIN PREVIEW (BÉTA)
 
+## Sailor ikonok: privát, Degree-szerinti ZIP-betöltés
+
+A **Szett & itemek** fülön a **Saját Sailor ikoncsomag · Degree szerint** panelben beolvashatsz egy saját **Sailor_Ikoncsomag_Bongeszobe.zip** csomagot. A PNG-k **csak a saját böngésződben** maradnak; a nyilvános GitHub/Render oldal nem tartalmazza a játék grafikáit. CH/EU, ruhatípus, fegyver, felszerelési hely és Degree szerint szűrhetsz, és **kézzel** választhatod ki a tényleges itemhez illő ikont. A bizonytalan jelölteket nem hitelesítjük automatikusan. Az ikonválasztás az aktuális szerverprofilhoz tartozik; a JSON-mentés csak az ikon azonosítóját viszi, így új eszközön újra be kell tölteni a ZIP-et.
+
+Kizárólag a **külön előkészített, tömörítés nélküli böngészős ZIP** olvasható be (nem a teljes eredeti Media.pk2, nem a régi v2 katalógus-ZIP). Az app nem kommunikál a játékkal és nem küldi fel a képeket. Útmutató: [Privát böngészős ikonok](docs/LOCAL_BROWSER_ICONS.md).
+
+
 ## Emerald v5: prémium SET-kirakat és minőségi elemzés
 
 A főoldalon már **12 felszerelési helyes SET-kirakat** mutatja a ruhát, ékszereket, fegyvert és pajzsot. Egy itemre kattintva a meglévő kézi szerkesztő nyílik meg. A felszereléskártyák az ismert, jogosan feltöltött vagy hitelesített ikonokat használják, ellenkező esetben az eredeti, stilizált helyettesítőket. A grafikon az **érvényesen kitöltött Wheel-sorokat** és a saját célértékeket mutatja, nem a dobás esélyét. Az optimalizálási sorrend a már meglévő sorok elméleti javítási lehetőségét mutatja; nem ígér sikeres pörgetést.
