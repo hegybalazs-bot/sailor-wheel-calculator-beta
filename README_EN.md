@@ -1,5 +1,12 @@
 # Wheel Calculator — Emerald v5 Admin Preview (Beta)
 
+## Sailor icons: private ZIP import with degree-specific selection
+
+Open **SET & items → Private Sailor icon pack · by Degree**, then import your own prepared **Sailor_Ikoncsomag_Bongeszobe.zip** file. The extracted PNG files stay **in your browser**; the public GitHub/Render app does not include copyrighted game artwork. Pick matching candidate pictures manually by CH/EU region, apparel family, weapon, slot, Degree and optional item code. Candidate images are **not** automatically verified as authentic item art.
+
+The local image bytes use browser IndexedDB when available. The JSON backup retains only the selected icon identifiers, so you must reimport the prepared ZIP on another browser. This loader accepts only the dedicated **uncompressed browser ZIP**, not the original extracted Media.pk2 or the older v2 review ZIP. No game client or server integration. Details: [Local browser icon workflow](docs/LOCAL_BROWSER_ICONS.md).
+
+
 ## Emerald v5 premium SET loadout and quality insights
 
 The home page now includes a **12-slot equipment loadout**, covering armor, jewelry, weapon and shield. Clicking a slot opens its existing manual editor. The display uses an authorized user icon, a unique verified sprite match or a stylized fallback. Its quality chart only scores **complete and valid manually recorded Wheel lines**; empty/invalid items remain unscored. It compares personal item goals with current quality and ranks below-target, valid items by percentage-point gap. Improvement room on known existing rows is *theoretical*, **never a drop probability**.
