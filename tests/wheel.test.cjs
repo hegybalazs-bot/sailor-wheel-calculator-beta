@@ -55,9 +55,9 @@ function boot(){
  state:()=>S,html:()=>document.querySelector('#root').innerHTML,translateText,translateMarkup,setUiLanguage,helpViewEnglish,promptUI,confirmUI,alertUI,validServerState,profileCaps,
  save,paint,createSet,selectSet,recordWheelSnapshot,
  wheelHistoryStats,wheelComparison,optimizedLinePlan,balanceTargetAdvice,
- getSetComparison,balanceThreshold,balanceMetrics,qualifiedWheelStats,chooseCap,rowValueEditor,itemBlueInventory,blueInventoryView,addServerProfile,renameServerProfile,switchServerProfile,currentServerName,exportAllProfiles,importAllProfiles,applyFixedStatLimits,switchDegreeModel,blueTypesFor,blueCatalogKey,BLUE_BASE,setBlueTypes,resetBlueTypes,blueCatalogWarnings,blueCatalogPanel,blueTypeCountPanel,visiblePlanTypes,chanceWeightsFor,ensureChanceWeights,chancesComplete,rowMax,penOneBlueEstimate,keepOrRerollAdvice,keepOrRerollPanel,validUserIconData,setUserIcon,clearUserIcon,userIconPanel,uiIcon,itemLabel,statLabel,itemList,editPanel,iconIdentity,verifiedIconFor,verifiedWheelIconFor,wheelToolIcon,VERIFIED_ICON_ASSETS,normalizeApparelStyle,autoWheelEstimate,autoWheelChancePanel,chanceView,shellCards,parryWheelOverview,parryWheelOverviewCell,overviewValidWheelStats,overviewItemView,overviewSummary,overviewTable,check,total,noteBackupExport,backupReminderState
+ getSetComparison,balanceThreshold,balanceMetrics,qualifiedWheelStats,chooseCap,rowValueEditor,itemBlueInventory,blueInventoryView,addServerProfile,renameServerProfile,switchServerProfile,currentServerName,exportAllProfiles,importAllProfiles,applyFixedStatLimits,switchDegreeModel,blueTypesFor,blueCatalogKey,BLUE_BASE,setBlueTypes,resetBlueTypes,blueCatalogWarnings,blueCatalogPanel,blueTypeCountPanel,visiblePlanTypes,chanceWeightsFor,ensureChanceWeights,chancesComplete,rowMax,penOneBlueEstimate,keepOrRerollAdvice,keepOrRerollPanel,validUserIconData,setUserIcon,clearUserIcon,userIconPanel,uiIcon,itemLabel,statLabel,itemList,editPanel,iconIdentity,verifiedIconFor,verifiedWheelIconFor,wheelToolIcon,VERIFIED_ICON_ASSETS,normalizeApparelStyle,autoWheelEstimate,autoWheelChancePanel,chanceView,wheelStagesPanel,wheelCostPanel,calculateCost,costPlanFor,adminDemoData,createAdminDemo,adminShowcasePanel,shareSetSnapshot,validateSharedSet,encodeSharedSet,decodeSharedSet,sharedSetPreviewPanel,evidenceFor,evidenceKey,evidencePanel,adminReviewReport,shellCards,parryWheelOverview,parryWheelOverviewCell,overviewValidWheelStats,overviewItemView,overviewSummary,overviewTable,check,total,noteBackupExport,backupReminderState
 };`,sandbox,{timeout:5000});
- return {hooks:sandbox.hooks,document,store,inputs};
+ return {hooks:sandbox.hooks,document,store,inputs,window:sandbox.window};
 }
 
 test('initial UI includes all six feature areas',()=>{
@@ -1427,4 +1427,137 @@ test('v5 icon foundation: JSON backup roundtrip preserves icon metadata without 
  assert.equal(restored.hooks.state().sets[90].chest.iconDegree,10);
  assert.equal(restored.hooks.state().sets[90].chest.iconItemCode,'ITEM_CH_M_GARMENT_10');
  assert.equal(restored.hooks.total().str,before);
+});
+
+test('showcase: three Wheel stages and a manual budget remain conditional',()=>{
+ const {hooks}=boot();
+ assert.match(hooks.wheelStagesPanel(),/Wheel of Fate/);
+ assert.match(hooks.wheelStagesPanel(),/Wheel of Fortune/);
+ assert.match(hooks.wheelStagesPanel(),/Feather Pen/);
+ const s=hooks.state();
+ s.costPlans={90:{currency:'Gold',fatePrice:500,fateCount:2,fortunePrice:250,fortuneCount:4,penPrice:100,penCount:3}};
+ const calc=hooks.calculateCost();
+ assert.equal(calc.total,2300);
+ assert.equal(calc.subtotals.fate,1000);
+ assert.equal(calc.subtotals.fortune,1000);
+ assert.equal(calc.subtotals.pen,300);
+ assert.match(hooks.wheelCostPanel(),/2\s?300/);
+ assert.equal(hooks.calculateCost({...s.costPlans[90],fateCount:-1}),null);
+ assert.equal(hooks.calculateCost({...s.costPlans[90],penCount:2.5}),null);
+ assert.equal(hooks.calculateCost({...s.costPlans[90],penPrice:Infinity}),null);
+});
+
+test('showcase: demo SET never replaces the existing set or pollutes another CAP',()=>{
+ const {hooks}=boot(),s=hooks.state();
+ const id=s.setBank[90].activeId;
+ const before=JSON.stringify(s.setBank[90].entries.find(x=>x.id===id).data);
+ s.sets[90].head.rows=[{type:'STR',value:3}];
+ hooks.save();
+ const saved=JSON.stringify(s.setBank[90].entries.find(x=>x.id===id).data);
+ assert.notEqual(saved,before);
+ assert.equal(hooks.createAdminDemo(90),true);
+ assert.equal(s.setBank[90].entries.length,2);
+ assert.match(s.setBank[90].entries.find(x=>x.id===s.setBank[90].activeId).name,/DEMO/);
+ assert.equal(s.sets[90].chest.rows[0].type,'STR');
+ hooks.selectSet(id);
+ assert.equal(JSON.stringify(s.setBank[90].entries.find(x=>x.id===id).data),saved);
+ assert.equal(s.sets[90].head.rows[0].value,3);
+ assert.equal(hooks.createAdminDemo(130),true);
+ assert.equal(s.cap,130);
+ assert.equal(s.setBank[90].entries.length,2);
+ assert.equal(s.setBank[100].entries.length,1);
+ assert.equal(hooks.createAdminDemo(95),false);
+});
+
+test('showcase: read-only shared snapshot is validated and cannot overwrite data',()=>{
+ const {hooks,window}=boot(),s=hooks.state();
+ s.sets[90].chest.count=1;
+ s.sets[90].chest.rows=[{type:'STR',value:8}];
+ const snap=JSON.parse(JSON.stringify(hooks.shareSetSnapshot()));
+ assert.equal(hooks.validateSharedSet(snap),true);
+ const encoded=hooks.encodeSharedSet(snap);
+ assert.equal(typeof encoded,'string');
+ assert.equal(hooks.decodeSharedSet(encoded).items[4].rows[0].value,8);
+ window.location={hash:'#set='+encoded};
+ const before=JSON.stringify(s);
+ assert.match(hooks.sharedSetPreviewPanel(),/read-only|olvasható/);
+ assert.equal(JSON.stringify(s),before);
+ assert.equal(hooks.decodeSharedSet(encodeURIComponent(JSON.stringify({...snap,cap:9999}))),null);
+ assert.equal(hooks.decodeSharedSet('%ZZ'),null);
+ assert.equal(hooks.decodeSharedSet('x'.repeat(16001)),null);
+});
+
+test('showcase: link contains no other SET history, server bank or saved icon data',()=>{
+ const {hooks}=boot(),s=hooks.state();
+ s.userIcons={head:'data:image/png;base64,AA=='};
+ s.sets[90].head.history=[{secret:'not shared'}];
+ const text=decodeURIComponent(hooks.encodeSharedSet(hooks.shareSetSnapshot()));
+ assert.ok(!text.includes('not shared'));
+ assert.ok(!text.includes('userIcons'));
+ assert.ok(!text.includes('serverProfiles'));
+});
+
+test('showcase: source metadata is explicitly user-reported and stays CAP scoped',()=>{
+ const {hooks}=boot(),s=hooks.state();
+ assert.equal(hooks.evidenceKey(),'90:9');
+ assert.match(hooks.evidencePanel(),/Még nincs bizonyíték/);
+ s.dataEvidence={'90:9':{status:'submitted',sourceUrl:'https://example.org/sro',notes:'player screenshot',updatedAt:'2026-11-06T00:00:00Z'}};
+ assert.match(hooks.evidencePanel(),/example.org/);
+ hooks.chooseCap(100);
+ assert.equal(hooks.evidenceFor().status,'missing');
+ hooks.chooseCap(90);
+ assert.equal(hooks.evidenceFor().notes,'player screenshot');
+ const exportData=hooks.exportAllProfiles();
+ assert.equal(exportData.dataEvidence['90:9'].status,'submitted');
+});
+
+test('showcase: the new panels render in both languages',()=>{
+ const {hooks}=boot();
+ assert.match(hooks.html(),/Admin bemutató/);
+ assert.equal(hooks.setUiLanguage('en'),true);
+ assert.match(hooks.html(),/Admin showcase/);
+ hooks.state().tab='chance';hooks.paint();
+ assert.match(hooks.html(),/Three-stage Wheel planner/);
+ assert.match(hooks.html(),/Wheel budget planner/);
+ hooks.state().tab='rules';hooks.paint();
+ assert.match(hooks.html(),/CAP \/ Degree evidence record/);
+});
+
+test('showcase: legacy string-valued Wheel rolls remain safe in share links',()=>{
+ const {hooks}=boot(),o=hooks.state().sets[90].chest;
+ o.count=2;o.rows=[{type:'STR',value:'8'},{type:'INT',value:'9'}];
+ const snapshot=hooks.shareSetSnapshot();
+ assert.equal(hooks.validateSharedSet(snapshot),true);
+ const encoded=hooks.encodeSharedSet(snapshot);
+ assert.ok(encoded);
+ assert.equal(hooks.decodeSharedSet(encoded).items[4].rows[0].value,'8');
+ snapshot.items[4].rows[0].value='<img onerror=alert(1)>';
+ assert.equal(hooks.validateSharedSet(snapshot),false);
+});
+
+test('showcase: bilingual admin page exists and describes beta limitations',()=>{
+ const file=fs.readFileSync(path.join(__dirname,'..','bemutato.html'),'utf8');
+ assert.match(file,/Admin Showcase/);
+ assert.match(file,/Wheel of Fate/);
+ assert.match(file,/Wheel of Fortune/);
+ assert.match(file,/Feather Pen/);
+ assert.match(file,/data-hu=/);
+ assert.match(file,/data-en=/);
+ assert.match(file,/nem valós|nem valódi|kitalált/);
+ assert.match(html,/href="bemutato.html"/);
+});
+
+test('showcase: server rule review request contains Blue pools, limits and honest caveats',()=>{
+ const {hooks}=boot();
+ const hu=hooks.adminReviewReport();
+ assert.match(hu,/90 \/ 9DG/);
+ assert.match(hu,/Shoulder:/);
+ assert.match(hu,/STR \/ INT per line: \+11/);
+ assert.match(hu,/200%/);
+ assert.match(hu,/Kérjük az ehhez a CAP/);
+ assert.match(hooks.evidencePanel(),/copyReviewRequest/);
+ hooks.setUiLanguage('en');
+ const en=hooks.adminReviewReport();
+ assert.match(en,/verification request/);
+ assert.match(en,/no official odds are claimed/);
 });

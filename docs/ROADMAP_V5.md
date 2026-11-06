@@ -1,10 +1,10 @@
 # Wheel Calculator — verified v5.0 release checklist
 
-Updated for the v4.10.0 bilingual beta.
+Updated for the v5 Admin Preview (2026-11-06).
 
 ## Must pass before declaring v5.0
 
-- [ ] **Authentic equipment icons:** obtain clearly matched 9DG Chinese Garment inventory PNG/WebP files with appropriate reuse permission; verify Head, Shoulder, Chest, Hands, Legs, Foot, Weapon, Shield, Necklace, Earring, and Rings. Current drawings remain labeled as stylized placeholders.
+- [ ] **Authentic equipment icons:** obtain correctly matched CH/EU item sprites for all available degrees with appropriate reuse permission, including head, shoulder, chest, hands, legs, foot, weapon, shield and jewelry. Current imagery remains stylized when no verified source is present.
 - [ ] **Gameplay-proven Blue catalogs:** verify each item slot's possible Blue types for Sailor and other user-selected servers; distinguish the number of possible types from the maximum lines visible on one item. Document server and date of evidence.
 - [ ] **Real roll probabilities:** obtain measured/server-documented distribution for Wheel of Fortune line types and value ranges, Feather Pen line selection and value outcomes. Until verified, show conditional assumptions only; never invent odds.
 - [ ] **Full CAP/degree references:** validate at least 90, 100, 110, 120, 125, 130 and 140 CAP with in-game screenshots. Preserve +11 STR/INT, Durability 200, HP 2300 / Parry 60 at 130+, and current 130=140 Wheel baseline. Check other server-specific Rate, Critical, status resistances and grade line limits.
@@ -14,7 +14,7 @@ Updated for the v4.10.0 bilingual beta.
 - [ ] **Accessibility and English text QA:** keyboard navigation, icon+label semantics, input errors, dialogs, English feedback form, untranslatable user-entered names, and complete language coverage of populated (not only empty) items.
 - [ ] **Documentation and release:** update English/Hungarian changelog, pin a release commit/tag, archive tested JSON backups and publish beta caveats.
 
-## Current completed foundations
+## Admin-preview foundations added (not final release sign-off)\n\n- [x] Three-stage Wheel overview and per-CAP/per-server manual budget planner.\n- [x] Fictional demo SET generator (90/100/130 CAP), independent of original SETs.\n- [x] Read-only share links for the current equipment snapshot, without other private history.\n- [x] Player-entered per-CAP/Degree evidence register (not admin certification).\n- [x] Bilingual standalone admin showcase page.\n- [x] Prior verified icon groundwork and local-only safe image manifest preparer.\n- [ ] Real in-game validation of Fate stage rules, actual prices and external stat limits.\n- [ ] Live-browser and device QA for all new admin-preview features.\n\n## Current completed foundations
 
 - [x] Offline HU/EN interface and English feedback/help (v4.10.0).
 - [x] Independently named server profiles with safe CAPS and guarded imports.

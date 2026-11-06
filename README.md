@@ -1,9 +1,22 @@
-# Wheel Calculator – Emerald v4.10.0 BÉTA
+# Wheel Calculator – Emerald v5 ADMIN PREVIEW (BÉTA)
 
 A Silkroad Online szerverekhez használható felszerelés- és Wheel-sor-kalkulátor, kipróbálásra szánt **béta verzió**. Alapértelmezett profilja: Sailor Online.
 
 **Nyelv:** magyar / angol, a felső **Nyelv / Language** kapcsolóval; a választást a böngésző helyben megőrzi. A súgó és a visszajelző oldal is kétnyelvű. [English user guide](README_EN.md) · [Ellenőrzött v5.0 kiadási lista](docs/ROADMAP_V5.md).
 
+
+## Emerald v5 Admin Preview – új bemutató és játékosfunkciók (2026-11-06)
+
+**Admin bemutató:** [bemutato.html](https://sailor-wheel-calculator-beta.onrender.com/bemutato.html) – mobilbarát, kétnyelvű prezentáció a jelenlegi lehetőségekről és korlátokról.
+
+- **Wheel-folyamat:** a Wheel of Fate, Wheel of Fortune és Feather Pen külön megmagyarázott szakaszai. A szerverfüggő mechanikák nincsenek ellenőrzött tényként feltüntetve.
+- **Költségtervező:** minden CAP/szerverprofil saját, kézzel beírt Fate/Fortune/Pen árakkal és tervezett darabszámokkal; Gold, Silk vagy egyedi közös pénznem. Nem jósol valódi árakat, sikeres pörgetéseket vagy Gold–Silk árfolyamot.
+- **Admin DEMO SET:** 90, 100 és 130 CAP-hoz egy kattintással külön **kitalált példa-SET** hozható létre. A meglévő SET-ek változatlanok. A példák nem igazolt játékosdobások.
+- **SET megosztás:** csak olvasható URL-fragmentum az aktív SET felszerelési soraival; nem exportál mentési előzményeket, másik SET-et, profilbankot vagy feltöltött képet. Megtekintése nem importálja és nem írja felül a saját adatokat.
+- **Adatforrások:** szerverprofilon belül CAP/DG szerint külön játékos által megadott HTTPS-forráslink, megjegyzés és ellenőrzésre váró státusz. Az alkalmazás NEM hitelesíti automatikusan az admin jóváhagyását.
+- **Eredeti ikonok:** továbbra is az üres, ellenőrzött ikontárra előkészített rendszer és helyettesítő grafika az alap. A Media.pk2 fájlokat és jogvédett képeket nem tesszük közzé automatikusan.
+
+**Fontos:** a 83 korábbi tesztet kibővítettük; a Node tesztek és a Render deploy sikere nem helyettesíti a valós böngészős/mobilos és játékbeli ellenőrzést. A v5 jelzés **PREVIEW, nem végleges kiadás**. A statmaximumok és dobási esélyek szerverfüggők lehetnek.
 
 ## Jellemzők
 - 120%-os **Physical és Magical Balance** célértékek CAP szerint, a korábban küldött képből
