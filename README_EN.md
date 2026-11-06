@@ -1,8 +1,21 @@
-# Wheel Calculator — Emerald v4.10.0 Beta
+# Wheel Calculator — Emerald v5 Admin Preview (Beta)
 
 **Offline Hungarian / English Silkroad Wheel calculator** for Sailor Online and other customizable Silkroad servers.
 
 [Open the app](https://sailor-wheel-calculator-beta.onrender.com/) · [Report a bug or share a verified stat](https://sailor-wheel-calculator-beta.onrender.com/visszajelzes.html)
+
+## Emerald v5 Admin Preview — showcase and planning features (2026-11-06)
+
+**Admin presentation:** [open bilingual showcase](https://sailor-wheel-calculator-beta.onrender.com/bemutato.html). Mobile-friendly and explicit about beta limitations.
+
+- **Three Wheel stages:** separate explanation of Wheel of Fate, Wheel of Fortune and Feather Pen; actual server behavior must be verified.
+- **Budget planner:** independent per-server/per-CAP, manual Fate/Fortune/Pen unit prices and planned counts, in one common Gold, Silk or custom currency. No invented prices, exchange rates, success chances or guarantees.
+- **Admin demo SETs:** 90, 100 and 130 CAP examples are created as separate, explicitly fictional SETs. Existing SETs are retained.
+- **Shareable read-only SET:** copy a URL fragment containing only the current equipment lines and CAP. It does not expose history, other saved sets, server bank data, or uploaded sprites; visiting it never imports or overwrites the viewer's data.
+- **Source-evidence register:** server/CAP/Degree-specific player-entered HTTPS source, notes and review-request status, with no claim of independent administrator certification.
+- **Icon groundwork:** validated local preparer and empty verified-asset registry with safe fallbacks. Original client sprites and unverified game artwork are **not** publicly distributed.
+
+**Release gate:** v5 is a PREVIEW, not full production validation. Real-world mobile/desktop browser QA, accurate server-specific Blue limits/odds, asset source review and Render auto-deploy remediation remain open. CI alone cannot certify gameplay assumptions.
 
 ## English interface
 
