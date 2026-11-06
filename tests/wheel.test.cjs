@@ -1522,3 +1522,27 @@ test('showcase: the new panels render in both languages',()=>{
  hooks.state().tab='rules';hooks.paint();
  assert.match(hooks.html(),/CAP \/ Degree evidence record/);
 });
+
+test('showcase: legacy string-valued Wheel rolls remain safe in share links',()=>{
+ const {hooks}=boot(),o=hooks.state().sets[90].chest;
+ o.count=2;o.rows=[{type:'STR',value:'8'},{type:'INT',value:'9'}];
+ const snapshot=hooks.shareSetSnapshot();
+ assert.equal(hooks.validateSharedSet(snapshot),true);
+ const encoded=hooks.encodeSharedSet(snapshot);
+ assert.ok(encoded);
+ assert.equal(hooks.decodeSharedSet(encoded).items[4].rows[0].value,'8');
+ snapshot.items[4].rows[0].value='<img onerror=alert(1)>';
+ assert.equal(hooks.validateSharedSet(snapshot),false);
+});
+
+test('showcase: bilingual admin page exists and describes beta limitations',()=>{
+ const file=fs.readFileSync(path.join(__dirname,'..','bemutato.html'),'utf8');
+ assert.match(file,/Admin Showcase/);
+ assert.match(file,/Wheel of Fate/);
+ assert.match(file,/Wheel of Fortune/);
+ assert.match(file,/Feather Pen/);
+ assert.match(file,/data-hu=/);
+ assert.match(file,/data-en=/);
+ assert.match(file,/nem valós|nem valódi|kitalált/);
+ assert.match(html,/href="bemutato.html"/);
+});
