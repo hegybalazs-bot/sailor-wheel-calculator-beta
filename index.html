@@ -1767,7 +1767,7 @@ function overviewTable(){
   <p class="info" style="margin-top:12px">Az összesítő csak a felszerelt itemeket adja a SET-végösszegekhez. A kézi és Wheel HP/MP/Parry külön forrás; <b>nem adódnak össze automatikusan</b>. Kattints az itemre a szerkesztéshez, vagy nyisd le a Részleteket. Mobilon a táblázat helyett kártyák jelennek meg.</p>
  </section>`;
 }
-function setView(){return shellCards()+`<nav class="wheel-jumps" aria-label="Gyors ugrás a kalkulátor részeihez"><a href="#wheel-items">⚔ Wheel-sorok</a><a href="#wheel-balance">⚖ Balance</a><a href="#wheel-target">🎯 Célsegéd</a><a href="#wheel-optimize">🧠 Optimalizáló</a><a href="#wheel-compare">🔁 SET-ek</a></nav>`+balancePanel()+`<div class="content" id="wheel-items">${itemList()}${editPanel()}</div>${balanceTargetPanel()}${optimizerPanel()}${blueTypeCountPanel()}${overviewTable()}${setComparePanel()}${backupReminderPanel()}<div class="notice">Az egyedi célszázalékok és a sorok automatikusan mentődnek. Biztonsági mentéshez használd a <b>Mentés JSON-ba</b> gombot.</div>`;}
+function setView(){return sharedSetPreviewPanel()+adminShowcasePanel()+shellCards()+`<nav class="wheel-jumps" aria-label="Gyors ugrás a kalkulátor részeihez"><a href="#wheel-items">⚔ Wheel-sorok</a><a href="#wheel-balance">⚖ Balance</a><a href="#wheel-target">🎯 Célsegéd</a><a href="#wheel-optimize">🧠 Optimalizáló</a><a href="#wheel-compare">🔁 SET-ek</a></nav>`+balancePanel()+`<div class="content" id="wheel-items">${itemList()}${editPanel()}</div>${balanceTargetPanel()}${optimizerPanel()}${blueTypeCountPanel()}${overviewTable()}${setComparePanel()}${shareToolsPanel()}${backupReminderPanel()}<div class="notice">Az egyedi célszázalékok és a sorok automatikusan mentődnek. Biztonsági mentéshez használd a <b>Mentés JSON-ba</b> gombot.</div>`;}
 
 /* Emerald demo toolkit — informational stages, not claims of game-server drop odds. */
 function wheelStagesPanel(){
@@ -1808,6 +1808,115 @@ function wheelCostPanel(){
  <div class="showcase-cost-grid">${controls}</div>
  <p class="showcase-cost-total">${en?'Estimated total':'Tervezett összköltség'}: ${calc?nf(calc.total)+' '+esc(calc.currency):'—'}</p>
  <p class="showcase-muted">${en?'Manual item prices and planned quantities only. No market prices, probabilities, success guarantees or Gold/Silk exchange rates are assumed.':'Csak kézzel megadott árak és tervezett mennyiségek. Nem használunk kitalált piaci árakat, esélyeket vagy Gold/Silk átváltást.'}</p></section>`;
+}
+
+
+/* Admin showcase: creates a NEW, clearly labelled example SET. Never overwrites a user SET. */
+const DEMO_CAPS=[90,100,130];
+function adminDemoData(cap){
+ if(!DEMO_CAPS.includes(Number(cap)))return null;
+ const data=freshSetData(cap,'ch_bow');
+ data.apparelStyle='ch_garment';
+ const samples={
+  shoulder:[['STR',9],['INT',8]],hands:[['STR',8],['INT',9]],
+  chest:[['STR',10],['INT',9]],head:[['STR',7],['INT',11]],
+  legs:[['STR',9],['INT',10]],foot:[['STR',8],['INT',8]],
+  necklace:[['STR',7],['INT',8]],earring:[['STR',9],['INT',9]],
+  ring1:[['STR',10],['INT',8]],ring2:[['STR',8],['INT',10]],
+  weapon:[['AR',cap===90?40:60],['AR',cap===90?40:60],['BR',100],['STR',9],['INT',8]]
+ };
+ for(const [id,rows] of Object.entries(samples)){
+  const obj=id==='weapon'?data.weaponInventory.ch_bow:data.items[id];
+  obj.grade='SoS';obj.count=rows.length;obj.target=rows.filter(([type])=>type==='STR'||type==='INT').length;
+  obj.rows=rows.map(([type,value])=>({type,value}));
+  obj.goalPct=75;
+ }
+ return data;
+}
+function createAdminDemo(cap){
+ cap=Number(cap);
+ if(!DEMO_CAPS.includes(cap))return false;
+ if(S.cap!==cap&&!chooseCap(cap))return false;
+ const bank=activeBank();
+ if(bank.entries.length>=40)return false;
+ syncActiveSet();
+ const id=nextSetId(cap),data=adminDemoData(cap);
+ const label='DEMO · '+cap+' CAP · sample (not real rolls)';
+ const entry={id,name:label,data,createdAt:new Date().toISOString(),demo:true};
+ bank.entries.push(entry);bank.activeId=id;applySetEntry(cap,entry);
+ S.active='chest';S.tab='set';lastSim=null;save();paint();return true;
+}
+function adminShowcasePanel(){
+ const en=UI_LANG==='en';
+ return `<section class="showcase-panel" id="admin-demo"><h2>${en?'Admin showcase · demonstration SETs':'Admin bemutató · minta SET-ek'}</h2>
+ <p class="showcase-muted">${en?'Each option creates a separate, clearly named example SET. Your existing SETs are kept. Sample values are fictional and do not represent live drops or approved server limits.':'Mindegyik gomb külön, egyértelműen jelölt DEMO SET-et hoz létre. Meglévő SET-jeid megmaradnak. A példaértékek kitaláltak, nem valós dobások vagy admin által jóváhagyott limitek.'}</p>
+ <div class="showcase-tools">${DEMO_CAPS.map(cap=>`<button type="button" data-demo-cap="${cap}">${en?'Create':'Létrehozás'} · ${cap} CAP</button>`).join('')}</div>
+ <p class="showcase-muted">${en?'The overview below and SET comparison can present the chosen sample without changing any of your other saved sets.':'A lentebbi összesítő és SET-összehasonlító a mintával is használható, más mentett szettjeid módosítása nélkül.'}</p></section>`;
+}
+function shareSetSnapshot(){
+ const entry=activeEntry();
+ const snapshot={v:1,cap:S.cap,degree:currentCfg().degree,name:safeSetName(entry?.name||'SET'),
+  weapon:weaponId(),apparelStyle:normalizeApparelStyle(S.apparelStyle),
+  items:IDS.map(id=>{
+   const obj=itm(id),count=Math.max(0,Math.min(30,Math.floor(num(obj.count))));
+   return {id,grade:obj.grade,count,
+    rows:(Array.isArray(obj.rows)?obj.rows:[]).slice(0,count).map(row=>({
+     type:String(row.type||'').slice(0,24),value:row.value??''
+    }))};
+  })};
+ return snapshot;
+}
+function validateSharedSet(snap){
+ if(!snap||snap.v!==1||!Number.isInteger(snap.cap)||snap.cap<1||snap.cap>200||
+  !Number.isInteger(snap.degree)||snap.degree<1||snap.degree>20||
+  typeof snap.name!=='string'||snap.name.length>60||!WEAPONS[snap.weapon]||
+  !Object.prototype.hasOwnProperty.call(APPAREL_STYLES,snap.apparelStyle)||
+  !Array.isArray(snap.items)||snap.items.length!==IDS.length)return false;
+ return snap.items.every((item,i)=>{
+  if(!item||item.id!==IDS[i]||!['Normal','SoS','SoM','Sun'].includes(item.grade)||
+   !Number.isInteger(item.count)||item.count<0||item.count>30||
+   !Array.isArray(item.rows)||item.rows.length!==item.count)return false;
+  return item.rows.every(row=>row&&typeof row.type==='string'&&row.type.length<=24&&
+   (row.type===''||Object.prototype.hasOwnProperty.call(TYPES,row.type))&&
+   (row.value===''||typeof row.value==='number'&&Number.isFinite(row.value)&&row.value>=0&&row.value<=99999));
+ });
+}
+function encodeSharedSet(snap){
+ if(!validateSharedSet(snap))return null;
+ const encoded=encodeURIComponent(JSON.stringify(snap));
+ return encoded.length<=16000?encoded:null;
+}
+function decodeSharedSet(encoded){
+ try{
+  if(typeof encoded!=='string'||encoded.length>16000||encoded.length<10)return null;
+  const parsed=JSON.parse(decodeURIComponent(encoded));
+  return validateSharedSet(parsed)?parsed:null;
+ }catch(_){return null;}
+}
+function currentSharedSet(){
+ const hash=typeof window!=='undefined'&&window.location?.hash||'';
+ return hash.startsWith('#set=')?decodeSharedSet(hash.slice(5)):null;
+}
+function sharedSetPreviewPanel(){
+ const hash=typeof window!=='undefined'&&window.location?.hash||'';
+ if(!hash.startsWith('#set='))return '';
+ const en=UI_LANG==='en',snap=currentSharedSet();
+ if(!snap)return `<section class="showcase-panel"><b>${en?'Invalid or unsupported shared SET link':'Hibás vagy nem támogatott megosztott SET-link'}</b></section>`;
+ const populated=snap.items.filter(item=>item.count>0);
+ const rows=populated.map(o=>`<tr><td>${esc(NAMES[o.id])}</td><td>${esc(o.grade)}</td><td>${o.count}</td><td>${esc(o.rows.map(r=>r.type+': '+r.value).join(' · '))}</td></tr>`).join('');
+ return `<section class="showcase-panel" id="shared-set-preview">
+ <h2>${en?'Shared SET · read-only preview':'Megosztott SET · csak olvasható előnézet'}</h2>
+ <p><b>${esc(snap.name)}</b> · ${snap.cap} CAP · ${snap.degree}DG · ${esc(WEAPONS[snap.weapon].label)}</p>
+ <div class="rowtable-wrap"><table><thead><tr><th>Item</th><th>Grade</th><th>${en?'Lines':'Sorok'}</th><th>Blue</th></tr></thead><tbody>${rows}</tbody></table></div>
+ <p class="showcase-muted">${en?'This link shows only selected equipment data. It does not import, overwrite or verify your local SETs.':'A link csak a kiválasztott felszerelés adatait mutatja. Nem importál, nem írja felül és nem hitelesíti a helyi SET-jeidet.'}</p>
+ </section>`;
+}
+function shareToolsPanel(){
+ const en=UI_LANG==='en';
+ return `<section class="showcase-panel" id="set-share">
+ <h3>${en?'Share the selected SET':'Kiválasztott SET megosztása'}</h3>
+ <p class="showcase-muted">${en?'Creates a read-only link for the current items, line values and CAP. No login, history or other SETs are included. Very large sets may exceed link size limits.':'Csak olvasható linket készít az aktuális itemekből, sorértékekből és CAP-ból. Nem küld fiókadatot, előzményt vagy másik SET-et. Túl nagy SET esetén a link nem készül el.'}</p>
+ <button type="button" id="copySetLink">${en?'Copy read-only SET link':'SET megosztási link másolása'}</button></section>`;
 }
 
 function chanceWeightsFor(id=S.active,cfg=currentCfg()){
@@ -1982,6 +2091,22 @@ function paint(){
 function toast(txt){txt=translateText(txt);let old=$('.toast');if(old)old.remove();let x=document.createElement('div');x.className='toast';x.textContent=txt;document.body.append(x);clearTimeout(toastTimer);toastTimer=setTimeout(()=>x.remove(),2700);}
 function adjustState(){let id=S.active,ob=itm(id),lim=itemLimit(ob);if(ob.count>lim){ob.count=lim;ob.rows=ob.rows.slice(0,lim);toast('Figyelem: a grade maximumára csökkent a sorok száma!');}if(ob.count<0)ob.count=0;while(ob.rows.length<ob.count)ob.rows.push({type:'',value:''});}
 function bindRendered(){
+ document.querySelectorAll('[data-demo-cap]').forEach(el=>el.onclick=()=>{
+  if(!createAdminDemo(el.dataset.demoCap))toast(UI_LANG==='en'?'Could not create demonstration SET.':'Nem sikerült létrehozni a minta SET-et.');
+ });
+ const share=$('#copySetLink');
+ if(share)share.onclick=async()=>{
+  const token=encodeSharedSet(shareSetSnapshot());
+  if(!token)return toast(UI_LANG==='en'?'This SET is too large or invalid for a link.':'A SET túl nagy vagy hibás a linkhez.');
+  const loc=window.location;
+  if(!loc)return;
+  const url=loc.href.split('#')[0]+'#set='+token;
+  try{
+   if(typeof navigator!=='undefined'&&navigator.clipboard?.writeText)await navigator.clipboard.writeText(url);
+   else promptUI(UI_LANG==='en'?'Copy this link:':'Másold ki ezt a linket:',url);
+   toast(UI_LANG==='en'?'Read-only SET link ready.':'Csak olvasható SET-link elkészült.');
+  }catch(_){promptUI(UI_LANG==='en'?'Copy this link:':'Másold ki ezt a linket:',url);}
+ };
  document.querySelectorAll('[data-blue-type]').forEach(el=>el.onchange=()=>{
   const selected=new Set(blueTypesFor(S.active));
   if(el.checked)selected.add(el.dataset.blueType);else selected.delete(el.dataset.blueType);
