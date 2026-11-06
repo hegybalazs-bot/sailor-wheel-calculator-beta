@@ -327,6 +327,12 @@ background:radial-gradient(circle at 28% 15%,#453656,#1c2136 66%,#102329);box-sh
 @media(max-width:740px){.premium-layout,.premium-analysis-grid{grid-template-columns:1fr}.premium-layout .premium-group:last-child{grid-column:auto}.premium-armory-head{padding:17px}.premium-layout,.premium-analysis-grid{padding:10px}.premium-highlights{padding:10px}}
 @media(max-width:390px){.premium-slots{grid-template-columns:1fr}.premium-layout .premium-group:last-child .premium-slots{grid-template-columns:1fr}.premium-quality-row{grid-template-columns:89px minmax(0,1fr) 44px;gap:4px}.premium-highlights strong{font-size:18px}}
 @media print{.premium-armory,.premium-analytics{color:#111;background:white;border:1px solid #777;box-shadow:none}.premium-slot,.premium-analysis-block,.premium-highlights>div{color:#111;background:white}.premium-armory-head h2,.premium-analysis-block h3,.premium-group-title strong{color:#111}.premium-slot-copy strong{color:#111}.premium-slot-quality,.premium-highlights strong{color:#164}.premium-slot:hover{background:white}.premium-priorities li button{color:#111;background:white}}
+.slot-compare-scroll{overflow-x:auto;max-width:100%;overscroll-behavior-x:contain}
+.slot-compare-table{min-width:620px;width:100%;font-variant-numeric:tabular-nums}
+.slot-compare-table th[scope=row]{text-align:left;white-space:nowrap}
+.slot-compare-wrap{margin-top:22px;padding-top:16px;border-top:1px solid #346a66}
+.slot-compare-wrap h4{margin:0 0 6px}
+@media print{.slot-compare-scroll{overflow:visible}.slot-compare-table{min-width:0;font-size:10px}}
 </style>
 </head>
 <body><div class="shell">
@@ -1463,6 +1469,51 @@ function getSetComparison(cap=S.cap){
  if(!left||!right)return null;
  return {entries,left,right,leftId,rightId};
 }
+/* Manual SET snapshots compared item-by-item; no game or server interaction. */
+function compareSetSlots(cap,leftEntry,rightEntry){
+ const bank=S.setBank?.[cap],cfg=S.cfg?.[cap];
+ if(!bank||!cfg||!leftEntry||!rightEntry)return [];
+ const data=entry=>bank.activeId===entry.id?captureSet(cap):entry.data;
+ const left=data(leftEntry),right=data(rightEntry);
+ if(!left?.items||!right?.items)return [];
+ const weaponL=normalizeWeapon(left.weapon),weaponR=normalizeWeapon(right.weapon);
+ const read=(d,w,id)=>id==='weapon'?(d.weaponInventory?.[w]||freshItem(id)):(d.items?.[id]||freshItem(id));
+ return IDS.map(id=>{
+  const equippedL=id!=='shield'||!!WEAPONS[weaponL]?.shield;
+  const equippedR=id!=='shield'||!!WEAPONS[weaponR]?.shield;
+  const inspect=(d,w,equipped)=>{
+   if(!equipped)return {quality:null,str:0,int:0,ready:false};
+   const obj=read(d,w,id),result=check(id,obj,cfg,w),stats=qualifiedWheelStats(obj,cfg);
+   const quality=result.complete&&result.wheelComplete&&!result.issues.length&&
+    Number.isFinite(result.itemPct)?result.itemPct:null;
+   return {quality,str:stats.str,int:stats.int,ready:result.ready===true};
+  };
+  const a=inspect(left,weaponL,equippedL),b=inspect(right,weaponR,equippedR);
+  return {id,equippedL,equippedR,left:a,right:b,
+   qualityDelta:a.quality==null||b.quality==null?null:b.quality-a.quality,
+   strDelta:b.str-a.str,intDelta:b.int-a.int};
+ });
+}
+function setSlotComparePanel(data){
+ const en=UI_LANG==='en';
+ const rows=compareSetSlots(S.cap,data.entries.find(x=>x.id===data.leftId),data.entries.find(x=>x.id===data.rightId));
+ const showQuality=x=>x==null?'—':percent(x);
+ const delta=x=>x==null?'—':(x>0?'+':'')+r2(x);
+ const name=side=>esc(side.name);
+ return `<div class="slot-compare-wrap">
+  <h4>${en?'Equipment-by-equipment comparison':'Itemenkénti SET-összehasonlítás'}</h4>
+  <p class="info">${en?'The quality difference is shown only when both items have complete, valid manually entered Wheel values. An inactive shield is not compared.':'Minőségkülönbséget csak akkor számolunk, ha mindkét item teljes, hibamentes, kézzel rögzített Wheel-adattal rendelkezik. A nem használt pajzsot nem hasonlítjuk össze.'}</p>
+  <div class="slot-compare-scroll"><table class="tinytable slot-compare-table">
+  <thead><tr><th>${en?'Equipment':'Felszerelés'}</th><th>${name(data.left)}</th><th>${name(data.right)}</th><th>${en?'Quality Δ':'Minőség Δ'}</th><th>STR Δ</th><th>INT Δ</th></tr></thead>
+  <tbody>${rows.map(x=>`<tr><th scope="row">${esc(NAMES[x.id])}</th>
+   <td>${x.equippedL?showQuality(x.left.quality):(en?'Inactive':'Nem használt')}</td>
+   <td>${x.equippedR?showQuality(x.right.quality):(en?'Inactive':'Nem használt')}</td>
+   <td>${x.equippedL&&x.equippedR?(x.qualityDelta==null?'—':delta(x.qualityDelta)+(en?' pp':' százalékpont')):'—'}</td>
+   <td>${x.equippedL&&x.equippedR?delta(x.strDelta):'—'}</td>
+   <td>${x.equippedL&&x.equippedR?delta(x.intDelta):'—'}</td></tr>`).join('')}</tbody></table></div>
+  <p class="info">${en?'All deltas are the second SET minus the first. These are offline comparisons, not game-server readings.':'Minden különbség a második SET mínusz az első. Ezek helyi számítások, nem játékszerverről olvasott adatok.'}</p>
+ </div>`;
+}
 function setComparePanel(){
  const data=getSetComparison();
  if(!data)return `<section class="panel" id="wheel-compare" style="margin-top:16px"><h3>⚔ SET-ek összehasonlítása</h3><p class="info">A két külön SET összevetéséhez készíts legalább még egy SET-et a felső mentett szettek kezelőben.</p></section>`;
@@ -1485,6 +1536,7 @@ function setComparePanel(){
    <tr><td>Teljesült itemkövetelmények</td><td>${left.ready}/${left.active}</td><td>${right.ready}/${right.active}</td><td>${delta(left.ready,right.ready)}</td></tr>
    </tbody></table></div>
   <p class="info">Az adott CAP mentett szettjei, az aktuális CAP/DG szabályok alapján újraszámolva. A második SET nagyobb értéke + jellel jelenik meg. Balance csak akkor számolható, ha mindkét szett alap STR/INT értéke ki van töltve.</p>
+  ${setSlotComparePanel(data)}
  </section>`;
 }
 // 4.8/cycle 6 – nonintrusive offline backup reminder (no server sync).

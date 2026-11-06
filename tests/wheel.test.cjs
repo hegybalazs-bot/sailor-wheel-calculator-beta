@@ -55,7 +55,7 @@ function boot(){
  state:()=>S,html:()=>document.querySelector('#root').innerHTML,translateText,translateMarkup,setUiLanguage,helpViewEnglish,promptUI,confirmUI,alertUI,validServerState,profileCaps,
  save,paint,createSet,selectSet,recordWheelSnapshot,
  wheelHistoryStats,wheelComparison,optimizedLinePlan,balanceTargetAdvice,
- getSetComparison,balanceThreshold,balanceMetrics,qualifiedWheelStats,chooseCap,rowValueEditor,itemBlueInventory,blueInventoryView,addServerProfile,renameServerProfile,switchServerProfile,currentServerName,exportAllProfiles,importAllProfiles,applyFixedStatLimits,switchDegreeModel,blueTypesFor,blueCatalogKey,BLUE_BASE,setBlueTypes,resetBlueTypes,blueCatalogWarnings,blueCatalogPanel,blueTypeCountPanel,visiblePlanTypes,chanceWeightsFor,ensureChanceWeights,chancesComplete,rowMax,penOneBlueEstimate,keepOrRerollAdvice,keepOrRerollPanel,validUserIconData,setUserIcon,clearUserIcon,userIconPanel,uiIcon,itemLabel,statLabel,itemList,editPanel,iconIdentity,verifiedIconFor,verifiedWheelIconFor,wheelToolIcon,VERIFIED_ICON_ASSETS,normalizeApparelStyle,autoWheelEstimate,autoWheelChancePanel,chanceView,interactiveWheelPlanner,wheelPlannerFor,setWheelPlannerField,cleanWheelPlanner,wheelStagesPanel,wheelCostPanel,calculateCost,costPlanFor,adminDemoData,createAdminDemo,adminShowcasePanel,shareSetSnapshot,validateSharedSet,encodeSharedSet,decodeSharedSet,sharedSetPreviewPanel,evidenceFor,evidenceKey,evidencePanel,adminReviewReport,shellCards,parryWheelOverview,parryWheelOverviewCell,overviewValidWheelStats,overviewItemView,overviewSummary,overviewTable,check,total,premiumSlotMetrics,premiumSetInsights,premiumLoadoutPanel,premiumAnalyticsPanel,noteBackupExport,backupReminderState
+ getSetComparison,compareSetSlots,setSlotComparePanel,balanceThreshold,balanceMetrics,qualifiedWheelStats,chooseCap,rowValueEditor,itemBlueInventory,blueInventoryView,addServerProfile,renameServerProfile,switchServerProfile,currentServerName,exportAllProfiles,importAllProfiles,applyFixedStatLimits,switchDegreeModel,blueTypesFor,blueCatalogKey,BLUE_BASE,setBlueTypes,resetBlueTypes,blueCatalogWarnings,blueCatalogPanel,blueTypeCountPanel,visiblePlanTypes,chanceWeightsFor,ensureChanceWeights,chancesComplete,rowMax,penOneBlueEstimate,keepOrRerollAdvice,keepOrRerollPanel,validUserIconData,setUserIcon,clearUserIcon,userIconPanel,uiIcon,itemLabel,statLabel,itemList,editPanel,iconIdentity,verifiedIconFor,verifiedWheelIconFor,wheelToolIcon,VERIFIED_ICON_ASSETS,normalizeApparelStyle,autoWheelEstimate,autoWheelChancePanel,chanceView,interactiveWheelPlanner,wheelPlannerFor,setWheelPlannerField,cleanWheelPlanner,wheelStagesPanel,wheelCostPanel,calculateCost,costPlanFor,adminDemoData,createAdminDemo,adminShowcasePanel,shareSetSnapshot,validateSharedSet,encodeSharedSet,decodeSharedSet,sharedSetPreviewPanel,evidenceFor,evidenceKey,evidencePanel,adminReviewReport,shellCards,parryWheelOverview,parryWheelOverviewCell,overviewValidWheelStats,overviewItemView,overviewSummary,overviewTable,check,total,premiumSlotMetrics,premiumSetInsights,premiumLoadoutPanel,premiumAnalyticsPanel,noteBackupExport,backupReminderState
 };`,sandbox,{timeout:5000});
  return {hooks:sandbox.hooks,document,store,inputs,window:sandbox.window};
 }
@@ -1776,4 +1776,49 @@ test('premium dashboard is bilingual and retains responsive mobile presentation'
  assert.match(hooks.premiumAnalyticsPanel(),/does not predict drop rates/);
  assert.match(html,/@media\(max-width:390px\)/);
  assert.match(html,/@media print\{/);
+});
+
+test('premium comparison: per-item quality deltas require valid complete values',()=>{
+ const {hooks}=boot(),st=hooks.state(),a=st.setBank[90].entries[0];
+ const first=st.sets[90].head;first.count=1;first.rows=[{type:'STR',value:5}];
+ hooks.save();
+ hooks.createSet(false);
+ const b=st.setBank[90].entries.find(x=>x.id===st.setBank[90].activeId);
+ const second=st.sets[90].head;second.count=1;second.rows=[{type:'STR',value:11}];
+ hooks.save();
+ const rows=hooks.compareSetSlots(90,a,b),head=rows.find(x=>x.id==='head');
+ assert.equal(head.strDelta,6);
+ assert.ok(head.qualityDelta>0);
+ assert.equal(rows.length,12);
+ assert.match(hooks.setSlotComparePanel(hooks.getSetComparison()),/Itemenkénti SET-összehasonlítás/);
+ assert.match(hooks.setSlotComparePanel(hooks.getSetComparison()),/STR Δ/);
+ assert.equal(st.sets[90].head.rows[0].value,11);
+});
+
+test('premium comparison: invalid items and inactive shields cannot produce fake quality',()=>{
+ const {hooks}=boot(),st=hooks.state(),a=st.setBank[90].entries[0];
+ st.sets[90].head.count=1;st.sets[90].head.rows=[{type:'STR',value:99}];
+ hooks.save();hooks.createSet(false);
+ const b=st.setBank[90].entries.find(x=>x.id===st.setBank[90].activeId);
+ st.sets[90].head.count=1;st.sets[90].head.rows=[{type:'STR',value:11}];
+ hooks.save();
+ const rows=hooks.compareSetSlots(90,a,b),head=rows.find(x=>x.id==='head');
+ assert.equal(head.left.quality,null);
+ assert.equal(head.qualityDelta,null);
+ const shield=rows.find(x=>x.id==='shield');
+ assert.equal(shield.equippedL,false);
+ assert.equal(shield.equippedR,false);
+ assert.equal(shield.qualityDelta,null);
+ assert.match(hooks.setSlotComparePanel(hooks.getSetComparison()),/Nem használt/);
+});
+
+test('premium comparison: bilingual mobile-scrollable report without network calls',()=>{
+ const {hooks}=boot();
+ hooks.createSet(false);
+ hooks.setUiLanguage('en');
+ const panel=hooks.setSlotComparePanel(hooks.getSetComparison());
+ assert.match(panel,/Equipment-by-equipment comparison/);
+ assert.match(panel,/second SET minus the first/);
+ assert.match(html,/slot-compare-scroll\{overflow-x:auto/);
+ assert.doesNotMatch(panel,/fetch\(|WebSocket|phBot/);
 });
