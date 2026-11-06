@@ -55,7 +55,7 @@ function boot(){
  state:()=>S,html:()=>document.querySelector('#root').innerHTML,translateText,translateMarkup,setUiLanguage,helpViewEnglish,promptUI,confirmUI,alertUI,validServerState,profileCaps,
  save,paint,createSet,selectSet,recordWheelSnapshot,
  wheelHistoryStats,wheelComparison,optimizedLinePlan,balanceTargetAdvice,
- getSetComparison,balanceThreshold,balanceMetrics,qualifiedWheelStats,chooseCap,rowValueEditor,itemBlueInventory,blueInventoryView,addServerProfile,renameServerProfile,switchServerProfile,currentServerName,exportAllProfiles,importAllProfiles,applyFixedStatLimits,switchDegreeModel,blueTypesFor,blueCatalogKey,BLUE_BASE,setBlueTypes,resetBlueTypes,blueCatalogWarnings,blueCatalogPanel,blueTypeCountPanel,visiblePlanTypes,chanceWeightsFor,ensureChanceWeights,chancesComplete,rowMax,penOneBlueEstimate,keepOrRerollAdvice,keepOrRerollPanel,validUserIconData,setUserIcon,clearUserIcon,userIconPanel,uiIcon,itemLabel,statLabel,itemList,editPanel,iconIdentity,verifiedIconFor,verifiedWheelIconFor,wheelToolIcon,VERIFIED_ICON_ASSETS,normalizeApparelStyle,autoWheelEstimate,autoWheelChancePanel,chanceView,interactiveWheelPlanner,wheelPlannerFor,setWheelPlannerField,cleanWheelPlanner,wheelStagesPanel,wheelCostPanel,calculateCost,costPlanFor,adminDemoData,createAdminDemo,adminShowcasePanel,shareSetSnapshot,validateSharedSet,encodeSharedSet,decodeSharedSet,sharedSetPreviewPanel,evidenceFor,evidenceKey,evidencePanel,adminReviewReport,shellCards,parryWheelOverview,parryWheelOverviewCell,overviewValidWheelStats,overviewItemView,overviewSummary,overviewTable,check,total,noteBackupExport,backupReminderState
+ getSetComparison,balanceThreshold,balanceMetrics,qualifiedWheelStats,chooseCap,rowValueEditor,itemBlueInventory,blueInventoryView,addServerProfile,renameServerProfile,switchServerProfile,currentServerName,exportAllProfiles,importAllProfiles,applyFixedStatLimits,switchDegreeModel,blueTypesFor,blueCatalogKey,BLUE_BASE,setBlueTypes,resetBlueTypes,blueCatalogWarnings,blueCatalogPanel,blueTypeCountPanel,visiblePlanTypes,chanceWeightsFor,ensureChanceWeights,chancesComplete,rowMax,penOneBlueEstimate,keepOrRerollAdvice,keepOrRerollPanel,validUserIconData,setUserIcon,clearUserIcon,userIconPanel,uiIcon,itemLabel,statLabel,itemList,editPanel,iconIdentity,verifiedIconFor,verifiedWheelIconFor,wheelToolIcon,VERIFIED_ICON_ASSETS,normalizeApparelStyle,autoWheelEstimate,autoWheelChancePanel,chanceView,interactiveWheelPlanner,wheelPlannerFor,setWheelPlannerField,cleanWheelPlanner,wheelStagesPanel,wheelCostPanel,calculateCost,costPlanFor,adminDemoData,createAdminDemo,adminShowcasePanel,shareSetSnapshot,validateSharedSet,encodeSharedSet,decodeSharedSet,sharedSetPreviewPanel,evidenceFor,evidenceKey,evidencePanel,adminReviewReport,shellCards,parryWheelOverview,parryWheelOverviewCell,overviewValidWheelStats,overviewItemView,overviewSummary,overviewTable,check,total,premiumSlotMetrics,premiumSetInsights,premiumLoadoutPanel,premiumAnalyticsPanel,noteBackupExport,backupReminderState
 };`,sandbox,{timeout:5000});
  return {hooks:sandbox.hooks,document,store,inputs,window:sandbox.window};
 }
@@ -1700,4 +1700,80 @@ test('manual Wheel plans do not leak across server profiles',()=>{
  assert.equal(hooks.switchServerProfile('srv_sailor'),true);
  assert.equal(hooks.wheelPlannerFor().stage,'pen');
  assert.equal(hooks.wheelPlannerFor().targetLines,7);
+});
+
+test('premium armory renders 12 equipment slots with verified/placeholder icons and click targets',()=>{
+ const {hooks}=boot(),html=hooks.premiumLoadoutPanel();
+ assert.match(html,/Felszerelés-kirakat/);
+ assert.match(html,/EMERALD · SET SHOWCASE/);
+ for(const id of ['head','shoulder','chest','hands','legs','foot','necklace','earring','ring1','ring2','weapon','shield']){
+  assert.match(html,new RegExp('data-item="'+id+'" data-loadout="true"'),id);
+ }
+ assert.equal((html.match(/data-loadout="true"/g)||[]).length,12);
+ assert.match(html,/Stilizált|helyettesítő/);
+ assert.match(hooks.html(),/premium-armory/);
+ assert.match(hooks.html(),/premium-analytics/);
+});
+
+test('premium analytics distinguishes zero data from a perfect score and excludes missing items',()=>{
+ const {hooks}=boot();
+ const before=hooks.premiumSetInsights();
+ assert.equal(before.valid.length,0);
+ assert.equal(before.average,null);
+ assert.equal(before.unknown,before.active);
+ assert.match(hooks.premiumAnalyticsPanel(),/Átlagos rögzített minőség/);
+ assert.match(hooks.premiumAnalyticsPanel(),/—/);
+ const o=hooks.state().sets[90].head;
+ o.count=1;o.rows=[{type:'STR',value:11}];
+ const after=hooks.premiumSetInsights();
+ assert.equal(after.valid.length,1);
+ assert.equal(after.slots.find(x=>x.id==='head').qualityPct,100);
+ assert.ok(after.unknown>0);
+ assert.equal(after.average,100);
+ assert.equal(after.goalsMet,1);
+ assert.match(hooks.premiumAnalyticsPanel(),/100%/);
+});
+
+test('premium priority insights use only valid complete item data and do not invent odds',()=>{
+ const {hooks}=boot(),s=hooks.state(),head=s.sets[90].head,shoulder=s.sets[90].shoulder;
+ head.count=1;head.rows=[{type:'STR',value:5}];
+ shoulder.count=1;shoulder.rows=[{type:'INT',value:10}];
+ const trackedBefore=JSON.stringify({head,shoulder});
+ const info=hooks.premiumSetInsights();
+ assert.equal(info.valid.length,2);
+ assert.equal(info.priority.length,1);
+ assert.equal(info.priority[0].id,'head');
+ assert.ok(info.priority[0].opportunity.gain>0);
+ assert.equal(JSON.stringify({head,shoulder}),trackedBefore);
+ assert.match(hooks.premiumAnalyticsPanel(),/Fejlesztési sorrend/);
+ assert.match(hooks.premiumAnalyticsPanel(),/elméleti/);
+ assert.doesNotMatch(hooks.premiumAnalyticsPanel(),/90% esély|real drop rate/);
+});
+
+test('premium analytics never includes inactive shields or malformed scores in average',()=>{
+ const {hooks}=boot(),s=hooks.state();
+ s.weaponByCap[90]='ch_bow';
+ const shield=s.sets[90].shield;
+ shield.count=1;shield.rows=[{type:'STR',value:11}];
+ const head=s.sets[90].head;
+ head.count=1;head.rows=[{type:'STR',value:99}];
+ const info=hooks.premiumSetInsights();
+ const shieldInfo=info.slots.find(x=>x.id==='shield');
+ assert.equal(shieldInfo.equipped,false);
+ assert.equal(shieldInfo.qualityPct,null);
+ assert.equal(info.valid.length,0,'invalid item value must not be included');
+ assert.equal(info.average,null);
+ const display=hooks.premiumLoadoutPanel();
+ assert.match(display,/Nem használt/);
+});
+
+test('premium dashboard is bilingual and retains responsive mobile presentation',()=>{
+ const {hooks}=boot();
+ assert.match(hooks.premiumLoadoutPanel(),/Ruházat/);
+ assert.equal(hooks.setUiLanguage('en'),true);
+ assert.match(hooks.premiumLoadoutPanel(),/Equipment loadout/);
+ assert.match(hooks.premiumAnalyticsPanel(),/SET quality dashboard/);
+ assert.match(hooks.premiumAnalyticsPanel(),/does not predict drop rates/);
+ assert.match(html,/@media\(max-width:390px\)/);
+ assert.match(html,/@media print\{/);
 });
