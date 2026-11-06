@@ -1508,7 +1508,7 @@ function setSlotComparePanel(data){
   <tbody>${rows.map(x=>`<tr><th scope="row">${esc(NAMES[x.id])}</th>
    <td>${x.equippedL?showQuality(x.left.quality):(en?'Inactive':'Nem használt')}</td>
    <td>${x.equippedR?showQuality(x.right.quality):(en?'Inactive':'Nem használt')}</td>
-   <td>${x.equippedL&&x.equippedR?delta(x.qualityDelta)+'${x.qualityDelta==null?'':en?' pp':' százalékpont'}':'—'}</td>
+   <td>${x.equippedL&&x.equippedR?(x.qualityDelta==null?'—':delta(x.qualityDelta)+(en?' pp':' százalékpont')):'—'}</td>
    <td>${x.equippedL&&x.equippedR?delta(x.strDelta):'—'}</td>
    <td>${x.equippedL&&x.equippedR?delta(x.intDelta):'—'}</td></tr>`).join('')}</tbody></table></div>
   <p class="info">${en?'All deltas are the second SET minus the first. These are offline comparisons, not game-server readings.':'Minden különbség a második SET mínusz az első. Ezek helyi számítások, nem játékszerverről olvasott adatok.'}</p>
