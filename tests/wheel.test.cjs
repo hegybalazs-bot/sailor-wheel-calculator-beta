@@ -55,7 +55,7 @@ function boot(){
  state:()=>S,html:()=>document.querySelector('#root').innerHTML,translateText,translateMarkup,setUiLanguage,helpViewEnglish,promptUI,confirmUI,alertUI,validServerState,profileCaps,
  save,paint,createSet,selectSet,recordWheelSnapshot,
  wheelHistoryStats,wheelComparison,optimizedLinePlan,balanceTargetAdvice,
- getSetComparison,compareSetSlots,setSlotComparePanel,balanceThreshold,balanceMetrics,qualifiedWheelStats,chooseCap,rowValueEditor,itemBlueInventory,blueInventoryView,addServerProfile,renameServerProfile,switchServerProfile,currentServerName,exportAllProfiles,importAllProfiles,applyFixedStatLimits,switchDegreeModel,blueTypesFor,blueCatalogKey,BLUE_BASE,setBlueTypes,resetBlueTypes,blueCatalogWarnings,blueCatalogPanel,blueTypeCountPanel,visiblePlanTypes,chanceWeightsFor,ensureChanceWeights,chancesComplete,rowMax,penOneBlueEstimate,keepOrRerollAdvice,keepOrRerollPanel,validUserIconData,setUserIcon,clearUserIcon,userIconPanel,uiIcon,itemLabel,statLabel,itemList,editPanel,iconIdentity,verifiedIconFor,verifiedWheelIconFor,wheelToolIcon,VERIFIED_ICON_ASSETS,normalizeApparelStyle,autoWheelEstimate,autoWheelChancePanel,chanceView,interactiveWheelPlanner,wheelPlannerFor,setWheelPlannerField,cleanWheelPlanner,wheelStagesPanel,wheelCostPanel,calculateCost,costPlanFor,adminDemoData,createAdminDemo,adminShowcasePanel,shareSetSnapshot,validateSharedSet,encodeSharedSet,decodeSharedSet,sharedSetPreviewPanel,evidenceFor,evidenceKey,evidencePanel,adminReviewReport,shellCards,parryWheelOverview,parryWheelOverviewCell,overviewValidWheelStats,overviewItemView,overviewSummary,overviewTable,check,total,premiumSlotMetrics,premiumSetInsights,premiumLoadoutPanel,premiumAnalyticsPanel,noteBackupExport,backupReminderState
+ getSetComparison,compareSetSlots,setSlotComparePanel,balanceThreshold,balanceMetrics,qualifiedWheelStats,chooseCap,rowValueEditor,itemBlueInventory,blueInventoryView,addServerProfile,renameServerProfile,switchServerProfile,currentServerName,exportAllProfiles,importAllProfiles,applyFixedStatLimits,switchDegreeModel,blueTypesFor,blueCatalogKey,BLUE_BASE,setBlueTypes,resetBlueTypes,blueCatalogWarnings,blueCatalogPanel,blueTypeCountPanel,visiblePlanTypes,chanceWeightsFor,ensureChanceWeights,chancesComplete,rowMax,penOneBlueEstimate,keepOrRerollAdvice,keepOrRerollPanel,validUserIconData,setUserIcon,clearUserIcon,userIconPanel,localIconLibraryPanel,localIconChoiceKey,manuallySelectedIconFor,uiIcon,itemLabel,statLabel,itemList,editPanel,iconIdentity,verifiedIconFor,verifiedWheelIconFor,wheelToolIcon,VERIFIED_ICON_ASSETS,normalizeApparelStyle,autoWheelEstimate,autoWheelChancePanel,chanceView,interactiveWheelPlanner,wheelPlannerFor,setWheelPlannerField,cleanWheelPlanner,wheelStagesPanel,wheelCostPanel,calculateCost,costPlanFor,adminDemoData,createAdminDemo,adminShowcasePanel,shareSetSnapshot,validateSharedSet,encodeSharedSet,decodeSharedSet,sharedSetPreviewPanel,evidenceFor,evidenceKey,evidencePanel,adminReviewReport,shellCards,parryWheelOverview,parryWheelOverviewCell,overviewValidWheelStats,overviewItemView,overviewSummary,overviewTable,check,total,premiumSlotMetrics,premiumSetInsights,premiumLoadoutPanel,premiumAnalyticsPanel,noteBackupExport,backupReminderState
 };`,sandbox,{timeout:5000});
  return {hooks:sandbox.hooks,document,store,inputs,window:sandbox.window};
 }
@@ -1821,4 +1821,49 @@ test('premium comparison: bilingual mobile-scrollable report without network cal
  assert.match(panel,/second SET minus the first/);
  assert.match(html,/slot-compare-scroll\{overflow-x:auto/);
  assert.doesNotMatch(panel,/fetch\(|WebSocket|phBot/);
+});
+
+test('local Sailor image matching uses exact item identity and manually selected hash only',()=>{
+ const {hooks,window}=boot(),state=hooks.state(),sha='f'.repeat(64);
+ state.apparelStyle='ch_garment';state.cfg[90].degree=9;
+ const identity=hooks.iconIdentity('head'),key=hooks.localIconChoiceKey(identity);
+ window.WHEEL_LOCAL_PACK={
+  summary:()=>({ready:true,count:1273,images:1091}),
+  candidates:x=>x.region==='ch'&&x.equipmentType==='garment'&&x.slot==='head'&&x.degree===9?
+   [{assetSha256:sha,sourcePath:'icon/item/china/clothes/hat_09.ddj',reviewStatus:'pending'}]:[],
+  iconURL:x=>x===sha?'blob:chosen-hat':null
+ };
+ assert.equal(hooks.manuallySelectedIconFor('head'),null,'a pack alone must not autoselect art');
+ state.localIconSelections={[key]:sha};
+ const img=hooks.uiIcon('item','head');
+ assert.match(img,/data-icon-source="local-manual"/);
+ assert.match(img,/blob:chosen-hat/);
+ assert.match(hooks.itemLabel('head'),/nem hitelesített/);
+ assert.doesNotMatch(hooks.uiIcon('item','chest'),/blob:chosen-hat/,'no cross-slot guessing');
+ assert.match(hooks.localIconLibraryPanel(),/data-pick-local-icon=/);
+ hooks.chooseCap(100);
+ assert.doesNotMatch(hooks.uiIcon('item','head'),/blob:chosen-hat/,'no cross-degree auto substitution');
+});
+test('private icon selection metadata is saved in JSON while original sprite bytes are omitted',()=>{
+ const {hooks,window}=boot(),state=hooks.state(),sha='a'.repeat(64);
+ const key=hooks.localIconChoiceKey(hooks.iconIdentity('earring'));
+ state.localIconSelections={[key]:sha};hooks.save();
+ const snapshot=hooks.exportAllProfiles();
+ assert.equal(snapshot.localIconSelections[key],sha);
+ assert.doesNotMatch(JSON.stringify(snapshot),/data:image\/png;base64/);
+ const other=boot();other.hooks.importAllProfiles(JSON.parse(JSON.stringify(snapshot)));
+ assert.equal(other.hooks.state().localIconSelections[key],sha);
+ assert.match(other.hooks.itemLabel('earring'),/helyettesítő/i);
+});
+test('local icon pack UI renders a safe manual import fallback in HU and EN',()=>{
+ const {hooks}=boot();
+ const fallback=hooks.localIconLibraryPanel();
+ assert.match(fallback,/localIconZip/);
+ assert.match(fallback,/Saját Sailor ikoncsomag/);
+ assert.doesNotMatch(fallback,/data-pick-local-icon/);
+ hooks.setUiLanguage('en');
+ assert.match(hooks.localIconLibraryPanel(),/Private Sailor icon pack/);
+ assert.match(hooks.localIconLibraryPanel(),/No game login, bot, packet or API integration/);
+ assert.match(html,/<script src="assets\/icons\/local-pack\.js"><\/script>/);
+ assert.match(html,/local-icon-gallery/);
 });
