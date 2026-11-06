@@ -1928,6 +1928,27 @@ function shareToolsPanel(){
 const EVIDENCE_STATES=['missing','submitted','review_requested'];
 function evidenceKey(cap=S.cap,degree=currentCfg().degree){return String(cap)+':'+String(degree);}
 function evidenceFor(){return S.dataEvidence?.[evidenceKey()]||{status:'missing',sourceUrl:'',notes:'',updatedAt:''};}
+
+function adminReviewReport(){
+ const en=UI_LANG==='en',c=currentCfg(),ev=evidenceFor();
+ const items=IDS.filter(id=>id!=='ring2').map(id=>NAMES[id]+': '+blueTypesFor(id).join(', ')).join('\n');
+ const head=en?'Wheel Calculator · Server verification request':'Wheel Calculator · Szerveradat-ellenőrzési kérés';
+ return [
+  head,'Server / Szerver: '+currentServerName(),
+  'CAP / Degree: '+S.cap+' / '+c.degree+'DG',
+  'STR / INT per line: +11 / +11',
+  'Durability: 200% (not scored)',
+  'HP reference: '+(c.maxHP??'?')+' · MP: '+(c.maxMP??'?')+' · Parry: '+(c.maxPARRY??'?'),
+  'Attack Rate: '+(c.maxAR??'?')+' · Blocking Rate: '+(c.maxBR??'?')+' · Critical: '+(c.maxCRIT??'?'),
+  'Grade maximum lines: '+Object.entries(c.gradeMax||{}).map(([k,v])=>k+' '+v).join(', '),
+  'Blue catalog by equipment slot (player-configurable):',''+items,
+  'Source URL: '+(ev.sourceUrl||'-'),'Notes: '+(ev.notes||'-'),
+  en?'Please confirm the allowed Blue types, line counts and max values for this exact CAP/Degree. Send game screenshots or official server documents.':
+   'Kérjük az ehhez a CAP/Degree pároshoz tartozó Blue-fajták, sorszámok és maximumok megerősítését játékbeli képekkel vagy hivatalos szerverdokumentummal.',
+  en?'These are player-entered and provisional values; no official odds are claimed.':
+   'Ezek játékos által megadott és ideiglenes értékek; a program nem állít hivatalos dobási esélyeket.'
+ ].join('\n');
+}
 function evidencePanel(){
  const en=UI_LANG==='en',data=evidenceFor();
  const labels=en?{missing:'No evidence yet',submitted:'Player source provided',review_requested:'Submitted for admin review'}:
@@ -1941,6 +1962,7 @@ function evidencePanel(){
   <label>${en?'Source URL (HTTPS)':'Forráslink (HTTPS)'}<input type="url" maxlength="300" data-evidence="sourceUrl" value="${esc(data.sourceUrl||'')}" placeholder="https://..."></label>
   <label>${en?'Source notes':'Forrás megjegyzése'}<input type="text" maxlength="400" data-evidence="notes" value="${esc(data.notes||'')}" placeholder="${en?'Screenshots, date or admin message':'Kép, dátum vagy admin üzenet'}"></label>
  </div>
+ <div class="showcase-tools"><button type="button" id="copyReviewRequest">${en?'Copy verification request for admins':'Admin ellenőrzési kérés másolása'}</button></div>
  <p class="showcase-muted">${en?'This is player-entered evidence metadata, not server-certified data. No value is automatically validated or given official status.':'Ez játékos által rögzített forrásjegyzék, nem hivatalos szerverhitelesítés. Semmilyen értéket nem igazolunk automatikusan.'}
  ${url?`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${en?'Open source':'Forrás megnyitása'}</a>`:''}</p>
  </section>`;
@@ -2121,6 +2143,15 @@ function bindRendered(){
  document.querySelectorAll('[data-demo-cap]').forEach(el=>el.onclick=()=>{
   if(!createAdminDemo(el.dataset.demoCap))toast(UI_LANG==='en'?'Could not create demonstration SET.':'Nem sikerült létrehozni a minta SET-et.');
  });
+ const review=$('#copyReviewRequest');
+ if(review)review.onclick=async()=>{
+  const report=adminReviewReport();
+  try{
+   if(typeof navigator!=='undefined'&&navigator.clipboard?.writeText)await navigator.clipboard.writeText(report);
+   else promptUI(UI_LANG==='en'?'Copy this request:':'Másold ki az ellenőrzési kérést:',report);
+   toast(UI_LANG==='en'?'Admin review request prepared.':'Admin ellenőrzési kérés elkészült.');
+  }catch(_){promptUI(UI_LANG==='en'?'Copy this request:':'Másold ki az ellenőrzési kérést:',report);}
+ };
  const share=$('#copySetLink');
  if(share)share.onclick=async()=>{
   const token=encodeSharedSet(shareSetSnapshot());
