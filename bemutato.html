@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="description" content="Wheel Calculator – Silkroad Online equipment, SET and Wheel planning showcase.">
+<title>Wheel Calculator · Admin Showcase</title>
+<style>
+:root{color-scheme:dark;--bg:#071015;--card:#122427;--card2:#0c1c20;--mint:#54ffb3;--soft:#c5ded5;--border:#28584b;--amber:#ffca76}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 24% 0%,#174b35 0,transparent 44%),linear-gradient(165deg,#071015,#0a121d);color:#f3fff8;font:15px/1.65 Inter,Segoe UI,Arial,sans-serif}
+a{color:#8dffcf}a:focus-visible,button:focus-visible{outline:3px solid var(--mint);outline-offset:3px}
+.wrap{width:min(1150px,calc(100% - 36px));margin:auto}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:22px 0;flex-wrap:wrap}
+.logo{font-size:18px;font-weight:900;letter-spacing:.6px;color:#dbfff0}.logo span{color:var(--mint)}
+.nav-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+button,.action{appearance:none;display:inline-flex;align-items:center;justify-content:center;border-radius:9px;cursor:pointer;border:1px solid #357d67;background:#13372d;color:#ebfff5;padding:10px 16px;text-decoration:none;font:inherit;font-weight:750}
+button:hover,.action:hover{background:#185642}.action.primary{color:#06160f;background:var(--mint);border-color:var(--mint)}
+.hero{padding:65px 0 52px;display:grid;grid-template-columns:1.4fr .85fr;gap:45px;align-items:center}
+.kicker{color:#a6ffd5;text-transform:uppercase;font-size:12px;letter-spacing:2px;font-weight:850}
+h1{font-size:clamp(38px,5vw,68px);line-height:1.12;letter-spacing:-1.8px;margin:15px 0 20px}
+h1 em{font-style:normal;color:var(--mint)}
+.lead{font-size:18px;color:#d5e8e0;max-width:640px}
+.hero .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}
+.glow{border-radius:22px;border:1px solid #348263;box-shadow:0 20px 70px #0008,0 0 55px #27d7921e;background:linear-gradient(150deg,#1d4b3b,#132a2e 68%,#0d1b25);padding:28px}
+.glow h2{font-size:18px;margin:0 0 20px}
+.metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.metric{padding:18px 10px;background:#0b2622;border-radius:13px;border:1px solid #376f59;text-align:center}
+.metric b{font-size:29px;display:block;color:var(--mint)}.metric small{color:var(--soft)}
+.notice{background:#2b2515;border:1px solid #866a35;border-radius:10px;padding:12px 16px;color:#ffe4b0;font-size:13px;margin:18px 0}
+section{padding:25px 0 40px}h2.section-title{font-size:30px;margin:0 0 22px;letter-spacing:-.6px}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.card{border:1px solid var(--border);background:linear-gradient(160deg,var(--card),var(--card2));border-radius:17px;padding:23px}
+.card .symbol{font-size:27px;display:block;margin-bottom:13px}.card h3{font-size:18px;margin:0 0 10px}.card p{color:var(--soft);font-size:14px;margin:0}
+.steps{counter-reset:n;display:grid;gap:12px}.step{display:flex;gap:18px;align-items:start;padding:16px;background:#112c27;border:1px solid #285b4d;border-radius:12px}
+.step .no{font-size:14px;background:#225947;color:var(--mint);font-weight:900;border-radius:10px;padding:10px 15px;flex:none}
+.step p{color:var(--soft);margin:0}.step b{display:block;color:#eafff4}
+.banner{border-radius:20px;border:1px solid #397963;background:linear-gradient(130deg,#163d32,#0c2330);padding:30px;display:flex;justify-content:space-between;gap:20px;align-items:center;flex-wrap:wrap}
+.banner h2{font-size:25px;margin:0 0 8px}.banner p{margin:0;color:var(--soft)}
+.footer{border-top:1px solid var(--border);padding:25px 0;color:#91b4a7;font-size:12px}
+@media(max-width:850px){.hero{grid-template-columns:1fr;gap:18px;padding-top:25px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.wrap{width:min(100% - 24px,1150px)}.grid{grid-template-columns:1fr}h1{letter-spacing:-.8px}.nav{padding-top:15px}.hero{padding-top:18px}.glow{padding:18px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="nav" aria-label="Navigation"><div class="logo">⚔ WHEEL <span>CALCULATOR</span></div><div class="nav-actions"><button id="lang" type="button" aria-label="Switch language">EN / HU</button><a class="action" href="./" data-hu="Kalkulátor megnyitása" data-en="Open calculator">Kalkulátor megnyitása</a></div></nav>
+<header class="hero"><div>
+<div class="kicker" data-hu="EMERALD · Admin bemutató előzetes" data-en="EMERALD · Admin preview">EMERALD · Admin bemutató előzetes</div>
+<h1 data-hu="Építs jobb SET-et. <em>Értsd a Wheel-t.</em>" data-en="Plan a stronger SET. <em>Understand the Wheel.</em>">Építs jobb SET-et. <em>Értsd a Wheel-t.</em></h1>
+<p class="lead" data-hu="A Silkroad Online felszerelés- és Wheel-tervezője: Blue-sorok, minőségi célok, karakter Balance, mentett SET-ek és szerverenként külön szabályok egy helyen." data-en="Silkroad Online equipment and Wheel planning: Blue lines, quality targets, character Balance, saved SETs and server-specific rules in one place.">A Silkroad Online felszerelés- és Wheel-tervezője: Blue-sorok, minőségi célok, karakter Balance, mentett SET-ek és szerverenként külön szabályok egy helyen.</p>
+<div class="actions"><a class="action primary" href="./" data-hu="⚔ Kalkulátor kipróbálása" data-en="⚔ Try the calculator">⚔ Kalkulátor kipróbálása</a><a class="action" href="#flow" data-hu="🎲 Wheel-tervező áttekintés" data-en="🎲 Explore Wheel planner">🎲 Wheel-tervező áttekintés</a></div>
+</div><aside class="glow" aria-label="Capabilities"><h2 data-hu="Jelenlegi képességek" data-en="Current capabilities">Jelenlegi képességek</h2>
+<div class="metrics"><div class="metric"><b>12</b><small data-hu="felszerelési hely" data-en="equipment slots">felszerelési hely</small></div><div class="metric"><b>HU/EN</b><small data-hu="kétnyelvű" data-en="bilingual">kétnyelvű</small></div><div class="metric"><b>90–140+</b><small data-hu="CAP és kézi bevitel" data-en="CAP + custom entry">CAP és kézi bevitel</small></div><div class="metric"><b>SET</b><small data-hu="mentés és összevetés" data-en="save and compare">mentés és összevetés</small></div></div>
+</aside></header>
+<div class="notice" role="note" data-hu="Nyilvános bemutató / béta: az eredeti játékikonok egy része hiányzik, a szerveresélyek és néhány alapmaximum ellenőrzésre várnak. Az itt látható demonstrációs SET-adatok nem valódi játékosdobások." data-en="Public demo / beta: some authentic inventory artwork is missing; server odds and some default limits require verification. Demonstration SET values are not real player rolls.">Nyilvános bemutató / béta: az eredeti játékikonok egy része hiányzik, a szerveresélyek és néhány alapmaximum ellenőrzésre várnak. Az itt látható demonstrációs SET-adatok nem valódi játékosdobások.</div>
+<section><h2 class="section-title" data-hu="Miért hasznos a játékosoknak?" data-en="Why it helps players">Miért hasznos a játékosoknak?</h2>
+<div class="grid">
+<article class="card"><span class="symbol">⚔</span><h3 data-hu="Teljes SET-tervezés" data-en="Whole-SET planning">Teljes SET-tervezés</h3><p data-hu="Fegyverek, pajzs, ruha és ékszerek, itemenként külön grade és Blue-sorok. Több SET kezelése és összehasonlítása." data-en="Weapons, shield, armor and jewelry; independent grade and Blue lines per item, plus multiple saved and comparable SETs.">Fegyverek, pajzs, ruha és ékszerek, itemenként külön grade és Blue-sorok. Több SET kezelése és összehasonlítása.</p></article>
+<article class="card"><span class="symbol">📈</span><h3 data-hu="Wheel-értékelés" data-en="Wheel quality">Wheel-értékelés</h3><p data-hu="Soronkénti értékek, egyedi 100%-os maximumok, STR/INT összesítés, Parry, Rate és célmutatók." data-en="Per-line values, adjustable maximum references, STR/INT totals, Parry, Rate and progress targets.">Soronkénti értékek, egyedi 100%-os maximumok, STR/INT összesítés, Parry, Rate és célmutatók.</p></article>
+<article class="card"><span class="symbol">🧮</span><h3 data-hu="Költségtervező" data-en="Budget planner">Költségtervező</h3><p data-hu="Tervezett Wheel/Fate/Pen mennyiségek és kézi árak Gold, Silk vagy saját pénznemben; nem kitalált piaci ár." data-en="Enter planned Wheel/Fate/Pen counts and unit costs in Gold, Silk or a custom currency; no fabricated market price.">Tervezett Wheel/Fate/Pen mennyiségek és kézi árak Gold, Silk vagy saját pénznemben; nem kitalált piaci ár.</p></article>
+<article class="card"><span class="symbol">🗂</span><h3 data-hu="Szerverprofilok" data-en="Server profiles">Szerverprofilok</h3><p data-hu="Külön CAP, Degree, beállítások, kék sorok és saját szabályok minden szerverhez." data-en="Separate CAP, Degree, Blue catalogs and customizable rules for each server.">Külön CAP, Degree, beállítások, kék sorok és saját szabályok minden szerverhez.</p></article>
+<article class="card"><span class="symbol">🔗</span><h3 data-hu="SET megosztás" data-en="SET sharing">SET megosztás</h3><p data-hu="Csak olvasható link a kiválasztott felszerelési állapotról, a többi mentés és előzmény nélkül." data-en="Read-only link for selected equipment details without exposing other saved sets or roll history.">Csak olvasható link a kiválasztott felszerelési állapotról, a többi mentés és előzmény nélkül.</p></article>
+<article class="card"><span class="symbol">🔐</span><h3 data-hu="Helyi adatok" data-en="Local-first data">Helyi adatok</h3><p data-hu="A számítások és mentések helyben működnek; JSON biztonsági másolatot készíthetsz. Nincs automatikus szerverkapcsolat." data-en="Calculations and saved data stay in the browser, with JSON backup. No automatic connection to game servers.">A számítások és mentések helyben működnek; JSON biztonsági másolatot készíthetsz. Nincs automatikus szerverkapcsolat.</p></article>
+</div></section>
+<section id="flow"><h2 class="section-title" data-hu="Háromlépcsős Wheel-áttekintés" data-en="Three-stage Wheel overview">Háromlépcsős Wheel-áttekintés</h2>
+<div class="steps">
+<div class="step"><div class="no">01</div><div><b>Wheel of Fate</b><p data-hu="Sorok száma és célok – a pontos működés szerverenként ellenőrzendő." data-en="Line count and targets — exact behavior must be checked per server.">Sorok száma és célok – a pontos működés szerverenként ellenőrzendő.</p></div></div>
+<div class="step"><div class="no">02</div><div><b>Wheel of Fortune</b><p data-hu="Blue-típusok, sorértékek és feltételes teljes újrapörgetés-modellek." data-en="Blue types, line values and conditional full-reroll models.">Blue-típusok, sorértékek és feltételes teljes újrapörgetés-modellek.</p></div></div>
+<div class="step"><div class="no">03</div><div><b>Feather Pen</b><p data-hu="Egy meglévő sor értékváltozásának külön vizsgálata; a modell nem állít valódi droprátát." data-en="Separate evaluation of one line's value change, without claiming actual drop odds.">Egy meglévő sor értékváltozásának külön vizsgálata; a modell nem állít valódi droprátát.</p></div></div>
+</div></section>
+<section><div class="banner"><div><h2 data-hu="Mutasd meg a működését élőben!" data-en="Show it live!">Mutasd meg a működését élőben!</h2><p data-hu="Nyisd meg a kalkulátort, és válaszd az Admin bemutató részt: 90 / 100 / 130 CAP DEMO SET-eket készíthetsz úgy, hogy saját mentett SET-jeid érintetlenek maradnak." data-en="Open the calculator and choose Admin showcase: create 90 / 100 / 130 CAP DEMO SETs without overwriting your existing saved SETs.">Nyisd meg a kalkulátort, és válaszd az Admin bemutató részt: 90 / 100 / 130 CAP DEMO SET-eket készíthetsz úgy, hogy saját mentett SET-jeid érintetlenek maradnak.</p></div><a class="action primary" href="./" data-hu="Kalkulátor indítása" data-en="Launch calculator">Kalkulátor indítása</a></div></section>
+<footer class="footer" data-hu="Wheel Calculator · Emerald Admin Preview · Béta és közösségi fejlesztés. Nincs hivatalos Silkroad szerverkapcsolat vagy garantált dobási esély." data-en="Wheel Calculator · Emerald Admin Preview · Community beta. No official game-server connection or guaranteed roll odds.">Wheel Calculator · Emerald Admin Preview · Béta és közösségi fejlesztés. Nincs hivatalos Silkroad szerverkapcsolat vagy garantált dobási esély.</footer>
+</div>
+<script>
+'use strict';
+const key='wheel-calculator-language-v1';
+let lang='hu';
+try{lang=localStorage.getItem(key)==='en'?'en':'hu';}catch(_){}
+function render(){
+ document.documentElement.lang=lang;
+ document.querySelectorAll('[data-hu][data-en]').forEach(el=>{el.innerHTML=el.getAttribute('data-'+lang);});
+ document.getElementById('lang').textContent=lang==='hu'?'English':'Magyar';
+}
+document.getElementById('lang').addEventListener('click',()=>{
+ lang=lang==='hu'?'en':'hu';
+ try{localStorage.setItem(key,lang);}catch(_){}
+ render();
+});
+render();
+</script>
+</body>
+</html>
