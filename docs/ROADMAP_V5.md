@@ -1,5 +1,16 @@
 # Wheel Calculator — verified v5.0 release checklist
 
+## Premium SET dashboard foundations (2026-11-06)
+
+- [x] Responsive 12-slot armor/jewelry/weapon/shield loadout using the existing safe icon registry.
+- [x] Per-item quality progress bars vs. custom targets; missing or invalid entries do not contribute to quality.
+- [x] Prioritized improvement list based on valid manually entered values and known row maxima.
+- [x] Bilingual copy and print styling; static fallback behavior.
+- [ ] Obtain and approve authentic Silkroad sprites for the full CH/EU Degree/grade coverage.
+- [ ] Run actual desktop/mobile portrait/landscape browser checks and accessible screen reader smoke tests.
+- [ ] Validate estimates against representative in-game screenshots, without connecting to game clients.
+
+
 Updated for the v5 Admin Preview (2026-11-06).
 
 ## Must pass before declaring v5.0
