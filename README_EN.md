@@ -1,5 +1,12 @@
 # Wheel Calculator — Emerald v5 Admin Preview (Beta)
 
+## Interactive Wheel steps — strictly manual, browser-only
+
+The **Next Wheel / Pen** tab now includes a manual Fate → Fortune → Pen planning workflow. Enter a line-count target, review already recorded Blue lines, then set a desired value for one chosen scored line. Each item plan is saved in the current SET and included in JSON backups.
+
+**Never touches the game:** no Silkroad client, account, bot, memory, packets or game-server connection. Actual in-game rolls must be performed by the player, and observations must be typed manually into the item editor. The static pages enforce a restrictive CSP against programmatic API and socket connections. See [WEB_ONLY_MANUAL_PLANNER.md](docs/WEB_ONLY_MANUAL_PLANNER.md) for the technical boundary.
+
+
 **Offline Hungarian / English Silkroad Wheel calculator** for Sailor Online and other customizable Silkroad servers.
 
 [Open the app](https://sailor-wheel-calculator-beta.onrender.com/) · [Report a bug or share a verified stat](https://sailor-wheel-calculator-beta.onrender.com/visszajelzes.html)

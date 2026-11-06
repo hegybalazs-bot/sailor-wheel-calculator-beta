@@ -1,5 +1,12 @@
 # Wheel Calculator – Emerald v5 ADMIN PREVIEW (BÉTA)
 
+## Interaktív Wheel-lépéstervező — kizárólag webes, kézi működés
+
+A **Következő Wheel / Pen esélye** fülön a Wheel of Fate / Wheel of Fortune / Feather Pen lépések között válthatsz. A sorszámcél, a meglévő Blue-sorok áttekintése és egy kiválasztott sor Pen-célértéke **csak a böngészőben** működik. A tervek külön mentődnek itemenként, SET-enként és CAP-onként, a JSON-mentésben is megmaradnak.
+
+**Nem befolyásolja a játékot:** a kalkulátor nem kapcsolódik Silkroad-klienshez, játékosfiókhoz, bothoz vagy játékszerverhez, nem küld parancsot, nem pörget és nem változtat itemet. A játékos a valódi eredményt manuálisan viszi fel. A főoldal CSP-vel tiltja az API- és WebSocket-kapcsolatokat. Részletes technikai szabályok: [WEB_ONLY_MANUAL_PLANNER.md](docs/WEB_ONLY_MANUAL_PLANNER.md).
+
+
 A Silkroad Online szerverekhez használható felszerelés- és Wheel-sor-kalkulátor, kipróbálásra szánt **béta verzió**. Alapértelmezett profilja: Sailor Online.
 
 **Nyelv:** magyar / angol, a felső **Nyelv / Language** kapcsolóval; a választást a böngésző helyben megőrzi. A súgó és a visszajelző oldal is kétnyelvű. [English user guide](README_EN.md) · [Ellenőrzött v5.0 kiadási lista](docs/ROADMAP_V5.md).

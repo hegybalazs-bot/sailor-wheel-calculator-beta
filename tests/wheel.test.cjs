@@ -55,7 +55,7 @@ function boot(){
  state:()=>S,html:()=>document.querySelector('#root').innerHTML,translateText,translateMarkup,setUiLanguage,helpViewEnglish,promptUI,confirmUI,alertUI,validServerState,profileCaps,
  save,paint,createSet,selectSet,recordWheelSnapshot,
  wheelHistoryStats,wheelComparison,optimizedLinePlan,balanceTargetAdvice,
- getSetComparison,balanceThreshold,balanceMetrics,qualifiedWheelStats,chooseCap,rowValueEditor,itemBlueInventory,blueInventoryView,addServerProfile,renameServerProfile,switchServerProfile,currentServerName,exportAllProfiles,importAllProfiles,applyFixedStatLimits,switchDegreeModel,blueTypesFor,blueCatalogKey,BLUE_BASE,setBlueTypes,resetBlueTypes,blueCatalogWarnings,blueCatalogPanel,blueTypeCountPanel,visiblePlanTypes,chanceWeightsFor,ensureChanceWeights,chancesComplete,rowMax,penOneBlueEstimate,keepOrRerollAdvice,keepOrRerollPanel,validUserIconData,setUserIcon,clearUserIcon,userIconPanel,uiIcon,itemLabel,statLabel,itemList,editPanel,iconIdentity,verifiedIconFor,verifiedWheelIconFor,wheelToolIcon,VERIFIED_ICON_ASSETS,normalizeApparelStyle,autoWheelEstimate,autoWheelChancePanel,chanceView,wheelStagesPanel,wheelCostPanel,calculateCost,costPlanFor,adminDemoData,createAdminDemo,adminShowcasePanel,shareSetSnapshot,validateSharedSet,encodeSharedSet,decodeSharedSet,sharedSetPreviewPanel,evidenceFor,evidenceKey,evidencePanel,adminReviewReport,shellCards,parryWheelOverview,parryWheelOverviewCell,overviewValidWheelStats,overviewItemView,overviewSummary,overviewTable,check,total,noteBackupExport,backupReminderState
+ getSetComparison,balanceThreshold,balanceMetrics,qualifiedWheelStats,chooseCap,rowValueEditor,itemBlueInventory,blueInventoryView,addServerProfile,renameServerProfile,switchServerProfile,currentServerName,exportAllProfiles,importAllProfiles,applyFixedStatLimits,switchDegreeModel,blueTypesFor,blueCatalogKey,BLUE_BASE,setBlueTypes,resetBlueTypes,blueCatalogWarnings,blueCatalogPanel,blueTypeCountPanel,visiblePlanTypes,chanceWeightsFor,ensureChanceWeights,chancesComplete,rowMax,penOneBlueEstimate,keepOrRerollAdvice,keepOrRerollPanel,validUserIconData,setUserIcon,clearUserIcon,userIconPanel,uiIcon,itemLabel,statLabel,itemList,editPanel,iconIdentity,verifiedIconFor,verifiedWheelIconFor,wheelToolIcon,VERIFIED_ICON_ASSETS,normalizeApparelStyle,autoWheelEstimate,autoWheelChancePanel,chanceView,interactiveWheelPlanner,wheelPlannerFor,setWheelPlannerField,cleanWheelPlanner,wheelStagesPanel,wheelCostPanel,calculateCost,costPlanFor,adminDemoData,createAdminDemo,adminShowcasePanel,shareSetSnapshot,validateSharedSet,encodeSharedSet,decodeSharedSet,sharedSetPreviewPanel,evidenceFor,evidenceKey,evidencePanel,adminReviewReport,shellCards,parryWheelOverview,parryWheelOverviewCell,overviewValidWheelStats,overviewItemView,overviewSummary,overviewTable,check,total,noteBackupExport,backupReminderState
 };`,sandbox,{timeout:5000});
  return {hooks:sandbox.hooks,document,store,inputs,window:sandbox.window};
 }
@@ -1560,4 +1560,144 @@ test('showcase: server rule review request contains Blue pools, limits and hones
  const en=hooks.adminReviewReport();
  assert.match(en,/verification request/);
  assert.match(en,/no official odds are claimed/);
+});
+
+test('manual Wheel planner starts in Fate and never mutates recorded item values',()=>{
+ const {hooks}=boot(),state=hooks.state(),ob=state.sets[90].shoulder;
+ ob.count=2;ob.rows=[{type:'STR',value:8},{type:'INT',value:9}];
+ const before=JSON.stringify(ob);
+ assert.equal(hooks.wheelPlannerFor().stage,'fate');
+ assert.match(hooks.interactiveWheelPlanner(),/Wheel of Fate/);
+ assert.match(hooks.interactiveWheelPlanner(),/nem kommunikál a Silkroaddal/);
+ assert.equal(hooks.setWheelPlannerField('targetLines',3),true);
+ assert.equal(hooks.wheelPlannerFor().targetLines,3);
+ assert.match(hooks.interactiveWheelPlanner(),/1 sor hiányzik/);
+ assert.equal(JSON.stringify(ob),before,'planning changes must not rewrite real item rows');
+ assert.equal(hooks.setWheelPlannerField('targetLines',0),false);
+ assert.equal(hooks.setWheelPlannerField('targetLines',999),false);
+ assert.equal(hooks.setWheelPlannerField('targetLines','not-a-number'),false);
+ assert.equal(hooks.setWheelPlannerField('unknown','x'),false);
+});
+
+test('manual Wheel planner changes stages independently of actual Wheel rolls',()=>{
+ const {hooks}=boot(),state=hooks.state();
+ const before=JSON.stringify(state.sets[90].shoulder);
+ assert.equal(hooks.setWheelPlannerField('stage','fortune'),true);
+ assert.equal(hooks.wheelPlannerFor().stage,'fortune');
+ assert.match(hooks.interactiveWheelPlanner(),/Blue-sorok/);
+ assert.equal(hooks.setWheelPlannerField('stage','pen'),true);
+ assert.match(hooks.interactiveWheelPlanner(),/Feather Pen/);
+ assert.equal(hooks.setWheelPlannerField('stage','client_attack'),false);
+ assert.equal(hooks.wheelPlannerFor().stage,'pen');
+ assert.equal(JSON.stringify(state.sets[90].shoulder),before);
+});
+
+test('manual Pen target validates known line maxima and resets when line selection changes',()=>{
+ const {hooks}=boot(),state=hooks.state(),ob=state.sets[90].shoulder;
+ ob.count=2;ob.rows=[{type:'STR',value:7},{type:'INT',value:8}];
+ assert.equal(hooks.setWheelPlannerField('stage','pen'),true);
+ assert.equal(hooks.setWheelPlannerField('penTarget',11),true);
+ assert.equal(hooks.wheelPlannerFor().penTarget,11);
+ assert.match(hooks.interactiveWheelPlanner(),/Hiányzó érték: \+4/);
+ assert.equal(hooks.setWheelPlannerField('penTarget',12),false,'STR fixed maximum is +11');
+ assert.equal(hooks.setWheelPlannerField('penTarget',1.5),false);
+ assert.equal(hooks.setWheelPlannerField('penLine',1),true);
+ assert.equal(hooks.wheelPlannerFor().penLine,1);
+ assert.equal(hooks.wheelPlannerFor().penTarget,null);
+ assert.equal(hooks.setWheelPlannerField('penTarget',10),true);
+ assert.equal(hooks.setWheelPlannerField('penLine',2),false);
+ assert.equal(ob.rows[0].value,7);
+ assert.equal(ob.rows[1].value,8);
+});
+
+test('manual planner refuses Pen goals for unknown or unscored line types',()=>{
+ const {hooks}=boot(),state=hooks.state(),ob=state.sets[90].shoulder;
+ ob.count=1;ob.rows=[{type:'OTHER',value:''}];
+ assert.equal(hooks.setWheelPlannerField('penTarget',2),false);
+ ob.rows=[{type:'DUR',value:200}];
+ assert.equal(hooks.setWheelPlannerField('penTarget',20),false);
+ ob.rows=[{type:'AR',value:20}];
+ assert.equal(hooks.setWheelPlannerField('penTarget',0),false);
+ assert.equal(hooks.setWheelPlannerField('penTarget','abc'),false);
+ assert.equal(hooks.setWheelPlannerField('penTarget','40'),true);
+});
+
+test('manual planner is separately saved for each SET and CAP',()=>{
+ const {hooks}=boot(),state=hooks.state(),old=state.setBank[90].activeId;
+ assert.equal(hooks.setWheelPlannerField('targetLines',5),true);
+ assert.equal(hooks.setWheelPlannerField('stage','fortune'),true);
+ hooks.createSet(false);
+ assert.equal(hooks.wheelPlannerFor().targetLines,null,'new SET starts without target');
+ assert.equal(hooks.wheelPlannerFor().stage,'fate');
+ assert.equal(hooks.setWheelPlannerField('targetLines',3),true);
+ hooks.selectSet(old);
+ assert.equal(hooks.wheelPlannerFor().targetLines,5);
+ assert.equal(hooks.wheelPlannerFor().stage,'fortune');
+ assert.equal(hooks.chooseCap(100),true);
+ assert.equal(hooks.wheelPlannerFor().targetLines,null,'different CAP starts empty');
+ assert.equal(hooks.setWheelPlannerField('targetLines',7),true);
+ hooks.chooseCap(90);
+ assert.equal(hooks.wheelPlannerFor().targetLines,5);
+ hooks.chooseCap(100);
+ assert.equal(hooks.wheelPlannerFor().targetLines,7);
+});
+
+test('manual planner survives backup import and old profiles without planner fields',()=>{
+ const original=boot();
+ original.hooks.setWheelPlannerField('stage','pen');
+ original.hooks.setWheelPlannerField('targetLines',4);
+ const json=JSON.parse(JSON.stringify(original.hooks.exportAllProfiles()));
+ const copy=boot();
+ assert.equal(copy.hooks.importAllProfiles(json),true);
+ assert.equal(copy.hooks.wheelPlannerFor().stage,'pen');
+ assert.equal(copy.hooks.wheelPlannerFor().targetLines,4);
+ const legacy=JSON.parse(JSON.stringify(json));
+ delete legacy.wheelPlanner;
+ for(const bank of Object.values(legacy.setBank||{}))
+  for(const entry of bank.entries||[])delete entry.data.wheelPlanner;
+ if(legacy.serverProfiles)
+  for(const profile of legacy.serverProfiles.entries||[]){
+   delete profile.data.wheelPlanner;
+   for(const bank of Object.values(profile.data.setBank||{}))
+    for(const entry of bank.entries||[])delete entry.data.wheelPlanner;
+  }
+ assert.equal(copy.hooks.importAllProfiles(legacy),true);
+ assert.equal(copy.hooks.wheelPlannerFor().targetLines,null);
+});
+
+test('manual planner UI is bilingual and includes no game client integration',()=>{
+ const {hooks}=boot();
+ hooks.state().tab='chance';hooks.paint();
+ assert.match(hooks.html(),/Interaktív Wheel-tervezés/);
+ assert.match(hooks.html(),/data-wheel-stage="fate"/);
+ assert.match(hooks.html(),/data-wheel-plan="targetLines"/);
+ assert.match(hooks.html(),/id="wheelGoEditor"/);
+ hooks.setUiLanguage('en');
+ assert.match(hooks.html(),/Interactive Wheel planning/);
+ assert.match(hooks.html(),/does not communicate with Silkroad/);
+ assert.doesNotMatch(script,/\b(?:WebSocket|XMLHttpRequest|RTCPeerConnection)\s*\(/);
+ assert.doesNotMatch(script,/\bfetch\s*\(/);
+});
+
+test('web-only pages enforce CSP denying browser API and socket connections',()=>{
+ const presentation=fs.readFileSync(path.join(__dirname,'..','bemutato.html'),'utf8');
+ for(const page of [html,presentation]){
+  assert.match(page,/<meta http-equiv="Content-Security-Policy" content="connect-src 'none'; object-src 'none'">/);
+ }
+ const guide=fs.readFileSync(path.join(__dirname,'..','docs','WEB_ONLY_MANUAL_PLANNER.md'),'utf8');
+ assert.match(guide,/No game packets, socket connections/);
+ assert.match(guide,/No bot control, phBot integration/);
+});
+
+test('manual Wheel plans do not leak across server profiles',()=>{
+ const {hooks}=boot();
+ assert.equal(hooks.setWheelPlannerField('stage','pen'),true);
+ assert.equal(hooks.setWheelPlannerField('targetLines',7),true);
+ assert.equal(hooks.addServerProfile('Second SRO server'),true);
+ assert.equal(hooks.wheelPlannerFor().stage,'fate');
+ assert.equal(hooks.wheelPlannerFor().targetLines,null);
+ assert.equal(hooks.setWheelPlannerField('targetLines',2),true);
+ assert.equal(hooks.switchServerProfile('srv_sailor'),true);
+ assert.equal(hooks.wheelPlannerFor().stage,'pen');
+ assert.equal(hooks.wheelPlannerFor().targetLines,7);
 });
