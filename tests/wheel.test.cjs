@@ -1678,3 +1678,26 @@ test('manual planner UI is bilingual and includes no game client integration',()
  assert.doesNotMatch(script,/\b(?:WebSocket|XMLHttpRequest|RTCPeerConnection)\s*\(/);
  assert.doesNotMatch(script,/\bfetch\s*\(/);
 });
+
+test('web-only pages enforce CSP denying browser API and socket connections',()=>{
+ const presentation=fs.readFileSync(path.join(__dirname,'..','bemutato.html'),'utf8');
+ for(const page of [html,presentation]){
+  assert.match(page,/<meta http-equiv="Content-Security-Policy" content="connect-src 'none'; object-src 'none'">/);
+ }
+ const guide=fs.readFileSync(path.join(__dirname,'..','docs','WEB_ONLY_MANUAL_PLANNER.md'),'utf8');
+ assert.match(guide,/No game packets, socket connections/);
+ assert.match(guide,/No bot control, phBot integration/);
+});
+
+test('manual Wheel plans do not leak across server profiles',()=>{
+ const {hooks}=boot();
+ assert.equal(hooks.setWheelPlannerField('stage','pen'),true);
+ assert.equal(hooks.setWheelPlannerField('targetLines',7),true);
+ assert.equal(hooks.addServerProfile('Second SRO server'),true);
+ assert.equal(hooks.wheelPlannerFor().stage,'fate');
+ assert.equal(hooks.wheelPlannerFor().targetLines,null);
+ assert.equal(hooks.setWheelPlannerField('targetLines',2),true);
+ assert.equal(hooks.switchServerProfile('srv_sailor'),true);
+ assert.equal(hooks.wheelPlannerFor().stage,'pen');
+ assert.equal(hooks.wheelPlannerFor().targetLines,7);
+});
