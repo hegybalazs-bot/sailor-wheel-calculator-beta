@@ -55,7 +55,7 @@ function boot(){
  state:()=>S,html:()=>document.querySelector('#root').innerHTML,translateText,translateMarkup,setUiLanguage,helpViewEnglish,promptUI,confirmUI,alertUI,validServerState,profileCaps,
  save,paint,createSet,selectSet,recordWheelSnapshot,
  wheelHistoryStats,wheelComparison,optimizedLinePlan,balanceTargetAdvice,
- getSetComparison,balanceThreshold,balanceMetrics,qualifiedWheelStats,chooseCap,rowValueEditor,itemBlueInventory,blueInventoryView,addServerProfile,renameServerProfile,switchServerProfile,currentServerName,exportAllProfiles,importAllProfiles,applyFixedStatLimits,switchDegreeModel,blueTypesFor,blueCatalogKey,BLUE_BASE,setBlueTypes,resetBlueTypes,blueCatalogWarnings,blueCatalogPanel,blueTypeCountPanel,visiblePlanTypes,chanceWeightsFor,ensureChanceWeights,chancesComplete,rowMax,penOneBlueEstimate,keepOrRerollAdvice,keepOrRerollPanel,validUserIconData,setUserIcon,clearUserIcon,userIconPanel,uiIcon,itemLabel,statLabel,itemList,editPanel,iconIdentity,verifiedIconFor,verifiedWheelIconFor,wheelToolIcon,VERIFIED_ICON_ASSETS,normalizeApparelStyle,autoWheelEstimate,autoWheelChancePanel,chanceView,wheelStagesPanel,wheelCostPanel,calculateCost,costPlanFor,adminDemoData,createAdminDemo,adminShowcasePanel,shareSetSnapshot,validateSharedSet,encodeSharedSet,decodeSharedSet,sharedSetPreviewPanel,evidenceFor,evidenceKey,evidencePanel,shellCards,parryWheelOverview,parryWheelOverviewCell,overviewValidWheelStats,overviewItemView,overviewSummary,overviewTable,check,total,noteBackupExport,backupReminderState
+ getSetComparison,balanceThreshold,balanceMetrics,qualifiedWheelStats,chooseCap,rowValueEditor,itemBlueInventory,blueInventoryView,addServerProfile,renameServerProfile,switchServerProfile,currentServerName,exportAllProfiles,importAllProfiles,applyFixedStatLimits,switchDegreeModel,blueTypesFor,blueCatalogKey,BLUE_BASE,setBlueTypes,resetBlueTypes,blueCatalogWarnings,blueCatalogPanel,blueTypeCountPanel,visiblePlanTypes,chanceWeightsFor,ensureChanceWeights,chancesComplete,rowMax,penOneBlueEstimate,keepOrRerollAdvice,keepOrRerollPanel,validUserIconData,setUserIcon,clearUserIcon,userIconPanel,uiIcon,itemLabel,statLabel,itemList,editPanel,iconIdentity,verifiedIconFor,verifiedWheelIconFor,wheelToolIcon,VERIFIED_ICON_ASSETS,normalizeApparelStyle,autoWheelEstimate,autoWheelChancePanel,chanceView,wheelStagesPanel,wheelCostPanel,calculateCost,costPlanFor,adminDemoData,createAdminDemo,adminShowcasePanel,shareSetSnapshot,validateSharedSet,encodeSharedSet,decodeSharedSet,sharedSetPreviewPanel,evidenceFor,evidenceKey,evidencePanel,adminReviewReport,shellCards,parryWheelOverview,parryWheelOverviewCell,overviewValidWheelStats,overviewItemView,overviewSummary,overviewTable,check,total,noteBackupExport,backupReminderState
 };`,sandbox,{timeout:5000});
  return {hooks:sandbox.hooks,document,store,inputs,window:sandbox.window};
 }
@@ -1545,4 +1545,19 @@ test('showcase: bilingual admin page exists and describes beta limitations',()=>
  assert.match(file,/data-en=/);
  assert.match(file,/nem valós|nem valódi|kitalált/);
  assert.match(html,/href="bemutato.html"/);
+});
+
+test('showcase: server rule review request contains Blue pools, limits and honest caveats',()=>{
+ const {hooks}=boot();
+ const hu=hooks.adminReviewReport();
+ assert.match(hu,/90 \/ 9DG/);
+ assert.match(hu,/Shoulder:/);
+ assert.match(hu,/STR \/ INT per line: \+11/);
+ assert.match(hu,/200%/);
+ assert.match(hu,/Kérjük az ehhez a CAP/);
+ assert.match(hooks.evidencePanel(),/copyReviewRequest/);
+ hooks.setUiLanguage('en');
+ const en=hooks.adminReviewReport();
+ assert.match(en,/verification request/);
+ assert.match(en,/no official odds are claimed/);
 });
