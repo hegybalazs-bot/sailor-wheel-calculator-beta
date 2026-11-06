@@ -50,6 +50,7 @@ function extractStoredZip(source){
   sum+=uncompressed;if(sum>MAX_TOTAL)fail('Icon pack exceeds memory limit.');
   need(local,30);
   if(u32(local)!==0x04034b50)fail('Broken ZIP local header.');
+  if(u16(local+8)!==method||u16(local+6)!==flags)fail('Use the generated uncompressed browser icon ZIP.');
   const localNameLength=u16(local+26),localExtra=u16(local+28);
   need(local+30,localNameLength+localExtra+compressed);
   if(decoder.decode(bytes.subarray(local+30,local+30+localNameLength))!==name)fail('ZIP filename mismatch.');
@@ -75,7 +76,7 @@ function normalizeRecord(entry,files){
   !Number.isInteger(entry.degree)||entry.degree<1||entry.degree>20||
   !IMAGE_PATH.test(entry.assetPath)||!SHA.test(entry.assetSha256)||
   !files.has(entry.assetPath))return null;
- const x={category:'equipment',region:entry.region,equipmentType:entry.equipmentType,
+ const x={category:'equipment',matchStatus:'candidate',reviewStatus:'pending',region:entry.region,equipmentType:entry.equipmentType,
   slot:entry.slot,degree:entry.degree,weaponType:entry.weaponType||null,
   gender:typeof entry.gender==='string'?entry.gender.slice(0,40):null,
   grade:entry.grade||null,sourcePath:typeof entry.sourcePath==='string'?entry.sourcePath.slice(0,220):'',
