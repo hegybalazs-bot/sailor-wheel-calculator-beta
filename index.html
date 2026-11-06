@@ -263,6 +263,17 @@ background:radial-gradient(circle at 28% 15%,#453656,#1c2136 66%,#102329);box-sh
 .showcase-cost-total{font-size:21px;font-weight:800;color:#86ffc5}
 .showcase-muted{font-size:12px;color:#adc8c1;line-height:1.5}
 .showcase-cost-grid input{width:100%;margin-top:4px}
+.local-icons-panel{margin-top:15px}
+.local-icon-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(98px,1fr));gap:8px;margin:12px 0}
+.local-icon-gallery button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;text-align:center;min-height:86px;border:1px solid #346759;border-radius:10px;padding:7px}
+.local-icon-gallery button:hover,.local-icon-gallery button:focus-visible{border-color:#8ff3c9}
+.local-icon-gallery button.selected{border:2px solid #8ff3c9;background:#154134}
+.local-icon-gallery img{width:44px;height:44px;object-fit:contain;image-rendering:pixelated}
+.local-icon-gallery small{font-size:10px;overflow-wrap:anywhere}
+.local-pack-meta{font-size:12px;color:#a5c9bc;margin:9px 0;line-height:1.5}
+.local-pack-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.local-pack-actions input[type=file]{max-width:100%;min-width:190px}
+
 .wheel-guide-detail{border:1px solid #356558;border-radius:10px;padding:14px;background:#0b2221;min-height:110px}
 .wheel-guide-stats{display:flex;flex-wrap:wrap;gap:18px;margin:12px 0}
 .wheel-guide-stats>div{padding:10px 14px;background:#092d28;border-radius:10px;min-width:120px}
@@ -356,6 +367,7 @@ background:radial-gradient(circle at 28% 15%,#453656,#1c2136 66%,#102329);box-sh
 <div class="tabs"><button data-tab="set" class="active">⚔ Szett & itemek</button><button data-tab="chance">🎲 Következő Wheel / Pen esélye</button><button data-tab="rules">⚙ CAP & grade szabályok</button><button data-tab="help">ⓘ Súgó / források</button></div>
 <main class="page" id="root"></main><div class="foot">Wheel Calculator · Szerverprofilok · Offline alkalmazás, internetkapcsolat nélkül is működik · A valós szerveresélyek ellenőrzött adatok nélkül nem ismertek.</div></div>
 <script src="assets/icons/manifest.js"></script>
+<script src="assets/icons/local-pack.js"></script>
 <script>
 'use strict';
 const IDS=['shoulder','hands','foot','head','chest','legs','necklace','earring','ring1','ring2','weapon','shield'];
@@ -478,6 +490,64 @@ function clearUserIcon(id){
  if(S.userIcons&&typeof S.userIcons==='object')delete S.userIcons[id];
  return true;
 }
+
+/* Local private review icons: never upload PNGs, and never label filename matches verified. */
+function localIconChoiceKey(identity){
+ return JSON.stringify([identity.slot,identity.region,identity.equipmentType,
+  identity.weaponType??null,identity.degree,identity.grade??null,identity.itemCode??null]);
+}
+function manuallySelectedIconFor(id){
+ const lib=window.WHEEL_LOCAL_PACK;
+ if(!lib?.summary()?.ready)return null;
+ const identity=iconIdentity(id),key=localIconChoiceKey(identity);
+ const hash=S.localIconSelections?.[key];
+ if(typeof hash!=='string'||!/^[a-f0-9]{64}$/.test(hash))return null;
+ const record=lib.candidates(identity).find(x=>x.assetSha256===hash);
+ if(!record)return null;
+ const path=lib.iconURL(hash);
+ return path?{...record,path}:null;
+}
+function localIconLibraryPanel(){
+ const en=UI_LANG==='en',lib=window.WHEEL_LOCAL_PACK,summary=lib?.summary?.()||{ready:false,count:0,images:0};
+ const identity=iconIdentity(S.active);
+ const all=summary.ready?lib.candidates(identity):[];
+ const distinct=[...new Map(all.map(a=>[a.assetSha256,a])).values()];
+ const key=localIconChoiceKey(identity),selected=manuallySelectedIconFor(S.active);
+ const msg=!summary.ready?(en?'Import your own local Sailor browser icon ZIP. No images are sent to a website or server.':
+  'Töltsd be a saját Sailor böngészős ikon ZIP-csomagodat. A képeket a weboldal nem küldi fel szerverre.'):
+  !identity.equipmentType?(en?'Select a CH/EU clothing family first.':'Válassz CH/EU ruhatípust az itemhez.'):
+  !distinct.length?(en?'No icon candidate for this exact item family and Degree. SVG fallback remains.':
+   'Ehhez a pontos itemtípushoz és Degree-hez nincs ikonjelölt. Marad a helyettesítő SVG.'):
+  (en?'Choose the picture that matches your actual in-game item.':'Válaszd ki azt a képet, amely tényleg egyezik a játékbeli itemeddel.');
+ const buttons=distinct.slice(0,50).map(a=>{
+  const url=lib.iconURL(a.assetSha256),chosen=selected?.assetSha256===a.assetSha256;
+  return `<button type="button" data-pick-local-icon="${a.assetSha256}" class="${chosen?'selected':''}" title="${esc(a.sourcePath)}">
+  <img loading="lazy" alt="" src="${esc(url)}"><small>${esc(a.sourcePath.split('/').pop()||a.assetSha256.slice(0,10))}</small>
+  ${chosen?'<strong>✓</strong>':''}</button>`;
+ }).join('');
+ return `<details class="local-icons-panel">
+  <summary>🧩 ${en?'Private Sailor icon pack · by Degree':'Saját Sailor ikoncsomag · Degree szerint'}
+  ${summary.ready?' · '+summary.count+' '+(en?'candidates':'jelölt'):''}</summary>
+  <p class="local-pack-meta">${en?
+   'Only manual visual selections are displayed. They are not official server-verified icons. CH/EU, equipment family, weapon type and Degree are filtered; uncertain and missing icons retain the safe fallback.':
+   'Csak a kézzel kiválasztott ikon jelenik meg. Ez nem hivatalosan hitelesített itemkép. CH/EU, ruhatípus, fegyver és Degree szerint szűrünk; bizonytalan vagy hiányzó képnél marad a helyettesítő.'}</p>
+  <div class="local-pack-actions"><label>${en?'Import private icon ZIP':'Saját ikon ZIP betöltése'}
+  <input id="localIconZip" type="file" accept=".zip,application/zip" aria-label="${en?'Choose local icon ZIP':'Helyi ikon ZIP kiválasztása'}"></label>
+  ${summary.ready?'<button type="button" id="localIconForget">'+(en?'Remove private pack':'Helyi csomag törlése')+'</button>':''}
+  </div>
+  <p class="local-pack-meta">${en?'The pack is stored locally in this browser (IndexedDB, when available); only its image IDs enter a SET backup. Re-import the ZIP on a different device.':
+  'A képek ebben a böngészőben tárolódnak (ha elérhető: IndexedDB); a SET-mentésbe csak a választott képek azonosítói kerülnek. Más eszközön töltsd be újra a ZIP-et.'}</p>
+  ${summary.ready?`<p class="local-pack-meta">${en?'Current item':'Aktív item'}: <strong>${esc(NAMES[S.active])}</strong> · ${esc(identity.equipmentType||'unknown')} · ${identity.degree}DG ·
+  ${distinct.length} ${en?'matching candidate image(s)':'illeszkedő képfajta'}. ${msg}</p>
+  ${buttons?'<div class="local-icon-gallery">'+buttons+'</div>':''}
+  ${distinct.length>50?'<p class="local-pack-meta">'+(en?'First 50 candidates shown. Narrow the item code.':'Az első 50 jelölt látszik. Szűkíts itemkóddal.')+'</p>':''}
+  ${selected?'<button type="button" id="localIconClearChoice">'+(en?'Clear selected picture':'Kiválasztott kép visszavonása')+'</button>':''}`:
+  '<p class="local-pack-meta">'+msg+'</p>'}
+  <p class="local-pack-meta">${en?'No game login, bot, packet or API integration. Original game images are not included in the public website.':
+  'Nincs játékbelépés, bot, packet vagy API-integráció. A nyilvános weboldal nem tartalmaz eredeti játékikonokat.'}</p>
+ </details>`;
+}
+
 function userIconPanel(){
  const uploaded=IDS.filter(id=>validUserIconData(S.userIcons?.[id])).length;
  return `<details class="user-icons-panel">
@@ -499,6 +569,8 @@ function uiIcon(kind,key){
   return `<span class="sro-icon sro-icon--item sro-icon--custom" aria-hidden="true"><img alt="" loading="lazy" src="${S.userIcons[key]}"></span>`;
  }
  if(item){
+  const selected=manuallySelectedIconFor(key);
+  if(selected)return `<span class="sro-icon sro-icon--item sro-icon--custom" data-icon-source="local-manual" aria-hidden="true"><img alt="" loading="lazy" src="${esc(selected.path)}"></span>`;
   const sprite=verifiedIconFor(key);
   if(sprite)return `<span class="sro-icon sro-icon--item sro-icon--custom" data-icon-source="verified" aria-hidden="true"><img alt="" loading="lazy" src="${esc(sprite.path)}"></span>`;
  }
@@ -510,6 +582,8 @@ function uiIcon(kind,key){
 function itemLabel(id){
  const title=validUserIconData(S?.userIcons?.[id])?
   (UI_LANG==='en'?'Custom slot icon (all degrees)':'Saját slotikon (minden Degree)'):
+  manuallySelectedIconFor(id)?
+   (UI_LANG==='en'?'Locally selected candidate · not server verified':'Helyben kiválasztott jelölt · nem hitelesített'):
   verifiedIconFor(id)?
    (UI_LANG==='en'?'Verified inventory icon':'Ellenőrzött inventory ikon'):
    (UI_LANG==='en'?'Stylized placeholder; no verified sprite for this item yet':'Stilizált helyettesítő; ehhez az itemhez még nincs ellenőrzött ikon');
@@ -1614,7 +1688,7 @@ function topControls(){refreshServerPicker();refreshSetPicker();let c=currentCfg
  document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('active',x.dataset.tab===S.tab));}
 
 function shellCards(){let t=total(),c=currentCfg();return `<div class="cards"><div class="card"><div class="label">${statLabel("STR","STR összesen")}</div><div class="num" style="color:#ff7886">+${r2(t.str)}</div><div class="sub">Felszerelt itemek</div></div><div class="card"><div class="label">${statLabel("INT","INT összesen")}</div><div class="num" style="color:var(--blue)">+${r2(t.int)}</div><div class="sub">Felszerelt itemek</div></div><div class="card"><div class="label">${statLabel("STR","STR")} + ${statLabel("INT","INT")} összesen</div><div class="num">+${r2(t.stats)}</div><div class="sub">A Shield csak pajzsos fegyvertípusnál számít</div></div><div class="card"><div class="label">SET átlagos Wheel-minőség</div><div class="num">${percent(t.qualityAvg)}</div><div class="sub">${t.qualityCount} / ${t.active} kitöltött, érvényes item átlaga</div></div><div class="card"><div class="label">Kész itemek</div><div class="num">${t.filled} / ${t.active}</div><div class="sub">Soronként kitöltve, hibamentesen</div></div><div class="card"><div class="label">🟢 Zöld · 🟡 Közel · 🔴 Gyenge</div><div class="num" style="font-size:21px">${t.green} / ${t.yellow} / ${t.red}</div><div class="sub">Kész minden feltétellel: ${t.ready} · ${c.degree}DG</div></div></div>`;}
-function itemList(){return `<section class="panel"><h2>Felszerelés <span class="badgebox">${UI_LANG==='en'?'12 items · icon-ready':'12 item · ikonok előkészítve'}</span></h2><p class="garment-mode-caption">${UI_LANG==='en'?'Until verified icons are available, stylized placeholders remain visible. Apparel type and per-item icon Degree affect appearance only, never Wheel stats.':'Az eredeti ikonok kinyeréséig helyettesítő képek látszanak. A ruhatípus és az itemenkénti ikon-Degree csak a megjelenítést érinti; a statokat nem.'}</p><div class="itemlist">${IDS.map(id=>{let ob=itm(id),v=check(id);return `<button class="item item-${v.color} ${id===S.active?'active':''}" data-item="${id}"><span><span class="nm">${itemLabel(id)}</span><span class="tiny">${esc(ob.grade)} · ${v.count}/${v.limit} sor · ${v.itemPct==null?'—':percent(v.itemPct)} / ${percent(v.goalPct)} cél${!isEquipped(id)?' · nincs felszerelve':''}</span></span>${statusP(v)}</button>`}).join('')}</div><div class="legend"><span>🟢 Cél elérve</span><span>🟡 Legfeljebb 10 százalékpont hiányzik</span><span>⚪ Még távol van</span><span>🔴 20% alatt</span></div><div class="notice">A színek a teljes, kézzel megadott Wheel-sorok saját maximumához számított minőséget jelzik, nem a következő dobás esélyét. A fegyver és a Shield Rate-feltételeit külön ellenőrizzük.</div>${userIconPanel()}</section>`;}
+function itemList(){return `<section class="panel"><h2>Felszerelés <span class="badgebox">${UI_LANG==='en'?'12 items · icon-ready':'12 item · ikonok előkészítve'}</span></h2><p class="garment-mode-caption">${UI_LANG==='en'?'Until verified icons are available, stylized placeholders remain visible. Apparel type and per-item icon Degree affect appearance only, never Wheel stats.':'Az eredeti ikonok kinyeréséig helyettesítő képek látszanak. A ruhatípus és az itemenkénti ikon-Degree csak a megjelenítést érinti; a statokat nem.'}</p><div class="itemlist">${IDS.map(id=>{let ob=itm(id),v=check(id);return `<button class="item item-${v.color} ${id===S.active?'active':''}" data-item="${id}"><span><span class="nm">${itemLabel(id)}</span><span class="tiny">${esc(ob.grade)} · ${v.count}/${v.limit} sor · ${v.itemPct==null?'—':percent(v.itemPct)} / ${percent(v.goalPct)} cél${!isEquipped(id)?' · nincs felszerelve':''}</span></span>${statusP(v)}</button>`}).join('')}</div><div class="legend"><span>🟢 Cél elérve</span><span>🟡 Legfeljebb 10 százalékpont hiányzik</span><span>⚪ Még távol van</span><span>🔴 20% alatt</span></div><div class="notice">A színek a teljes, kézzel megadott Wheel-sorok saját maximumához számított minőséget jelzik, nem a következő dobás esélyét. A fegyver és a Shield Rate-feltételeit külön ellenőrizzük.</div>${userIconPanel()}${localIconLibraryPanel()}</section>`;}
 function bonusStatsPanel(obj,cfg){
  const b=ensureBonusStats(obj);
  const specs=[['HP','HP Increase','maxHP'],['MP','MP Increase','maxMP'],['PARRY','Parry Rate','maxPARRY'],...(isJewelry(S.active)?[['FREEZE','Freezing (%)','maxFREEZE']]:[])];
@@ -2510,6 +2584,40 @@ function paint(){
 function toast(txt){txt=translateText(txt);let old=$('.toast');if(old)old.remove();let x=document.createElement('div');x.className='toast';x.textContent=txt;document.body.append(x);clearTimeout(toastTimer);toastTimer=setTimeout(()=>x.remove(),2700);}
 function adjustState(){let id=S.active,ob=itm(id),lim=itemLimit(ob);if(ob.count>lim){ob.count=lim;ob.rows=ob.rows.slice(0,lim);toast('Figyelem: a grade maximumára csökkent a sorok száma!');}if(ob.count<0)ob.count=0;while(ob.rows.length<ob.count)ob.rows.push({type:'',value:''});}
 function bindRendered(){
+ const reOpenLocalPanel=()=>{
+  const wasOpen=Boolean(document.querySelector('.local-icons-panel')?.open);
+  paint();
+  const next=document.querySelector('.local-icons-panel');if(next)next.open=wasOpen;
+ };
+ const packUpload=$('#localIconZip');
+ if(packUpload)packUpload.onchange=async()=>{
+  const file=packUpload.files?.[0];if(!file)return;
+  try{
+   const result=await window.WHEEL_LOCAL_PACK.importFile(file);
+   reOpenLocalPanel();
+   toast((UI_LANG==='en'?'Local icon pack loaded: ':'Helyi ikoncsomag betöltve: ')+result.count+
+    (result.persisted?'':' · '+(UI_LANG==='en'?'session only':'csak erre a munkamenetre')));
+  }catch(err){alertUI((UI_LANG==='en'?'Icon pack failed: ':'Ikoncsomag-hiba: ')+err.message);}
+  packUpload.value='';
+ };
+ const packForget=$('#localIconForget');
+ if(packForget)packForget.onclick=async()=>{
+  if(!confirmUI(UI_LANG==='en'?'Remove local pictures from this browser? Stored SET values are untouched.':'Törlöd a helyi ikonképeket ebből a böngészőből? A SET-értékek nem változnak.'))return;
+  await window.WHEEL_LOCAL_PACK.clear();reOpenLocalPanel();
+ };
+ document.querySelectorAll('[data-pick-local-icon]').forEach(el=>el.onclick=()=>{
+  const lib=window.WHEEL_LOCAL_PACK,hash=el.dataset.pickLocalIcon,identity=iconIdentity(S.active);
+  if(!lib?.candidates(identity).some(e=>e.assetSha256===hash))return;
+  S.localIconSelections??={};
+  S.localIconSelections[localIconChoiceKey(identity)]=hash;
+  save();reOpenLocalPanel();
+  toast(UI_LANG==='en'?'Local candidate selected (not verified).':'Helyi ikonjelölt kiválasztva (nem hitelesített).');
+ });
+ const clearLocalChoice=$('#localIconClearChoice');
+ if(clearLocalChoice)clearLocalChoice.onclick=()=>{
+  if(S.localIconSelections)delete S.localIconSelections[localIconChoiceKey(iconIdentity(S.active))];
+  save();reOpenLocalPanel();
+ };
  document.querySelectorAll('[data-wheel-stage]').forEach(el=>el.onclick=()=>{
   if(!setWheelPlannerField('stage',el.dataset.wheelStage))toast(UI_LANG==='en'?'Invalid step.':'Érvénytelen lépés.');
  });
@@ -2767,4 +2875,7 @@ $('#copySetBtn').onclick=()=>createSet(true);
 $('#renameSetBtn').onclick=renameSet;
 $('#deleteSetBtn').onclick=deleteSet;
 paint();save();
+if(window.WHEEL_LOCAL_PACK?.restore){
+ window.WHEEL_LOCAL_PACK.restore().then(found=>{if(found)paint();}).catch(()=>{});
+}
 </script></body></html>
