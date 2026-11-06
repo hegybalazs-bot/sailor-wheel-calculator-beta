@@ -1,5 +1,12 @@
 # Wheel Calculator — Emerald v5 Admin Preview (Beta)
 
+## Emerald v5 premium SET loadout and quality insights
+
+The home page now includes a **12-slot equipment loadout**, covering armor, jewelry, weapon and shield. Clicking a slot opens its existing manual editor. The display uses an authorized user icon, a unique verified sprite match or a stylized fallback. Its quality chart only scores **complete and valid manually recorded Wheel lines**; empty/invalid items remain unscored. It compares personal item goals with current quality and ranks below-target, valid items by percentage-point gap. Improvement room on known existing rows is *theoretical*, **never a drop probability**.
+
+This is a browser-only manual planner. Authentic client artwork requires independently sourced and licensed/approved files. [Full premium dashboard and icon intake notes](docs/PREMIUM_SET_DASHBOARD.md).
+
+
 ## Interactive Wheel steps — strictly manual, browser-only
 
 The **Next Wheel / Pen** tab now includes a manual Fate → Fortune → Pen planning workflow. Enter a line-count target, review already recorded Blue lines, then set a desired value for one chosen scored line. Each item plan is saved in the current SET and included in JSON backups.
