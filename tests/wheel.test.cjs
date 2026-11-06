@@ -1840,6 +1840,7 @@ test('local Sailor image matching uses exact item identity and manually selected
  assert.match(img,/blob:chosen-hat/);
  assert.match(hooks.itemLabel('head'),/nem hitelesített/);
  assert.doesNotMatch(hooks.uiIcon('item','chest'),/blob:chosen-hat/,'no cross-slot guessing');
+ state.active='head';
  assert.match(hooks.localIconLibraryPanel(),/data-pick-local-icon=/);
  hooks.chooseCap(100);
  assert.doesNotMatch(hooks.uiIcon('item','head'),/blob:chosen-hat/,'no cross-degree auto substitution');
