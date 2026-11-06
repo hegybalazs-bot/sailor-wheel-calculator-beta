@@ -1,5 +1,12 @@
 # Wheel Calculator – Emerald v5 ADMIN PREVIEW (BÉTA)
 
+## Emerald v5: prémium SET-kirakat és minőségi elemzés
+
+A főoldalon már **12 felszerelési helyes SET-kirakat** mutatja a ruhát, ékszereket, fegyvert és pajzsot. Egy itemre kattintva a meglévő kézi szerkesztő nyílik meg. A felszereléskártyák az ismert, jogosan feltöltött vagy hitelesített ikonokat használják, ellenkező esetben az eredeti, stilizált helyettesítőket. A grafikon az **érvényesen kitöltött Wheel-sorokat** és a saját célértékeket mutatja, nem a dobás esélyét. Az optimalizálási sorrend a már meglévő sorok elméleti javítási lehetőségét mutatja; nem ígér sikeres pörgetést.
+
+A weboldal továbbra is csak helyi, kézi kalkulátor. Az eredeti Silkroad képek külön, jogtisztán beszerzett és ellenőrzött forrást igényelnek. [Részletes fejlesztési/ikon átadási terv](docs/PREMIUM_SET_DASHBOARD.md).
+
+
 ## Interaktív Wheel-lépéstervező — kizárólag webes, kézi működés
 
 A **Következő Wheel / Pen esélye** fülön a Wheel of Fate / Wheel of Fortune / Feather Pen lépések között válthatsz. A sorszámcél, a meglévő Blue-sorok áttekintése és egy kiválasztott sor Pen-célértéke **csak a böngészőben** működik. A tervek külön mentődnek itemenként, SET-enként és CAP-onként, a JSON-mentésben is megmaradnak.

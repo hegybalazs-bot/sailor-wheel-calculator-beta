@@ -271,6 +271,62 @@ background:radial-gradient(circle at 28% 15%,#453656,#1c2136 66%,#102329);box-sh
 .wheel-guide-input{max-width:460px;margin:12px 0}
 .wheel-guide button[disabled]{opacity:.42;cursor:not-allowed}
 @media(max-width:700px){.showcase-flow,.showcase-cost-grid{grid-template-columns:1fr}}
+
+/* Emerald v5 premium dashboard. Static CSS and original vector placeholders; no game asset downloads. */
+.premium-armory,.premium-analytics{margin:18px 0;border:1px solid #396756;border-radius:20px;background:linear-gradient(140deg,#132927,#111c26 65%,#0b1720);overflow:hidden;box-shadow:0 16px 44px #0003}
+.premium-armory-head{padding:22px 25px 18px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid #294c44}
+.premium-kicker{font-size:10px;font-weight:900;color:#8dfbc6;letter-spacing:2px;margin-bottom:5px}
+.premium-armory-head h2{color:#e5fff2;font-size:24px;margin:0 0 4px}
+.premium-armory-head p{color:#b0cebf;font-size:12px;margin:0;line-height:1.65}
+.premium-badge{font-size:13px;font-weight:900;letter-spacing:1px;padding:9px 14px;border:1px solid #48a57b;background:#123a2b;color:#ccffe4;border-radius:999px}
+.premium-badge span{color:#69a993;padding:0 5px}
+.premium-layout{display:grid;grid-template-columns:1.5fr 1.05fr .85fr;gap:12px;padding:17px}
+.premium-group{padding:13px;background:#0b2020;border:1px solid #284a46;border-radius:13px;min-width:0}
+.premium-group-title{margin-bottom:12px;border-bottom:1px solid #2b5146;padding-bottom:9px;display:grid;gap:2px}
+.premium-group-title span{font-size:9px;letter-spacing:2px;color:#7fe6b7;font-weight:900}
+.premium-group-title strong{font-size:13px;color:#d6f3e5}
+.premium-slots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.premium-layout .premium-group:last-child .premium-slots{grid-template-columns:1fr}
+.premium-slot{display:grid;grid-template-columns:42px minmax(0,1fr);align-items:center;gap:8px;text-align:left;position:relative;background:linear-gradient(150deg,#142c2b,#0a1b1f);padding:12px 10px 27px;border:1px solid #345a4f;border-radius:11px;min-width:0;min-height:103px}
+.premium-slot .premium-slot-icon{display:flex;justify-content:center;align-items:center;width:42px;height:42px;border:1px solid #3d7560;border-radius:9px;background:radial-gradient(circle,#2c5c45,#112525)}
+.premium-slot .premium-slot-icon .sro-icon{margin:0}
+.premium-slot-copy{display:grid;gap:1px;min-width:0}
+.premium-slot-copy strong{font-size:12px;color:#e1ffee;overflow-wrap:anywhere}
+.premium-slot-copy small{font-size:10px;color:#a5cab8}
+.premium-slot-note{font-size:10px;color:#95bbac}
+.premium-slot-quality{position:absolute;bottom:7px;right:11px;font-size:12px;font-weight:900;color:#d7fce7}
+.premium-slot.met{border-color:#27985c}.premium-slot.met .premium-slot-quality{color:#57f5a7}
+.premium-slot.pending .premium-slot-quality{color:#f7d28f}
+.premium-slot.invalid{border-color:#95525d}.premium-slot.invalid .premium-slot-quality{color:#ff9ba7}
+.premium-slot.disabled{opacity:.5}.premium-slot.selected{outline:2px solid #71ffc3;outline-offset:1px}
+.premium-slot:hover{background:#21483a}
+.premium-armory-foot{display:flex;gap:8px 22px;flex-wrap:wrap;padding:13px 22px;color:#b0d2c3;border-top:1px solid #28483d;font-size:11px}
+.premium-highlights{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:15px}
+.premium-highlights>div{background:linear-gradient(155deg,#1b4032,#101f24);border:1px solid #306e52;border-radius:11px;padding:13px;min-width:0}
+.premium-highlights small{display:block;font-size:11px;color:#b6d0c4;line-height:1.45}
+.premium-highlights strong{font-size:23px;color:#9ffccb}
+.premium-analysis-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:12px;padding:0 15px 15px}
+.premium-analysis-block{border:1px solid #28544b;background:#0b201f;border-radius:12px;padding:16px;min-width:0}
+.premium-analysis-block h3{font-size:14px;color:#d4ffe6}
+.premium-chart{display:grid;gap:10px}
+.premium-quality-row{display:grid;grid-template-columns:120px minmax(0,1fr) 51px;align-items:center;gap:8px;min-width:0}
+.premium-quality-name{display:flex;align-items:center;gap:5px;min-width:0;font-size:11px;color:#deefea}
+.premium-quality-name .sro-icon{transform:scale(.65);flex-shrink:0;margin:-6px}
+.premium-quality-name span:last-child{overflow-wrap:anywhere}
+.premium-meter{position:relative;height:13px;border-radius:12px;background:#233932;border:1px solid #33594c;overflow:hidden}
+.premium-meter-fill{display:block;position:absolute;top:0;bottom:0;left:0;background:linear-gradient(90deg,#27856d,#5fe9a0)}
+.premium-meter-fill.pending{background:linear-gradient(90deg,#9a752e,#e9bc61)}
+.premium-meter-fill.unknown{background:transparent}
+.premium-meter-target{position:absolute;top:0;bottom:0;width:2px;z-index:2;background:#f5f4e5;opacity:.92}
+.premium-quality-value{font-size:12px;text-align:right;color:#d5f6e7;font-weight:800}
+.premium-chart-note{font-size:11px;color:#b1c7be;margin:10px 0 0;line-height:1.5}
+.premium-priorities{list-style:none;margin:0;padding:0;display:grid;gap:9px}
+.premium-priorities li button{width:100%;display:grid;gap:3px;padding:10px;text-align:left;background:#153329;border-color:#346c50}
+.premium-priorities strong{font-size:12px;color:#c8ffe3}.premium-priorities span{font-size:11px;color:#ffe0a7}.premium-priorities small{font-size:11px;color:#adcec0}
+@media(max-width:1050px){.premium-layout{grid-template-columns:1fr 1fr}.premium-layout .premium-group:last-child{grid-column:1/-1}.premium-layout .premium-group:last-child .premium-slots{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:740px){.premium-layout,.premium-analysis-grid{grid-template-columns:1fr}.premium-layout .premium-group:last-child{grid-column:auto}.premium-armory-head{padding:17px}.premium-layout,.premium-analysis-grid{padding:10px}.premium-highlights{padding:10px}}
+@media(max-width:390px){.premium-slots{grid-template-columns:1fr}.premium-layout .premium-group:last-child .premium-slots{grid-template-columns:1fr}.premium-quality-row{grid-template-columns:89px minmax(0,1fr) 44px;gap:4px}.premium-highlights strong{font-size:18px}}
+@media print{.premium-armory,.premium-analytics{color:#111;background:white;border:1px solid #777;box-shadow:none}.premium-slot,.premium-analysis-block,.premium-highlights>div{color:#111;background:white}.premium-armory-head h2,.premium-analysis-block h3,.premium-group-title strong{color:#111}.premium-slot-copy strong{color:#111}.premium-slot-quality,.premium-highlights strong{color:#164}.premium-slot:hover{background:white}.premium-priorities li button{color:#111;background:white}}
 </style>
 </head>
 <body><div class="shell">
@@ -1779,7 +1835,139 @@ function overviewTable(){
   <p class="info" style="margin-top:12px">Az összesítő csak a felszerelt itemeket adja a SET-végösszegekhez. A kézi és Wheel HP/MP/Parry külön forrás; <b>nem adódnak össze automatikusan</b>. Kattints az itemre a szerkesztéshez, vagy nyisd le a Részleteket. Mobilon a táblázat helyett kártyák jelennek meg.</p>
  </section>`;
 }
-function setView(){return sharedSetPreviewPanel()+adminShowcasePanel()+shellCards()+`<nav class="wheel-jumps" aria-label="Gyors ugrás a kalkulátor részeihez"><a href="#wheel-items">⚔ Wheel-sorok</a><a href="#wheel-balance">⚖ Balance</a><a href="#wheel-target">🎯 Célsegéd</a><a href="#wheel-optimize">🧠 Optimalizáló</a><a href="#wheel-compare">🔁 SET-ek</a></nav>`+balancePanel()+`<div class="content" id="wheel-items">${itemList()}${editPanel()}</div>${balanceTargetPanel()}${optimizerPanel()}${blueTypeCountPanel()}${overviewTable()}${setComparePanel()}${shareToolsPanel()}${backupReminderPanel()}<div class="notice">Az egyedi célszázalékok és a sorok automatikusan mentődnek. Biztonsági mentéshez használd a <b>Mentés JSON-ba</b> gombot.</div>`;}
+function premiumSlotMetrics(id){
+ const ob=itm(id),v=check(id),equipped=isEquipped(id);
+ const valid=equipped&&v.count>0&&v.complete&&v.wheelComplete&&!v.issues.length&&Number.isFinite(v.itemPct);
+ const qualityPct=valid?Math.min(100,Math.max(0,v.itemPct)):null;
+ const goal=Number(v.goalPct);
+ let potential=0,opportunity=null;
+ if(equipped&&v.count>0&&!v.issues.length){
+  for(let i=0;i<Math.min(30,v.count);i++){
+   const row=ob.rows?.[i];
+   if(!row||!row.type||row.type==='OTHER'||row.type==='DUR'||row.value===''||row.value==null)continue;
+   const max=effectiveRowMax(row);
+   const current=Number(row.value);
+   if(!Number.isFinite(max)||max<=0||!Number.isFinite(current)||current<0||current>max)continue;
+   const gain=Math.max(0,max-current);
+   if(gain>potential){potential=gain;opportunity={line:i+1,type:row.type,value:current,max,gain};}
+  }
+ }
+ return {id,grade:ob.grade,equipped,lines:v.count,limit:v.limit,qualityPct,goal,ready:v.ready,
+  goalMet:valid&&qualityPct>=goal,missing:valid?Math.max(0,goal-qualityPct):null,
+  issues:v.issues.length,complete:valid,potential,opportunity};
+}
+
+function premiumSetInsights(){
+ const slots=IDS.map(id=>premiumSlotMetrics(id)),equipped=slots.filter(x=>x.equipped);
+ const valid=equipped.filter(x=>x.complete),unknown=equipped.length-valid.length;
+ const goalsMet=valid.filter(x=>x.goalMet).length;
+ const priority=valid.filter(x=>!x.goalMet).sort((a,b)=>
+  (b.missing-a.missing)||(b.potential-a.potential)||a.id.localeCompare(b.id,'en'));
+ const needsInput=equipped.filter(x=>!x.complete);
+ const totalStats=total();
+ return {slots,equipped,valid,unknown,goalsMet,priority,needsInput,
+  average:totalStats.qualityAvg,ready:totalStats.ready,active:totalStats.active};
+}
+
+function premiumLoadoutPanel(){
+ const en=UI_LANG==='en',summary=premiumSetInsights();
+ const groups=[
+  {title:en?'Armor · six slots':'Ruházat · 6 hely',label:'ARMOR',ids:['head','shoulder','chest','hands','legs','foot']},
+  {title:en?'Jewelry · four slots':'Ékszerek · 4 hely',label:'JEWELRY',ids:['necklace','earring','ring1','ring2']},
+  {title:en?'Arsenal · weapon and shield':'Fegyvertár · fegyver és pajzs',label:'ARSENAL',ids:['weapon','shield']}
+ ];
+ const slot= id=>{
+  const x=summary.slots.find(a=>a.id===id);
+  const status=!x.equipped?(en?'Inactive':'Nem használt'):x.issues?(en?'Invalid data':'Adathiba'):
+   x.qualityPct==null?(en?'Not evaluated':'Nincs értékelve'):
+   x.goalMet?(en?'Target met':'Cél teljesítve'):(en?'Below target':'Cél alatt');
+  const css=!x.equipped?'disabled':x.issues?'invalid':x.qualityPct==null?'empty':x.goalMet?'met':'pending';
+  const description=x.qualityPct==null?'—':percent(x.qualityPct);
+  return `<button type="button" class="premium-slot ${css} ${id===S.active?'selected':''}"
+      data-item="${id}" data-loadout="true" aria-label="${esc(NAMES[id]+', '+status)}"
+      aria-pressed="${id===S.active}">
+    <span class="premium-slot-icon">${uiIcon('item',id)}</span>
+    <span class="premium-slot-copy"><strong>${esc(NAMES[id])}</strong>
+     <small>${esc(x.grade)} · ${x.lines}/${x.limit} ${en?'lines':'sor'}</small>
+     <span class="premium-slot-note">${status}</span></span>
+    <span class="premium-slot-quality">${description}</span>
+   </button>`;
+ };
+ return `<section class="premium-armory" id="premium-set">
+  <div class="premium-armory-head"><div><div class="premium-kicker">EMERALD · SET SHOWCASE</div>
+   <h2>${en?'Equipment loadout':'Felszerelés-kirakat'}</h2>
+   <p>${en?'Select an item to edit your manually recorded Wheel data.':'Válassz itemet a kézzel rögzített Wheel-adataid szerkesztéséhez.'}</p></div>
+   <div class="premium-badge">${S.cap} CAP <span>•</span> ${currentCfg().degree}DG</div></div>
+  <div class="premium-layout">${groups.map(g=>`<div class="premium-group">
+   <div class="premium-group-title"><span>${g.label}</span><strong>${g.title}</strong></div>
+   <div class="premium-slots">${g.ids.map(slot).join('')}</div></div>`).join('')}</div>
+  <footer class="premium-armory-foot">
+   <span>${en?'Armor appearance':'Ruhatípus'}: ${esc(APPAREL_STYLES[normalizeApparelStyle(S.apparelStyle)][UI_LANG])}</span>
+   <span>${en?'Recorded, evaluated items':'Érvényesen értékelt itemek'}: ${summary.valid.length}/${summary.active}</span>
+   <span>${en?'Original icons used only when verified; placeholders otherwise.':'Eredeti ikon csak hitelesített forrásból, addig helyettesítő grafika.'}</span>
+  </footer></section>`;
+}
+
+function premiumAnalyticsPanel(){
+ const en=UI_LANG==='en',info=premiumSetInsights();
+ const listed=info.slots.filter(x=>x.equipped);
+ const bars=listed.map(x=>{
+  const pct=x.qualityPct??0;
+  const caption=x.qualityPct==null?'—':percent(x.qualityPct);
+  const tone=x.qualityPct==null?'unknown':x.goalMet?'met':'pending';
+  const width=Number.isFinite(pct)?Math.min(100,Math.max(0,pct)):0;
+  return `<div class="premium-quality-row">
+    <span class="premium-quality-name">${uiIcon('item',x.id)}<span>${esc(NAMES[x.id])}</span></span>
+    <div class="premium-meter" role="progressbar" aria-label="${esc(NAMES[x.id])}"
+     aria-valuemin="0" aria-valuemax="100"${x.qualityPct==null?'':` aria-valuenow="${r2(pct)}"`}>
+     <span class="premium-meter-fill ${tone}" style="width:${width}%"></span>
+     <span class="premium-meter-target" style="left:${Math.max(0,Math.min(100,x.goal))}%"></span>
+    </div>
+    <span class="premium-quality-value">${caption}</span>
+   </div>`;
+ }).join('');
+ const improvements=info.priority.slice(0,5).map((x,i)=>{
+  const candidate=x.opportunity;
+  const next=candidate?
+   (en?`Possible improvement in existing ${candidate.type} line ${candidate.line}: +${r2(candidate.gain)} up to +${r2(candidate.max)}.`:
+    `Meglévő ${candidate.type} ${candidate.line}. sor: legfeljebb +${r2(candidate.gain)} javulás, +${r2(candidate.max)} plafonig.`):
+   (en?'No scored existing line with a known remaining value gap.':'Nincs ismert, tovább javítható meglévő pontozott sor.');
+  return `<li><button type="button" data-item="${x.id}" data-loadout="true">
+   <strong>${i+1}. ${esc(NAMES[x.id])}</strong>
+   <span>${en?'Quality':'Minőség'} ${percent(x.qualityPct)} · ${en?'target':'cél'} ${percent(x.goal)}
+    · ${en?'gap':'hiány'} ${r2(x.missing)} ${en?'percentage points':'százalékpont'}</span>
+   <small>${next}</small></button></li>`;
+ }).join('');
+ const pending=info.needsInput.length;
+ return `<section class="premium-analytics" id="premium-analytics">
+  <div class="premium-armory-head"><div><div class="premium-kicker">EMERALD · INSIGHTS</div>
+   <h2>${en?'SET quality dashboard':'SET-minőségi irányítópult'}</h2>
+   <p>${en?'Only fully entered, valid items contribute to the average.':'Az átlagba csak a teljesen kitöltött, hibamentes itemek számítanak bele.'}</p></div>
+  </div>
+  <div class="premium-highlights">
+   <div><small>${en?'Average recorded quality':'Átlagos rögzített minőség'}</small><strong>${percent(info.average)}</strong></div>
+   <div><small>${en?'Goals met / evaluated':'Teljesített célok / értékeltek'}</small><strong>${info.goalsMet}/${info.valid.length}</strong></div>
+   <div><small>${en?'Pending manual entries':'Hiányos vagy hibás itemek'}</small><strong>${pending}</strong></div>
+  </div>
+  <div class="premium-analysis-grid">
+   <div class="premium-analysis-block"><h3>${en?'Item quality vs. personal target':'Itemminőség és saját célérték'}</h3>
+    <div class="premium-chart">${bars||'<p>—</p>'}</div>
+    <p class="premium-chart-note">${en?'A vertical mark shows the target for each item. Missing or invalid data has no percentage.':
+    'A függőleges jelölés az item saját célját mutatja. A hiányzó és hibás adatoknak nincs százaléka.'}</p></div>
+   <div class="premium-analysis-block"><h3>${en?'Priority suggestions':'Fejlesztési sorrend'}</h3>
+    ${improvements?`<ol class="premium-priorities">${improvements}</ol>`:
+      `<p class="premium-chart-note">${pending?
+       (en?'Enter or correct the missing Wheel values first.':'Előbb töltsd ki vagy javítsd a hiányzó Wheel-értékeket.'):
+       (en?'All evaluated items currently meet their targets.':'Minden értékelt item eléri a megadott célt.')}</p>`}
+    ${pending?`<p class="premium-chart-note">${en?'Data completion required for':'Még kitöltendő / javítandó'}:
+     ${info.needsInput.map(x=>esc(NAMES[x.id])).join(', ')}</p>`:''}</div>
+  </div>
+  <p class="premium-chart-note">${en?'This dashboard displays your manually entered values and theoretical remaining line capacity. It does not predict drop rates or interact with Silkroad.':
+   'A grafikon kézzel bevitt adatokból számol, a sorok lehetséges javulása elméleti. Nem jósol dobási esélyt és nem kommunikál a Silkróddal.'}</p>
+ </section>`;
+}
+
+function setView(){return sharedSetPreviewPanel()+adminShowcasePanel()+premiumLoadoutPanel()+shellCards()+`<nav class="wheel-jumps" aria-label="Gyors ugrás a kalkulátor részeihez"><a href="#premium-set">🛡 SET</a><a href="#premium-analytics">${UI_LANG==='en'?'📊 Analytics':'📊 Elemzés'}</a><a href="#wheel-items">⚔ Wheel-sorok</a><a href="#wheel-balance">⚖ Balance</a><a href="#wheel-target">🎯 Célsegéd</a><a href="#wheel-optimize">🧠 Optimalizáló</a><a href="#wheel-compare">🔁 SET-ek</a></nav>`+balancePanel()+`<div class="content" id="wheel-items">${itemList()}${editPanel()}</div>${balanceTargetPanel()}${premiumAnalyticsPanel()}${optimizerPanel()}${blueTypeCountPanel()}${overviewTable()}${setComparePanel()}${shareToolsPanel()}${backupReminderPanel()}<div class="notice">Az egyedi célszázalékok és a sorok automatikusan mentődnek. Biztonsági mentéshez használd a <b>Mentés JSON-ba</b> gombot.</div>`;}
 
 /* Emerald demo toolkit — informational stages, not claims of game-server drop odds. */
 
@@ -2366,7 +2554,11 @@ function bindRendered(){
   const vals=S.balanceBases[S.cap]??=freshBalanceBase();vals[key]=raw===''?'':n;
   lastSim=null;save();paint();
  });
- document.querySelectorAll('[data-item]').forEach(b=>b.onclick=()=>{S.active=b.dataset.item;lastSim=null;save();paint();});
+ document.querySelectorAll('[data-item]').forEach(b=>b.onclick=()=>{
+ const fromLoadout=b.dataset.loadout==='true';
+ S.active=b.dataset.item;lastSim=null;save();paint();
+ if(fromLoadout)document.querySelector('#wheel-items')?.scrollIntoView?.({behavior:'smooth',block:'start'});
+});
  document.querySelectorAll('[data-icon-itemcode]').forEach(el=>el.onchange=()=>{
   const code=el.value.trim().toUpperCase();
   if(code&&!/^[A-Z0-9_]{3,128}$/.test(code)){
