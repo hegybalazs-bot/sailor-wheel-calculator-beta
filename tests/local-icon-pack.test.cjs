@@ -171,3 +171,74 @@ test('importing a corrected pack after an original pack preserves candidate iden
  assert.equal(imported.count,1);
  assert.equal(imported.skippedUnresolved,1);
 });
+
+const secondImage=Buffer.from(image);
+secondImage[secondImage.length-1]^=0x10;
+const secondSha=crypto.createHash('sha256').update(secondImage).digest('hex');
+const secondName='sprites/'+secondSha.slice(0,20)+'.png';
+function itemSprite(changes={}){
+ return {...icon(),equipmentType:'garment',slot:'head',gender:'man',
+  itemCodes:['ITEM_CH_M_CLOTHES_09_HA_A'],
+  sourcePath:'icon/item/china/man_item/clothes_09_ha.ddj',...changes};
+}
+function customPackage(items,files=[[name,image]]){
+ const m={schemaVersion:1,packType:'wheel-browser-local-review',
+  status:'unverified-candidates',icons:items};
+ return zipStored([['manifest.json',JSON.stringify(m)],...files]);
+}
+
+test('automatically matches equipment icon using known region, family, degree and gender',async()=>{
+ const {api}=mock();
+ const man=itemSprite();
+ const woman=itemSprite({
+  gender:'woman',assetPath:secondName,assetSha256:secondSha,
+  itemCodes:['ITEM_CH_W_CLOTHES_09_HA_A'],
+  sourcePath:'icon/item/china/woman_item/clothes_09_ha.ddj'
+ });
+ await api.importBuffer(customPackage([man,woman],[[name,image],[secondName,secondImage]]));
+ const id={region:'ch',equipmentType:'garment',slot:'head',degree:9,weaponType:null};
+ assert.equal(api.autoCandidate(id,'man').assetSha256,sha);
+ assert.equal(api.autoCandidate(id,'woman').assetSha256,secondSha);
+ assert.equal(api.autoCandidate(id,'robot'),null);
+ assert.equal(api.autoCandidate({...id,degree:10},'man'),null);
+ assert.equal(api.autoCandidate({...id,region:'eu'},'man'),null);
+ assert.equal(api.autoCandidate({...id,slot:'chest'},'man'),null);
+ assert.equal(api.autoCandidate({...id,itemCode:'ITEM_CH_W_CLOTHES_09_HA_A'},'man'),null,
+  'never show the wrong gender with a mismatched item code');
+ assert.equal(api.autoCandidate({...id,itemCode:'ITEM_CH_W_CLOTHES_09_HA_A'},'woman').assetSha256,secondSha);
+});
+
+test('automatic icons work for gender-neutral weapons and jewelry',async()=>{
+ const {api}=mock();
+ const jewel=icon();
+ const weapon=itemSprite({equipmentType:'weapon',slot:'weapon',weaponType:'ch_spear',
+  gender:null,itemCodes:['ITEM_CH_SPEAR_09_A'],
+  sourcePath:'icon/item/china/weapon/spear_09.ddj'});
+ await api.importBuffer(customPackage([jewel,weapon]));
+ assert.equal(api.autoCandidate({region:'ch',equipmentType:'jewelry',slot:'earring',degree:9,weaponType:null},'woman').assetSha256,sha);
+ assert.equal(api.autoCandidate({region:'ch',equipmentType:'weapon',slot:'weapon',degree:9,weaponType:'ch_spear'},'man').assetSha256,sha);
+ assert.equal(api.autoCandidate({region:'ch',equipmentType:'weapon',slot:'weapon',degree:9,weaponType:'ch_bow'},'man'),null);
+});
+
+test('automatic mapping refuses ambiguous art instead of selecting by source order',async()=>{
+ const {api}=mock();
+ const a=itemSprite(),b=itemSprite({assetSha256:secondSha,assetPath:secondName,
+  sourcePath:'icon/item/china/man_item/clothes_09_alt.ddj'});
+ await api.importBuffer(customPackage([a,b],[[name,image],[secondName,secondImage]]));
+ const id={region:'ch',equipmentType:'garment',slot:'head',degree:9,weaponType:null};
+ assert.equal(api.candidates(id).length,2);
+ assert.equal(api.autoCandidate(id,'man'),null);
+});
+
+test('automatic mapping rejects shared placeholder copied across multiple apparel slots',async()=>{
+ const {api}=mock();
+ const sprites=['head','hands','chest','shoulder','legs','foot'].map(slot=>itemSprite({
+  slot,degree:12,itemCodes:[],
+  sourcePath:'icon/item/europe/man_item/clothes_12_'+slot+'.ddj',
+  region:'eu',equipmentType:'robe'
+ }));
+ await api.importBuffer(customPackage(sprites));
+ assert.equal(api.autoCandidate({region:'eu',equipmentType:'robe',slot:'head',degree:12,weaponType:null},'man'),null,
+  '12DG generic placeholder used on six separate parts must not appear as a real hat');
+ assert.equal(api.candidates({region:'eu',equipmentType:'robe',slot:'head',degree:12,weaponType:null}).length,1);
+});

@@ -75,3 +75,23 @@ The browser importer now **skips exactly these recognized unresolved records**, 
 
 The smaller `Sailor_Ikoncsomag_Bongeszobe_Javitott.zip` (1,153 equipment records, 1,031 PNGs) can also be imported; it contains no unresolved `_ca` candidates. **Neither ZIP requires uploading original sprites to GitHub/Render.** The code remains strictly browser-local. Browser import and reload E2E are still not verified in real mobile/desktop devices.
 
+
+
+## 2026-11-07 — automatically matched item pictures (v5 preview)
+
+After loading a supported **user-owned private ZIP** (original or corrected), the website now selects a sprite **automatically for each matching equipment slot**, without clicking on individual candidate images. It uses the active server/SET, CH/EU apparel family, weapon type, individual icon Degree override or the current Degree, optional exact item code, and character gender.
+
+- **Character / Icon gender** is one shared Male/Female selector near the apparel-family selector. Default for old saved SETs is Male. It is stored per SET and preserved when switching CAP, server profile, SET or importing a JSON backup. There is **no required per-item image selection**.
+- Existing manual uploaded per-slot PNG/WebP icons remain highest priority, followed by optional existing manual per-item picks, then deterministic automatic matches, followed by existing rights-cleared static sprites and SVG fallback.
+- The original candidate gallery remains only inside **Optional manual override**. No user interaction in that gallery is required when a unique match is available.
+- If family/style is unknown, the user must set the **actual apparel family once** rather than have the website guess their character's gear.
+- Exact source match with the correct gender is required for apparel. Neutral weapon/jewelry/shield art needs no gender.
+- If two distinct asset hashes match one identity, if an exact item code disagrees, or if a sprite is reused across four or more different apparel slots (known 12DG placeholder pattern), use the existing SVG fallback. **Never pick randomly or falsely label unverified candidates official**.
+- All sprites stay in local IndexedDB and transient browser object URLs. Automatic matching saves *no* individual icon selections into the SET, and never changes Wheel lines or item stats.
+- The ZIP importer and upload policy are unchanged: no game client access, server calls, bot commands, extraction, external uploads or public redistribution of proprietary PNG/DDJ images.
+
+### Actual user ZIP coverage audit (candidate metadata, not full game verification)
+
+Inspecting the supplied corrected review ZIP locally shows one usable candidate for each 9DG/10DG/11DG slot in the common Chinese Garment + Spear and European Robe + Staff configurations (both male and female), including 6 clothing slots, 3 jewelry categories and the chosen weapon; shield variants also have their own mapped art. The 12DG clothing set is incomplete or placeholder-based, so SVG fallback is deliberate. Other configured weapons/armor families are resolved only where their exact source entries exist.
+
+**Quality status:** Node/unit and ZIP metadata audits are not evidence of successful physical mobile/desktop browser imports or independent rights verification. Those gates remain separate.

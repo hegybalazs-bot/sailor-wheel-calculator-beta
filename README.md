@@ -232,3 +232,9 @@ A 140 CAP-re korábban elmentett **üres vagy hiányzó MP referencia** az aktí
 - Új fájlok: [README_EN.md](README_EN.md) – angol használati útmutató; [docs/ROADMAP_V5.md](docs/ROADMAP_V5.md) – bizonyítékalapú v5.0 kiadási lista.
 
 **Korlátok:** az eredeti 9DG játékikonok nem részei a csomagnak (csak stilizált SVG-k és saját PNG/WebP betöltés). A valódi szerveres dobási esélyek továbbra sem igazoltak. A tényleges mobil/asztali vizuális E2E és az automatikus Render-élesítés külön ellenőrzendő; a Node-tesztek nem helyettesítik őket.
+
+
+### Frissítés: automatikus ikonpárosítás
+
+**A ZIP betöltése után már nem kell egyesével ikonokat választani.** Az oldal automatikusan párosítja a CH/EU, ruhatípus, fegyver, Degree, itemkód és karakternem alapján ismert képeket a SET-ben. A férfi/női ikonokhoz egy közös **Karakter / Icon gender** mező tartozik (régi SET-ben alapból férfi). A jelenlegi ruhatípust továbbra is meg kell adni, ha eddig `Nincs megadva` volt. A bizonytalan, hiányzó vagy 12DG-s helyettesítő képnél a jól ismert SVG-ikon marad. Kézi felülbírálás van, de **nem kötelező**. A képek továbbra is a saját böngésződben maradnak, a játékot nem befolyásolják.
+

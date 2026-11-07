@@ -55,7 +55,7 @@ function boot(){
  state:()=>S,html:()=>document.querySelector('#root').innerHTML,translateText,translateMarkup,setUiLanguage,helpViewEnglish,promptUI,confirmUI,alertUI,validServerState,profileCaps,
  save,paint,createSet,selectSet,recordWheelSnapshot,
  wheelHistoryStats,wheelComparison,optimizedLinePlan,balanceTargetAdvice,
- getSetComparison,compareSetSlots,setSlotComparePanel,balanceThreshold,balanceMetrics,qualifiedWheelStats,chooseCap,rowValueEditor,itemBlueInventory,blueInventoryView,addServerProfile,renameServerProfile,switchServerProfile,currentServerName,exportAllProfiles,importAllProfiles,applyFixedStatLimits,switchDegreeModel,blueTypesFor,blueCatalogKey,BLUE_BASE,setBlueTypes,resetBlueTypes,blueCatalogWarnings,blueCatalogPanel,blueTypeCountPanel,visiblePlanTypes,chanceWeightsFor,ensureChanceWeights,chancesComplete,rowMax,penOneBlueEstimate,keepOrRerollAdvice,keepOrRerollPanel,validUserIconData,setUserIcon,clearUserIcon,userIconPanel,localIconLibraryPanel,localIconChoiceKey,manuallySelectedIconFor,uiIcon,itemLabel,statLabel,itemList,editPanel,iconIdentity,verifiedIconFor,verifiedWheelIconFor,wheelToolIcon,VERIFIED_ICON_ASSETS,normalizeApparelStyle,autoWheelEstimate,autoWheelChancePanel,chanceView,interactiveWheelPlanner,wheelPlannerFor,setWheelPlannerField,cleanWheelPlanner,wheelStagesPanel,wheelCostPanel,calculateCost,costPlanFor,adminDemoData,createAdminDemo,adminShowcasePanel,shareSetSnapshot,validateSharedSet,encodeSharedSet,decodeSharedSet,sharedSetPreviewPanel,evidenceFor,evidenceKey,evidencePanel,adminReviewReport,shellCards,parryWheelOverview,parryWheelOverviewCell,overviewValidWheelStats,overviewItemView,overviewSummary,overviewTable,check,total,premiumSlotMetrics,premiumSetInsights,premiumLoadoutPanel,premiumAnalyticsPanel,noteBackupExport,backupReminderState
+ getSetComparison,compareSetSlots,setSlotComparePanel,balanceThreshold,balanceMetrics,qualifiedWheelStats,chooseCap,rowValueEditor,itemBlueInventory,blueInventoryView,addServerProfile,renameServerProfile,switchServerProfile,currentServerName,exportAllProfiles,importAllProfiles,applyFixedStatLimits,switchDegreeModel,blueTypesFor,blueCatalogKey,BLUE_BASE,setBlueTypes,resetBlueTypes,blueCatalogWarnings,blueCatalogPanel,blueTypeCountPanel,visiblePlanTypes,chanceWeightsFor,ensureChanceWeights,chancesComplete,rowMax,penOneBlueEstimate,keepOrRerollAdvice,keepOrRerollPanel,validUserIconData,setUserIcon,clearUserIcon,userIconPanel,localIconLibraryPanel,localIconChoiceKey,manuallySelectedIconFor,autoIconFor,normalizeIconGender,uiIcon,itemLabel,statLabel,itemList,editPanel,iconIdentity,verifiedIconFor,verifiedWheelIconFor,wheelToolIcon,VERIFIED_ICON_ASSETS,normalizeApparelStyle,autoWheelEstimate,autoWheelChancePanel,chanceView,interactiveWheelPlanner,wheelPlannerFor,setWheelPlannerField,cleanWheelPlanner,wheelStagesPanel,wheelCostPanel,calculateCost,costPlanFor,adminDemoData,createAdminDemo,adminShowcasePanel,shareSetSnapshot,validateSharedSet,encodeSharedSet,decodeSharedSet,sharedSetPreviewPanel,evidenceFor,evidenceKey,evidencePanel,adminReviewReport,shellCards,parryWheelOverview,parryWheelOverviewCell,overviewValidWheelStats,overviewItemView,overviewSummary,overviewTable,check,total,premiumSlotMetrics,premiumSetInsights,premiumLoadoutPanel,premiumAnalyticsPanel,noteBackupExport,backupReminderState
 };`,sandbox,{timeout:5000});
  return {hooks:sandbox.hooks,document,store,inputs,window:sandbox.window};
 }
@@ -572,8 +572,9 @@ test('v4.9.6: PNG/WebP upload restrictions, clearing and labelled inputs',()=>{
  assert.ok(hooks.uiIcon('item','hands').includes('<svg'));
  const panel=hooks.userIconPanel();
  assert.equal((panel.match(/data-custom-icon="/g)||[]).length,12);
- assert.ok(panel.includes('Media.pk2'));
- assert.ok(panel.includes('felszerelési helyenként'));
+ assert.ok(panel.includes('opcionális kézi felülbírálás'));
+ assert.ok(panel.includes('minden Degree-nél felülírja'));
+ assert.ok(panel.includes('data-custom-icon="hands"'));
 });
 
 test('v4.9.6: perfect shoulder cannot improve under same-types uniform-value model',()=>{
@@ -1823,7 +1824,7 @@ test('premium comparison: bilingual mobile-scrollable report without network cal
  assert.doesNotMatch(panel,/fetch\(|WebSocket|phBot/);
 });
 
-test('local Sailor image matching uses exact item identity and manually selected hash only',()=>{
+test('optional manual Sailor icon override still uses exact item identity and selected hash',()=>{
  const {hooks,window}=boot(),state=hooks.state(),sha='f'.repeat(64);
  state.apparelStyle='ch_garment';state.cfg[90].degree=9;
  const identity=hooks.iconIdentity('head'),key=hooks.localIconChoiceKey(identity);
@@ -1860,10 +1861,10 @@ test('local icon pack UI renders a safe manual import fallback in HU and EN',()=
  const {hooks}=boot();
  const fallback=hooks.localIconLibraryPanel();
  assert.match(fallback,/localIconZip/);
- assert.match(fallback,/Saját Sailor ikoncsomag/);
+ assert.match(fallback,/Automatikus Sailor ikonok/);
  assert.doesNotMatch(fallback,/data-pick-local-icon/);
  hooks.setUiLanguage('en');
- assert.match(hooks.localIconLibraryPanel(),/Private Sailor icon pack/);
+ assert.match(hooks.localIconLibraryPanel(),/Automatic Sailor icons/);
  assert.match(hooks.localIconLibraryPanel(),/No game login, bot, packet or API integration/);
  assert.match(html,/<script src="assets\/icons\/local-pack\.js"><\/script>/);
  assert.match(html,/local-icon-gallery/);
@@ -1883,4 +1884,107 @@ test('Sailor local import UI reports unresolved _ca sprites without blocking oth
  const en=hooks.localIconLibraryPanel();
  assert.match(en,/120 unresolved clothing sprites were excluded/);
  assert.match(en,/Other icons remain available/);
+});
+
+test('automatic Sailor icons appear immediately after ZIP load without any item image click',()=>{
+ const {hooks,window}=boot(),s=hooks.state(),hash='f'.repeat(64);
+ s.apparelStyle='ch_garment';s.active='head';s.cfg[90].degree=9;
+ window.WHEEL_LOCAL_PACK={
+  summary:()=>({ready:true,count:1153,images:1031,skippedUnresolved:0}),
+  candidates:()=>[],
+  autoCandidate:(id,gender)=>{
+   if(id.region==='ch'&&id.equipmentType==='garment'&&id.slot==='head'&&id.degree===9&&gender==='man')
+    return {assetSha256:hash,sourcePath:'icon/item/china/man_item/clothes_09_ha.ddj'};
+   return null;
+  },
+  iconURL:x=>x===hash?'blob:automatic-hat':null
+ };
+ assert.equal(s.localIconSelections,undefined,'no manual image picks were saved');
+ assert.match(hooks.uiIcon('item','head'),/data-icon-source="local-auto"/);
+ assert.match(hooks.uiIcon('item','head'),/blob:automatic-hat/);
+ assert.match(hooks.itemLabel('head'),/Automatikusan párosított/);
+ assert.doesNotMatch(hooks.uiIcon('item','chest'),/blob:automatic-hat/);
+ assert.match(hooks.localIconLibraryPanel(),/1\/11/,'spear loadout has no equipped shield');
+ assert.match(hooks.localIconLibraryPanel(),/Nem kell itemenként választani/);
+ assert.equal(s.localIconSelections,undefined,'auto matching must not create per-item overrides');
+ s.tab='set';hooks.paint();
+ assert.match(hooks.html(),/blob:automatic-hat/,'loadout updates with no manual selection');
+});
+
+test('automatic icons update on gender switch and item degree; missing sources fall back',()=>{
+ const {hooks,window}=boot(),s=hooks.state();
+ s.apparelStyle='ch_armor';s.cfg[90].degree=9;
+ window.WHEEL_LOCAL_PACK={
+  summary:()=>({ready:true,count:100,images:100}),
+  candidates:()=>[],
+  autoCandidate:(id,gender)=>
+   id.region==='ch'&&id.equipmentType==='armor'&&id.slot==='head'&&id.degree===9?
+    {assetSha256:gender==='woman'?'b'.repeat(64):'a'.repeat(64)}:null,
+  iconURL:hash=>'blob:'+hash.slice(0,1)
+ };
+ assert.match(hooks.uiIcon('item','head'),/blob:a/);
+ s.iconGender='woman';hooks.save();hooks.paint();
+ assert.match(hooks.uiIcon('item','head'),/blob:b/);
+ hooks.chooseCap(100);
+ assert.doesNotMatch(hooks.uiIcon('item','head'),/data-icon-source="local-auto"/);
+ hooks.chooseCap(90);
+ assert.equal(s.iconGender,'woman');
+ assert.match(hooks.uiIcon('item','head'),/blob:b/);
+ assert.equal(hooks.normalizeIconGender('corrupted'),'man');
+});
+
+test('manual slot overrides have priority over auto matching and do not affect Blue rows',()=>{
+ const {hooks,window}=boot(),s=hooks.state(),hash='a'.repeat(64);
+ s.apparelStyle='ch_garment';s.cfg[90].degree=9;
+ const obj=s.sets[90].head,before=JSON.stringify(obj);
+ window.WHEEL_LOCAL_PACK={
+  summary:()=>({ready:true,count:2,images:2}),
+  candidates:()=>[{assetSha256:'b'.repeat(64),gender:'man',sourcePath:'override.ddj'}],
+  autoCandidate:()=>({assetSha256:hash}),
+  iconURL:h=>'blob:'+h.slice(0,1)
+ };
+ assert.match(hooks.uiIcon('item','head'),/blob:a/);
+ s.localIconSelections={[hooks.localIconChoiceKey(hooks.iconIdentity('head'))]:'b'.repeat(64)};
+ assert.match(hooks.uiIcon('item','head'),/data-icon-source="local-manual"/);
+ assert.match(hooks.uiIcon('item','head'),/blob:b/);
+ delete s.localIconSelections[hooks.localIconChoiceKey(hooks.iconIdentity('head'))];
+ assert.match(hooks.uiIcon('item','head'),/data-icon-source="local-auto"/);
+ assert.equal(JSON.stringify(obj),before,'sprite state must not edit actual Wheel stat data');
+});
+
+test('gender choice is preserved per SET, CAP and multi-server JSON backup',()=>{
+ const {hooks}=boot(),s=hooks.state(),baseId=s.setBank[90].activeId;
+ s.iconGender='woman';hooks.save();
+ hooks.createSet(false);
+ assert.equal(s.iconGender,'woman','new SET inherits character appearance');
+ s.iconGender='man';hooks.save();
+ hooks.selectSet(baseId);
+ assert.equal(s.iconGender,'woman','switching sets restores appearance');
+ hooks.chooseCap(100);
+ assert.equal(s.iconGender,'man','other CAP uses default appearance');
+ hooks.chooseCap(90);
+ assert.equal(s.iconGender,'woman');
+ const snapshot=JSON.parse(JSON.stringify(hooks.exportAllProfiles()));
+ const imported=boot();
+ assert.equal(imported.hooks.importAllProfiles(snapshot),true);
+ assert.equal(imported.hooks.state().iconGender,'woman');
+ assert.doesNotMatch(JSON.stringify(snapshot),/blob:automatic|png;base64/i);
+});
+
+test('automatic icon UI remains bilingual and private, manual gallery optional only',()=>{
+ const {hooks,window}=boot();
+ window.WHEEL_LOCAL_PACK={
+  summary:()=>({ready:true,count:1,images:1}),
+  candidates:()=>[{assetSha256:'a'.repeat(64),sourcePath:'client.ddj'}],
+  autoCandidate:()=>null,iconURL:()=> 'blob:local'
+ };
+ const hu=hooks.localIconLibraryPanel();
+ assert.match(hu,/Kézi felülbírálás \(nem kötelező\)/);
+ assert.match(hu,/ZIP-betöltés után/);
+ assert.match(html,/id="iconGenderSel"/);
+ assert.match(html,/\$\('#iconGenderSel'\)\.onchange/);
+ hooks.setUiLanguage('en');
+ assert.match(hooks.localIconLibraryPanel(),/Optional manual override \(not required\)/);
+ assert.match(hooks.localIconLibraryPanel(),/No individual icon clicks are required/);
+ assert.doesNotMatch(hooks.localIconLibraryPanel(),/fetch\(|WebSocket/);
 });

@@ -92,3 +92,9 @@ By default, the app uses **original stylized vectors inspired by 9DG Chinese Gar
 Node-based regression tests: `node --test tests/wheel.test.cjs`. GitHub Actions runs the same checks on the main branch and pull requests.
 
 The product is still **Beta**, not final v5.0. Remaining release requirements: independent gameplay evidence for the Blue/drop distributions; legal authentic 9DG inventory sprites if desired; full mobile and desktop browser visual testing; explicit verification of static-site auto-deployment and backup recovery on real devices. Do not claim these are complete without evidence.
+
+
+### Update: automatic item icon matching
+
+**No per-item picture picking is required after importing the user-owned browser ZIP.** The website now selects unique local candidates automatically from CH/EU, apparel family, weapon, Degree, item code and a single **Character / Icon gender** preference (Male by default for legacy SETs). A real apparel family must still be set if the existing SET says `Not set`. Missing, ambiguous and reused 12DG placeholder artwork safely falls back to SVG. Manual overrides remain optional. Source art is stored in your own browser only and never communicates with the game.
+

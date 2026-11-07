@@ -363,7 +363,7 @@ background:radial-gradient(circle at 28% 15%,#453656,#1c2136 66%,#102329);box-sh
 </section>
 <div class="controls"><label>Karakter CAP (gyorsválasztó)<select id="capSel"></select></label>
 <label>CAP kézi beírása (1–200)<input type="number" min="1" max="200" step="1" id="capQuick" inputmode="numeric" aria-label="CAP kézi beírása"></label>
-<button type="button" id="capApply" title="Beírt CAP kiválasztása">✓ CAP beállítása</button><label>Degree (szerkeszthető)<input type="number" min="1" max="20" id="degreeInput"></label><label>Fegyver típusa <select id="weaponSel"></select></label><label>Ruhatípus / Armour family<select id="apparelStyleSel" aria-label="Ruhatípus / Armour family"></select></label><label>Alap cél (%)<input type="number" id="goalSel" min="1" max="100" step="0.1" title="Új itemek alapcélja; meglévő itemhez állíts be saját célt"></label><button id="applyGoalAll" title="Az alapcélt csak az aktuális CAP összes itemjére alkalmazza">Alapcél minden itemre</button><div class="grow"></div><div class="info" id="saveStatus">Automatikus helyi mentés bekapcsolva</div></div><div class="weapon-strip" id="weaponTip"></div>
+<button type="button" id="capApply" title="Beírt CAP kiválasztása">✓ CAP beállítása</button><label>Degree (szerkeszthető)<input type="number" min="1" max="20" id="degreeInput"></label><label>Fegyver típusa <select id="weaponSel"></select></label><label>Ruhatípus / Armour family<select id="apparelStyleSel" aria-label="Ruhatípus / Armour family"></select></label><label>Karakter / Icon gender<select id="iconGenderSel" aria-label="Character icon gender"><option value="man">Férfi / Male</option><option value="woman">Nő / Female</option></select></label><label>Alap cél (%)<input type="number" id="goalSel" min="1" max="100" step="0.1" title="Új itemek alapcélja; meglévő itemhez állíts be saját célt"></label><button id="applyGoalAll" title="Az alapcélt csak az aktuális CAP összes itemjére alkalmazza">Alapcél minden itemre</button><div class="grow"></div><div class="info" id="saveStatus">Automatikus helyi mentés bekapcsolva</div></div><div class="weapon-strip" id="weaponTip"></div>
 <div class="tabs"><button data-tab="set" class="active">⚔ Szett & itemek</button><button data-tab="chance">🎲 Következő Wheel / Pen esélye</button><button data-tab="rules">⚙ CAP & grade szabályok</button><button data-tab="help">ⓘ Súgó / források</button></div>
 <main class="page" id="root"></main><div class="foot">Wheel Calculator · Szerverprofilok · Offline alkalmazás, internetkapcsolat nélkül is működik · A valós szerveresélyek ellenőrzött adatok nélkül nem ismertek.</div></div>
 <script src="assets/icons/manifest.js"></script>
@@ -401,6 +401,7 @@ function normalizeApparelStyle(input){
 // Keep sprites out of browser save data. A future verified static manifest populates this list.
 const VERIFIED_ICON_ASSETS=Array.isArray(window.WHEEL_ICON_ASSETS_V1)?window.WHEEL_ICON_ASSETS_V1:[];
 const ICON_SPRITE_PATH=/^assets\/icons\/(?:[A-Za-z0-9_-]+\/)*[A-Za-z0-9_-]+\.(?:png|webp)$/;
+function normalizeIconGender(value){return value==='woman'?'woman':'man';}
 function iconIdentity(id){
  const obj=itm(id),base=Number(currentCfg().degree);
  const override=Number(obj?.iconDegree);
@@ -502,10 +503,19 @@ function manuallySelectedIconFor(id){
  const identity=iconIdentity(id),key=localIconChoiceKey(identity);
  const hash=S.localIconSelections?.[key];
  if(typeof hash!=='string'||!/^[a-f0-9]{64}$/.test(hash))return null;
- const record=lib.candidates(identity).find(x=>x.assetSha256===hash);
+ const record=lib.candidates(identity).find(x=>x.assetSha256===hash&&
+  (x.gender==null||x.gender===normalizeIconGender(S.iconGender)));
  if(!record)return null;
  const path=lib.iconURL(hash);
  return path?{...record,path}:null;
+}
+function autoIconFor(id){
+ const lib=window.WHEEL_LOCAL_PACK;
+ if(!lib?.summary?.().ready||typeof lib.autoCandidate!=='function')return null;
+ const chosen=lib.autoCandidate(iconIdentity(id),normalizeIconGender(S.iconGender));
+ if(!chosen)return null;
+ const path=lib.iconURL(chosen.assetSha256);
+ return path?{...chosen,path}:null;
 }
 function localIconLibraryPanel(){
  const en=UI_LANG==='en',lib=window.WHEEL_LOCAL_PACK,summary=lib?.summary?.()||{ready:false,count:0,images:0};
@@ -513,12 +523,14 @@ function localIconLibraryPanel(){
  const all=summary.ready?lib.candidates(identity):[];
  const distinct=[...new Map(all.map(a=>[a.assetSha256,a])).values()];
  const key=localIconChoiceKey(identity),selected=manuallySelectedIconFor(S.active);
+ const equippedIds=IDS.filter(isEquipped);
+ const mapped=summary.ready?equippedIds.filter(id=>Boolean(manuallySelectedIconFor(id)||autoIconFor(id))).length:0;
  const msg=!summary.ready?(en?'Import your own local Sailor browser icon ZIP. No images are sent to a website or server.':
   'Töltsd be a saját Sailor böngészős ikon ZIP-csomagodat. A képeket a weboldal nem küldi fel szerverre.'):
   !identity.equipmentType?(en?'Select a CH/EU clothing family first.':'Válassz CH/EU ruhatípust az itemhez.'):
   !distinct.length?(en?'No icon candidate for this exact item family and Degree. SVG fallback remains.':
    'Ehhez a pontos itemtípushoz és Degree-hez nincs ikonjelölt. Marad a helyettesítő SVG.'):
-  (en?'Choose the picture that matches your actual in-game item.':'Válaszd ki azt a képet, amely tényleg egyezik a játékbeli itemeddel.');
+  (en?'The matching picture is displayed throughout the SET automatically. You can optionally override it below.':'Az ikon automatikusan megjelenik a SET-ben. Szükség esetén lent felülbírálhatod.');
  const buttons=distinct.slice(0,50).map(a=>{
   const url=lib.iconURL(a.assetSha256),chosen=selected?.assetSha256===a.assetSha256;
   return `<button type="button" data-pick-local-icon="${a.assetSha256}" class="${chosen?'selected':''}" title="${esc(a.sourcePath)}">
@@ -526,23 +538,26 @@ function localIconLibraryPanel(){
   ${chosen?'<strong>✓</strong>':''}</button>`;
  }).join('');
  return `<details class="local-icons-panel">
-  <summary>🧩 ${en?'Private Sailor icon pack · by Degree':'Saját Sailor ikoncsomag · Degree szerint'}
-  ${summary.ready?' · '+summary.count+' '+(en?'candidates':'jelölt'):''}</summary>
+  <summary>🧩 ${en?'Automatic Sailor icons · by Degree':'Automatikus Sailor ikonok · Degree szerint'}
+  ${summary.ready?' · '+summary.count+' '+(en?'candidates':'jelölt')+' · '+mapped+'/'+equippedIds.length+' '+(en?'matched':'párosítva'):' · '+(en?'ZIP required':'ZIP szükséges')}</summary>
   <p class="local-pack-meta">${en?
-   'Only manual visual selections are displayed. They are not official server-verified icons. CH/EU, equipment family, weapon type and Degree are filtered; uncertain and missing icons retain the safe fallback.':
-   'Csak a kézzel kiválasztott ikon jelenik meg. Ez nem hivatalosan hitelesített itemkép. CH/EU, ruhatípus, fegyver és Degree szerint szűrünk; bizonytalan vagy hiányzó képnél marad a helyettesítő.'}</p>
+   'The browser automatically selects a locally matched picture for each equipment slot after ZIP import. No individual icon clicks are required. The character gender, outfit family, weapon and Degree determine the picture. Candidates are not official server-verified artwork.':
+   'ZIP-betöltés után a böngésző automatikusan megjeleníti a megfelelő ikonjelöltet minden ismert felszereléshelyen. Nem kell itemenként választani. A karakternem, ruhatípus, fegyver és Degree alapján párosítunk. Ezek nem hivatalosan hitelesített képek.'}</p>
+  ${summary.ready?`<p class="local-pack-meta" role="status"><strong>${mapped}/${equippedIds.length}</strong> ${en?'equipped slots have a matched icon.':'felszerelt helyhez találtunk ikont.'}</p>`:''}
   <div class="local-pack-actions"><label>${en?'Import private icon ZIP':'Saját ikon ZIP betöltése'}
   <input id="localIconZip" type="file" accept=".zip,application/zip" aria-label="${en?'Choose local icon ZIP':'Helyi ikon ZIP kiválasztása'}"></label>
   ${summary.ready?'<button type="button" id="localIconForget">'+(en?'Remove private pack':'Helyi csomag törlése')+'</button>':''}
   </div>
-  <p class="local-pack-meta">${en?'The pack is stored locally in this browser (IndexedDB, when available); only its image IDs enter a SET backup. Re-import the ZIP on a different device.':
-  'A képek ebben a böngészőben tárolódnak (ha elérhető: IndexedDB); a SET-mentésbe csak a választott képek azonosítói kerülnek. Más eszközön töltsd be újra a ZIP-et.'}</p>
+  <p class="local-pack-meta">${en?'Pictures stay in this browser (IndexedDB when available). Automatic matching needs no saved per-item IDs; optional manual overrides store only image hashes in JSON backups. Import the ZIP again on a new device.':
+  'A képek ebben a böngészőben maradnak (ha elérhető: IndexedDB). Az automatikus párosításhoz nem kell külön ikonazonosítókat menteni; az opcionális kézi választásoknál csak a kép hash-értéke kerül a JSON-ba. Más eszközön töltsd be újra a ZIP-et.'}</p>
   ${summary.ready&&summary.skippedUnresolved>0?`<p class="local-pack-meta" role="status">${summary.skippedUnresolved} ${en?'unresolved clothing sprites were excluded without guessing an item slot. Other icons remain available.':'azonosítatlan ruházati ikont kihagytunk, mert nem tudjuk biztosan a felszerelési helyüket. A többi ikon használható.'}</p>`:''}
   ${summary.ready?`<p class="local-pack-meta">${en?'Current item':'Aktív item'}: <strong>${esc(NAMES[S.active])}</strong> · ${esc(identity.equipmentType||'unknown')} · ${identity.degree}DG ·
   ${distinct.length} ${en?'matching candidate image(s)':'illeszkedő képfajta'}. ${msg}</p>
-  ${buttons?'<div class="local-icon-gallery">'+buttons+'</div>':''}
-  ${distinct.length>50?'<p class="local-pack-meta">'+(en?'First 50 candidates shown. Narrow the item code.':'Az első 50 jelölt látszik. Szűkíts itemkóddal.')+'</p>':''}
-  ${selected?'<button type="button" id="localIconClearChoice">'+(en?'Clear selected picture':'Kiválasztott kép visszavonása')+'</button>':''}`:
+  ${buttons?`<details class="local-icon-override"><summary>${en?'Optional manual override (not required)':'Kézi felülbírálás (nem kötelező)'}</summary>
+   <div class="local-icon-gallery">${buttons}</div>
+   ${distinct.length>50?'<p class="local-pack-meta">'+(en?'First 50 candidates shown. Narrow the item code.':'Az első 50 jelölt látszik. Szűkíts itemkóddal.')+'</p>':''}
+   ${selected?'<button type="button" id="localIconClearChoice">'+(en?'Restore automatic matching':'Vissza az automatikus párosításhoz')+'</button>':''}
+   </details>`:''}`:
   '<p class="local-pack-meta">'+msg+'</p>'}
   <p class="local-pack-meta">${en?'No game login, bot, packet or API integration. Original game images are not included in the public website.':
   'Nincs játékbelépés, bot, packet vagy API-integráció. A nyilvános weboldal nem tartalmaz eredeti játékikonokat.'}</p>
@@ -552,8 +567,8 @@ function localIconLibraryPanel(){
 function userIconPanel(){
  const uploaded=IDS.filter(id=>validUserIconData(S.userIcons?.[id])).length;
  return `<details class="user-icons-panel">
-  <summary>🖼️ Eredeti Silkroad ikonok betöltése (PNG/WebP) · ${uploaded}/${IDS.length} hozzáadva</summary>
-  <p class="info" style="margin-top:10px">${UI_LANG==='en'?'Current vector drawings are placeholders. <b>Manual uploads apply to a whole equipment slot</b> across every Degree. A future verified icon library will match the item family, weapon and Degree. Media.pk2 assets can be extracted using a separate local tool. PNG/WebP, maximum 96 KB per image; manual icons are included in JSON backups.':'A mostani vektorképek helyettesítők. A jelenlegi <b>kézi feltöltés felszerelési helyenként</b> működik, ezért az itt megadott ikon minden Degree-nél ugyanaz marad. A későbbi ellenőrzött ikontár viszont ruhatípus, fegyver, item és Degree szerint választ. A Media.pk2 ikonjai külön helyi eszközzel nyerhetők ki. PNG/WebP, maximum 96 KB/kép; a kézi képek a JSON-mentésben is szerepelnek.'}</p>
+  <summary>🖼️ ${UI_LANG==='en'?'Optional manual PNG/WebP overrides':'Opcionális kézi PNG/WebP ikonok'} · ${uploaded}/${IDS.length}</summary>
+  <p class="info" style="margin-top:10px">${UI_LANG==='en'?'The private Sailor ZIP above matches icons automatically. This section is an <b>optional manual override</b>, not a required setup step. Uploaded PNG/WebP pictures override automatic art for the same slot in every Degree (96 KB max per image), and are included in JSON backups.':'A fenti Sailor ZIP automatikusan párosítja az ikonokat. Ez a rész <b>csak opcionális kézi felülbírálás</b>, nem kötelező beállítás. Az itt feltöltött PNG/WebP kép ugyanazon helyen minden Degree-nél felülírja az automatikusat (max. 96 KB/kép), és bekerül a JSON-mentésbe.'}</p>
   <div class="icon-upload-grid">${IDS.map(id=>`<div class="icon-upload-slot" data-icon-slot="${id}">
     ${uiIcon('item',id)}
     <div class="icon-upload-meta"><strong>${esc(NAMES[id])}</strong><small>${validUserIconData(S.userIcons?.[id])?'✓ Saját kép betöltve':'Stilizált helyettesítő'}</small>
@@ -572,6 +587,8 @@ function uiIcon(kind,key){
  if(item){
   const selected=manuallySelectedIconFor(key);
   if(selected)return `<span class="sro-icon sro-icon--item sro-icon--custom" data-icon-source="local-manual" aria-hidden="true"><img alt="" loading="lazy" src="${esc(selected.path)}"></span>`;
+  const automatic=autoIconFor(key);
+  if(automatic)return `<span class="sro-icon sro-icon--item sro-icon--custom" data-icon-source="local-auto" aria-hidden="true"><img alt="" loading="lazy" src="${esc(automatic.path)}"></span>`;
   const sprite=verifiedIconFor(key);
   if(sprite)return `<span class="sro-icon sro-icon--item sro-icon--custom" data-icon-source="verified" aria-hidden="true"><img alt="" loading="lazy" src="${esc(sprite.path)}"></span>`;
  }
@@ -585,6 +602,8 @@ function itemLabel(id){
   (UI_LANG==='en'?'Custom slot icon (all degrees)':'Saját slotikon (minden Degree)'):
   manuallySelectedIconFor(id)?
    (UI_LANG==='en'?'Locally selected candidate · not server verified':'Helyben kiválasztott jelölt · nem hitelesített'):
+  autoIconFor(id)?
+   (UI_LANG==='en'?'Automatically matched local candidate · not server verified':'Automatikusan párosított helyi ikonjelölt · nem hitelesített'):
   verifiedIconFor(id)?
    (UI_LANG==='en'?'Verified inventory icon':'Ellenőrzött inventory ikon'):
    (UI_LANG==='en'?'Stylized placeholder; no verified sprite for this item yet':'Stilizált helyettesítő; ehhez az itemhez még nincs ellenőrzött ikon');
@@ -795,7 +814,7 @@ const num=x=>{let n=Number(x);return Number.isFinite(n)?n:0};
 const r2=x=>(Math.round(x*10)/10).toLocaleString('hu-HU');
 function freshConfig(cap){return {degree:DEFAULT_DEGREE[cap]||9, maxSTR:STR_INT_CHOICE_MAX,maxINT:STR_INT_CHOICE_MAX,maxAR:cap===90?40:60,maxBR:100,maxCRIT:3,maxHP:cap>=130?2300:BONUS_HP_MP_REF[cap]??null,maxMP:BONUS_HP_MP_REF[cap]??null,maxDUR:200,maxPARRY:cap>=130?60:BONUS_PARRY_REF[cap]??null,maxFREEZE:20,referenceMaxV42:true,gradeMax:{Normal:8,SoS:9,SoM:10,Sun:11},weaponMinAttackLines:2,weaponMinAttackTotal:cap===90?80:100,weaponMinPerfectAttackLines:cap===90?2:0,weaponMinBlockLines:1,weaponMinBlockValue:100,weaponMinStats:12,shieldMinBlockLines:1,shieldMinBlockValue:100,critMin:1,critIdeal:2,chances:{STR:'',INT:'',AR:'',BR:'',CRIT:'',OTHER:''},lineMode:'fixed'};}
 function freshItem(id){let targets={shoulder:7,hands:7,foot:7,head:5,chest:5,legs:5,necklace:4,earring:4,ring1:4,ring2:4,weapon:3,shield:3};return {grade:'SoS',count:0,target:targets[id],goalPct:75,rows:[],history:[],maxRowsByGrade:{},bonusStats:{HP:'',MP:'',PARRY:'',FREEZE:''}};}
-function initial(){let cfg={},sets={},weaponByCap={};for(let cap of CAPS){cfg[cap]=freshConfig(cap);sets[cap]={};weaponByCap[cap]='ch_spear';for(const id of IDS)sets[cap][id]=freshItem(id);}return {cap:90,weapon:'ch_spear',weaponByCap,apparelStyle:'unknown',goal:75,active:'shoulder',tab:'set',cfg,sets};}
+function initial(){let cfg={},sets={},weaponByCap={};for(let cap of CAPS){cfg[cap]=freshConfig(cap);sets[cap]={};weaponByCap[cap]='ch_spear';for(const id of IDS)sets[cap][id]=freshItem(id);}return {cap:90,weapon:'ch_spear',weaponByCap,apparelStyle:'unknown',iconGender:'man',goal:75,active:'shoulder',tab:'set',cfg,sets};}
 let S;let legacyMigrated=false;
 try{
  const stored=localStorage.getItem(STORAGE);
@@ -942,6 +961,7 @@ function captureSet(cap){return {
  weaponInventory:copyJSON(S.weaponInventory[cap]),
  weapon:normalizeWeapon(S.weaponByCap[cap]),
  apparelStyle:normalizeApparelStyle(S.apparelStyle),
+ iconGender:normalizeIconGender(S.iconGender),
  wheelPlanner:copyJSON(cap===S.cap?cleanWheelPlanner(S.wheelPlanner):cleanWheelPlanner(activeEntry(cap)?.data?.wheelPlanner)),
  critOverrides:copyJSON(S.critOverrides[cap]),
  balanceBase:copyJSON(S.balanceBases?.[cap]||freshBalanceBase())
@@ -949,7 +969,7 @@ function captureSet(cap){return {
 function freshSetData(cap,weapon){
  const items={};for(const id of IDS)items[id]=freshItem(id);
  const inv={};for(const wid of Object.keys(WEAPONS))inv[wid]=freshItem('weapon');
- return {items,weaponInventory:inv,weapon:normalizeWeapon(weapon||'ch_spear'),apparelStyle:'unknown',wheelPlanner:freshWheelPlanner(),critOverrides:{},balanceBase:freshBalanceBase()};
+ return {items,weaponInventory:inv,weapon:normalizeWeapon(weapon||'ch_spear'),apparelStyle:'unknown',iconGender:normalizeIconGender(S.iconGender),wheelPlanner:freshWheelPlanner(),critOverrides:{},balanceBase:freshBalanceBase()};
 }
 function activeBank(cap=S.cap){return S.setBank[cap];}
 function activeEntry(cap=S.cap){let b=activeBank(cap);return b?.entries?.find(x=>x.id===b.activeId)||null;}
@@ -962,6 +982,7 @@ function applySetEntry(cap,entry){
  S.sets[cap]=safeItems;S.weaponInventory[cap]=safeInv;
  S.weaponByCap[cap]=normalizeWeapon(d.weapon);
  S.apparelStyle=normalizeApparelStyle(d.apparelStyle);
+ S.iconGender=normalizeIconGender(d.iconGender);
  if(cap===S.cap)S.wheelPlanner=cleanWheelPlanner(d.wheelPlanner);
  S.critOverrides[cap]=copyJSON(d.critOverrides||{});
  S.balanceBases[cap]=copyJSON(d.balanceBase||freshBalanceBase());
@@ -985,6 +1006,7 @@ function normalizeSetBank(){
    applySetEntry(cap,bank.entries.find(e=>e.id===bank.activeId));
  }
  S.apparelStyle=normalizeApparelStyle(activeEntry(S.cap)?.data?.apparelStyle);
+ S.iconGender=normalizeIconGender(activeEntry(S.cap)?.data?.iconGender);
  S.schemaVersion=SCHEMA_VERSION;
 }
 normalizeSetBank();
@@ -1675,7 +1697,7 @@ function chooseCap(value){
   S.sets[cap]=Object.fromEntries(IDS.map(id=>[id,freshItem(id)]));
   normalizeGoals();applyStrIntChoiceRange();applyBonusReferenceV42();applyRateRulesV43();initializeDegreeModels();applyFixedStatLimits();normalizeSetBank();
  }
- S.cap=cap;S.weapon=weaponId(cap);S.apparelStyle=normalizeApparelStyle(activeEntry(cap)?.data?.apparelStyle);S.wheelPlanner=cleanWheelPlanner(activeEntry(cap)?.data?.wheelPlanner);S.active='shoulder';lastSim=null;
+ S.cap=cap;S.weapon=weaponId(cap);S.apparelStyle=normalizeApparelStyle(activeEntry(cap)?.data?.apparelStyle);S.iconGender=normalizeIconGender(activeEntry(cap)?.data?.iconGender);S.wheelPlanner=cleanWheelPlanner(activeEntry(cap)?.data?.wheelPlanner);S.active='shoulder';lastSim=null;
  save();paint();return true;
 }
 function topControls(){refreshServerPicker();refreshSetPicker();let c=currentCfg(),wid=weaponId(),w=WEAPONS[wid];
@@ -1684,12 +1706,13 @@ function topControls(){refreshServerPicker();refreshSetPicker();let c=currentCfg
  $('#degreeInput').value=c.degree;
  $('#weaponSel').innerHTML=Object.entries(WEAPON_GROUPS).map(([group,entries])=>`<optgroup label="${esc(group)}">${entries.map(([id,label])=>`<option value="${esc(id)}" ${id===wid?'selected':''}>${esc(label)}</option>`).join('')}</optgroup>`).join('');
  $('#apparelStyleSel').innerHTML=Object.entries(APPAREL_STYLES).map(([key,style])=>`<option value="${key}" ${key===normalizeApparelStyle(S.apparelStyle)?'selected':''}>${esc(style[UI_LANG])}</option>`).join('');
+ $('#iconGenderSel').value=normalizeIconGender(S.iconGender);
  $('#goalSel').value=String(S.goal);
  $('#weaponTip').innerHTML=`<b>${esc(w.label)}</b> · ${w.shield?'Shield használható, beleszámít a szettbe':'Nincs Shield, a Shield statjai nem számítanak bele'} · ${critRequired(wid)?'Critical: kötelező (állítható)':'Critical: opcionális (állítható)'} · külön fegyveradatlap a(z) ${S.cap} CAP-hoz`;
  document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('active',x.dataset.tab===S.tab));}
 
 function shellCards(){let t=total(),c=currentCfg();return `<div class="cards"><div class="card"><div class="label">${statLabel("STR","STR összesen")}</div><div class="num" style="color:#ff7886">+${r2(t.str)}</div><div class="sub">Felszerelt itemek</div></div><div class="card"><div class="label">${statLabel("INT","INT összesen")}</div><div class="num" style="color:var(--blue)">+${r2(t.int)}</div><div class="sub">Felszerelt itemek</div></div><div class="card"><div class="label">${statLabel("STR","STR")} + ${statLabel("INT","INT")} összesen</div><div class="num">+${r2(t.stats)}</div><div class="sub">A Shield csak pajzsos fegyvertípusnál számít</div></div><div class="card"><div class="label">SET átlagos Wheel-minőség</div><div class="num">${percent(t.qualityAvg)}</div><div class="sub">${t.qualityCount} / ${t.active} kitöltött, érvényes item átlaga</div></div><div class="card"><div class="label">Kész itemek</div><div class="num">${t.filled} / ${t.active}</div><div class="sub">Soronként kitöltve, hibamentesen</div></div><div class="card"><div class="label">🟢 Zöld · 🟡 Közel · 🔴 Gyenge</div><div class="num" style="font-size:21px">${t.green} / ${t.yellow} / ${t.red}</div><div class="sub">Kész minden feltétellel: ${t.ready} · ${c.degree}DG</div></div></div>`;}
-function itemList(){return `<section class="panel"><h2>Felszerelés <span class="badgebox">${UI_LANG==='en'?'12 items · icon-ready':'12 item · ikonok előkészítve'}</span></h2><p class="garment-mode-caption">${UI_LANG==='en'?'Until verified icons are available, stylized placeholders remain visible. Apparel type and per-item icon Degree affect appearance only, never Wheel stats.':'Az eredeti ikonok kinyeréséig helyettesítő képek látszanak. A ruhatípus és az itemenkénti ikon-Degree csak a megjelenítést érinti; a statokat nem.'}</p><div class="itemlist">${IDS.map(id=>{let ob=itm(id),v=check(id);return `<button class="item item-${v.color} ${id===S.active?'active':''}" data-item="${id}"><span><span class="nm">${itemLabel(id)}</span><span class="tiny">${esc(ob.grade)} · ${v.count}/${v.limit} sor · ${v.itemPct==null?'—':percent(v.itemPct)} / ${percent(v.goalPct)} cél${!isEquipped(id)?' · nincs felszerelve':''}</span></span>${statusP(v)}</button>`}).join('')}</div><div class="legend"><span>🟢 Cél elérve</span><span>🟡 Legfeljebb 10 százalékpont hiányzik</span><span>⚪ Még távol van</span><span>🔴 20% alatt</span></div><div class="notice">A színek a teljes, kézzel megadott Wheel-sorok saját maximumához számított minőséget jelzik, nem a következő dobás esélyét. A fegyver és a Shield Rate-feltételeit külön ellenőrizzük.</div>${userIconPanel()}${localIconLibraryPanel()}</section>`;}
+function itemList(){return `<section class="panel"><h2>Felszerelés <span class="badgebox">${UI_LANG==='en'?'12 items · icon-ready':'12 item · ikonok előkészítve'}</span></h2><p class="garment-mode-caption">${UI_LANG==='en'?'Until verified icons are available, stylized placeholders remain visible. Apparel type and per-item icon Degree affect appearance only, never Wheel stats.':'Az eredeti ikonok kinyeréséig helyettesítő képek látszanak. A ruhatípus és az itemenkénti ikon-Degree csak a megjelenítést érinti; a statokat nem.'}</p><div class="itemlist">${IDS.map(id=>{let ob=itm(id),v=check(id);return `<button class="item item-${v.color} ${id===S.active?'active':''}" data-item="${id}"><span><span class="nm">${itemLabel(id)}</span><span class="tiny">${esc(ob.grade)} · ${v.count}/${v.limit} sor · ${v.itemPct==null?'—':percent(v.itemPct)} / ${percent(v.goalPct)} cél${!isEquipped(id)?' · nincs felszerelve':''}</span></span>${statusP(v)}</button>`}).join('')}</div><div class="legend"><span>🟢 Cél elérve</span><span>🟡 Legfeljebb 10 százalékpont hiányzik</span><span>⚪ Még távol van</span><span>🔴 20% alatt</span></div><div class="notice">A színek a teljes, kézzel megadott Wheel-sorok saját maximumához számított minőséget jelzik, nem a következő dobás esélyét. A fegyver és a Shield Rate-feltételeit külön ellenőrizzük.</div>${localIconLibraryPanel()}${userIconPanel()}</section>`;}
 function bonusStatsPanel(obj,cfg){
  const b=ensureBonusStats(obj);
  const specs=[['HP','HP Increase','maxHP'],['MP','MP Increase','maxMP'],['PARRY','Parry Rate','maxPARRY'],...(isJewelry(S.active)?[['FREEZE','Freezing (%)','maxFREEZE']]:[])];
@@ -2856,6 +2879,7 @@ $('#capQuick').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();chooseCap(e.
 $('#degreeInput').onchange=e=>{switchDegreeModel(e.target.value);lastSim=null;save();paint();};
 $('#weaponSel').onchange=e=>{S.weaponByCap[S.cap]=normalizeWeapon(e.target.value);S.weapon=S.weaponByCap[S.cap];lastSim=null;save();paint();};
 $('#apparelStyleSel').onchange=e=>{S.apparelStyle=normalizeApparelStyle(e.target.value);save();paint();};
+$('#iconGenderSel').onchange=e=>{S.iconGender=normalizeIconGender(e.target.value);save();paint();};
 $('#goalSel').onchange=e=>{S.goal=Math.max(1,Math.min(100,num(e.target.value)||75));save();paint();};
 $('#applyGoalAll').onclick=()=>{if(confirmUI(`Az összes ${S.cap} CAP-os item célját ${percent(S.goal)} értékre állítsam?`)){for(const id of IDS)itm(id).goalPct=S.goal;lastSim=null;save();paint();toast('Az összes item saját célja frissítve.');}};
 document.querySelectorAll('[data-tab]').forEach(el=>el.onclick=()=>{S.tab=el.dataset.tab;save();paint();});
