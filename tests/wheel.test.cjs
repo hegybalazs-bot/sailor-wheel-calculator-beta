@@ -2017,23 +2017,23 @@ test('workspace navigation switches areas without changing SET data or stat calc
  assert.equal(hooks.chooseWorkspace('balance'),true);
  hooks.paint();
  assert.equal(hooks.workspaceActive(),'balance');
- assert.match(hooks.html(),/data-workspace-pane="balance">/);
+ assert.match(hooks.html(),/data-workspace-pane="balance"\s*>/);
  assert.match(hooks.html(),/data-workspace-pane="items"\s+hidden/);
  assert.match(hooks.html(),/id="wheel-balance"/);
  assert.equal(hooks.chooseWorkspace('analytics'),true);
  hooks.paint();
- assert.match(hooks.html(),/data-workspace-pane="analytics">/);
+ assert.match(hooks.html(),/data-workspace-pane="analytics"\s*>/);
  assert.equal(hooks.chooseWorkspace('planner'),true);
  hooks.paint();
- assert.match(hooks.html(),/data-workspace-pane="planner">/);
+ assert.match(hooks.html(),/data-workspace-pane="planner"\s*>/);
  assert.equal(hooks.chooseWorkspace('extras'),true);
  hooks.paint();
- assert.match(hooks.html(),/data-workspace-pane="extras">/);
+ assert.match(hooks.html(),/data-workspace-pane="extras"\s*>/);
  assert.equal(hooks.chooseWorkspace('unknown'),false);
  assert.equal(hooks.workspaceActive(),'extras');
  assert.equal(hooks.chooseWorkspace('items'),true);
  hooks.paint();
- assert.match(hooks.html(),/data-workspace-pane="items">/);
+ assert.match(hooks.html(),/data-workspace-pane="items"\s*>/);
  assert.equal(JSON.stringify(s.sets[90]),before);
  assert.equal(hooks.total().str,str);
 });
@@ -2054,7 +2054,11 @@ test('compact workspace remains bilingual, touch-scrollable and print-safe',()=>
 });
 
 test('editor advanced input panels and old SET overview are collapsed without deleting controls',()=>{
- const {hooks}=boot(),root=hooks.html();
+ const {hooks}=boot(),state=hooks.state();
+ state.sets[90].shoulder.count=1;
+ state.sets[90].shoulder.rows=[{type:'STR',value:6}];
+ hooks.paint();
+ const root=hooks.html();
  for(const fold of ['overview','guide','tools','bonus','history'])
   assert.match(root,new RegExp('data-editor-fold="'+fold+'"'));
  assert.match(root,/data-blue-type/);
