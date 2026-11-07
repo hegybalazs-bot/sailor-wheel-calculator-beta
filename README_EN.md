@@ -102,3 +102,13 @@ The product is still **Beta**, not final v5.0. Remaining release requirements: i
 ## Compact workspace — less scrolling
 
 Inside **SET & items**, the sticky top workspace switcher offers **⚔ Items / Wheel**, **⚖ Balance / Target**, **📊 Analysis**, **🧠 Optimize / Compare**, and **🧰 Sharing / Tools**. Only the active work area is visible. A horizontal, sticky 12-item icon strip lets you change equipment without scrolling through the full SET overview, which is still available in an optional expander. Detailed explanations, advanced Blue/Wheel controls, HP/MP/Rate inputs, and previous rolls are also collapsible. These are **presentation-only changes**: SETs, CAP/degree limits, Wheel statistics, server profiles and JSON backup contents are preserved. Both workspace tabs and item icons remain touch-scrollable on mobile; print CSS exposes the complete report.
+
+
+## Public calculator vs developer preview
+
+**Public player page:** [publikus.html](publikus.html), deployed at `https://sailor-wheel-calculator-beta.onrender.com/publikus.html`. Its rendered UI has **no image upload controls, icon ZIP importer, item code or icon Degree inputs, admin demo SET buttons, or admin provenance form**. Players can still enter their personal Wheel stats, maintain SETs, adjust locally assumed CAP values, and export/import their own JSON backups. Nothing edits a shared server database. Source icons are not hosted publicly: the public view uses free-to-distribute vector placeholders unless the user's own browser already has a privately imported icon pack.
+
+**Developer preview:** [index.html](index.html) retains the earlier icon tooling. Its rare exact item code and image degree overrides are folded under optional advanced icon diagnostics, not the main item form.
+
+**Security boundary:** These are separate static pages, not login-gated roles. The developer preview URL remains accessible to anyone who knows it; restricting real admin tools requires authenticated hosting or an independent private deployment.
+
