@@ -539,7 +539,7 @@ function localIconLibraryPanel(){
  }).join('');
  return `<details class="local-icons-panel">
   <summary>🧩 ${en?'Automatic Sailor icons · by Degree':'Automatikus Sailor ikonok · Degree szerint'}
-  ${summary.ready?' · '+mapped+'/'+equippedIds.length+' '+(en?'matched':'párosítva'):' · '+(en?'ZIP required':'ZIP szükséges')}</summary>
+  ${summary.ready?' · '+summary.count+' '+(en?'candidates':'jelölt')+' · '+mapped+'/'+equippedIds.length+' '+(en?'matched':'párosítva'):' · '+(en?'ZIP required':'ZIP szükséges')}</summary>
   <p class="local-pack-meta">${en?
    'The browser automatically selects a locally matched picture for each equipment slot after ZIP import. No individual icon clicks are required. The character gender, outfit family, weapon and Degree determine the picture. Candidates are not official server-verified artwork.':
    'ZIP-betöltés után a böngésző automatikusan megjeleníti a megfelelő ikonjelöltet minden ismert felszereléshelyen. Nem kell itemenként választani. A karakternem, ruhatípus, fegyver és Degree alapján párosítunk. Ezek nem hivatalosan hitelesített képek.'}</p>
