@@ -363,7 +363,7 @@ background:radial-gradient(circle at 28% 15%,#453656,#1c2136 66%,#102329);box-sh
 </section>
 <div class="controls"><label>Karakter CAP (gyorsválasztó)<select id="capSel"></select></label>
 <label>CAP kézi beírása (1–200)<input type="number" min="1" max="200" step="1" id="capQuick" inputmode="numeric" aria-label="CAP kézi beírása"></label>
-<button type="button" id="capApply" title="Beírt CAP kiválasztása">✓ CAP beállítása</button><label>Degree (szerkeszthető)<input type="number" min="1" max="20" id="degreeInput"></label><label>Fegyver típusa <select id="weaponSel"></select></label><label>Ruhatípus / Armour family<select id="apparelStyleSel" aria-label="Ruhatípus / Armour family"></select></label><label>Alap cél (%)<input type="number" id="goalSel" min="1" max="100" step="0.1" title="Új itemek alapcélja; meglévő itemhez állíts be saját célt"></label><button id="applyGoalAll" title="Az alapcélt csak az aktuális CAP összes itemjére alkalmazza">Alapcél minden itemre</button><div class="grow"></div><div class="info" id="saveStatus">Automatikus helyi mentés bekapcsolva</div></div><div class="weapon-strip" id="weaponTip"></div>
+<button type="button" id="capApply" title="Beírt CAP kiválasztása">✓ CAP beállítása</button><label>Degree (szerkeszthető)<input type="number" min="1" max="20" id="degreeInput"></label><label>Fegyver típusa <select id="weaponSel"></select></label><label>Ruhatípus / Armour family<select id="apparelStyleSel" aria-label="Ruhatípus / Armour family"></select></label><label>Karakter / Icon gender<select id="iconGenderSel" aria-label="Character icon gender"><option value="man">Férfi / Male</option><option value="woman">Nő / Female</option></select></label><label>Alap cél (%)<input type="number" id="goalSel" min="1" max="100" step="0.1" title="Új itemek alapcélja; meglévő itemhez állíts be saját célt"></label><button id="applyGoalAll" title="Az alapcélt csak az aktuális CAP összes itemjére alkalmazza">Alapcél minden itemre</button><div class="grow"></div><div class="info" id="saveStatus">Automatikus helyi mentés bekapcsolva</div></div><div class="weapon-strip" id="weaponTip"></div>
 <div class="tabs"><button data-tab="set" class="active">⚔ Szett & itemek</button><button data-tab="chance">🎲 Következő Wheel / Pen esélye</button><button data-tab="rules">⚙ CAP & grade szabályok</button><button data-tab="help">ⓘ Súgó / források</button></div>
 <main class="page" id="root"></main><div class="foot">Wheel Calculator · Szerverprofilok · Offline alkalmazás, internetkapcsolat nélkül is működik · A valós szerveresélyek ellenőrzött adatok nélkül nem ismertek.</div></div>
 <script src="assets/icons/manifest.js"></script>
@@ -523,12 +523,14 @@ function localIconLibraryPanel(){
  const all=summary.ready?lib.candidates(identity):[];
  const distinct=[...new Map(all.map(a=>[a.assetSha256,a])).values()];
  const key=localIconChoiceKey(identity),selected=manuallySelectedIconFor(S.active);
+ const equippedIds=IDS.filter(isEquipped);
+ const mapped=summary.ready?equippedIds.filter(id=>Boolean(manuallySelectedIconFor(id)||autoIconFor(id))).length:0;
  const msg=!summary.ready?(en?'Import your own local Sailor browser icon ZIP. No images are sent to a website or server.':
   'Töltsd be a saját Sailor böngészős ikon ZIP-csomagodat. A képeket a weboldal nem küldi fel szerverre.'):
   !identity.equipmentType?(en?'Select a CH/EU clothing family first.':'Válassz CH/EU ruhatípust az itemhez.'):
   !distinct.length?(en?'No icon candidate for this exact item family and Degree. SVG fallback remains.':
    'Ehhez a pontos itemtípushoz és Degree-hez nincs ikonjelölt. Marad a helyettesítő SVG.'):
-  (en?'Choose the picture that matches your actual in-game item.':'Válaszd ki azt a képet, amely tényleg egyezik a játékbeli itemeddel.');
+  (en?'The matching picture is displayed throughout the SET automatically. You can optionally override it below.':'Az ikon automatikusan megjelenik a SET-ben. Szükség esetén lent felülbírálhatod.');
  const buttons=distinct.slice(0,50).map(a=>{
   const url=lib.iconURL(a.assetSha256),chosen=selected?.assetSha256===a.assetSha256;
   return `<button type="button" data-pick-local-icon="${a.assetSha256}" class="${chosen?'selected':''}" title="${esc(a.sourcePath)}">
@@ -536,11 +538,12 @@ function localIconLibraryPanel(){
   ${chosen?'<strong>✓</strong>':''}</button>`;
  }).join('');
  return `<details class="local-icons-panel">
-  <summary>🧩 ${en?'Private Sailor icon pack · by Degree':'Saját Sailor ikoncsomag · Degree szerint'}
+  <summary>🧩 ${en?'Automatic Sailor icons · by Degree':'Automatikus Sailor ikonok · Degree szerint'}
   ${summary.ready?' · '+summary.count+' '+(en?'candidates':'jelölt'):''}</summary>
   <p class="local-pack-meta">${en?
-   'Only manual visual selections are displayed. They are not official server-verified icons. CH/EU, equipment family, weapon type and Degree are filtered; uncertain and missing icons retain the safe fallback.':
-   'Csak a kézzel kiválasztott ikon jelenik meg. Ez nem hivatalosan hitelesített itemkép. CH/EU, ruhatípus, fegyver és Degree szerint szűrünk; bizonytalan vagy hiányzó képnél marad a helyettesítő.'}</p>
+   'The browser automatically selects a locally matched picture for each equipment slot after ZIP import. No individual icon clicks are required. The character gender, outfit family, weapon and Degree determine the picture. Candidates are not official server-verified artwork.':
+   'ZIP-betöltés után a böngésző automatikusan megjeleníti a megfelelő ikonjelöltet minden ismert felszereléshelyen. Nem kell itemenként választani. A karakternem, ruhatípus, fegyver és Degree alapján párosítunk. Ezek nem hivatalosan hitelesített képek.'}</p>
+  ${summary.ready?`<p class="local-pack-meta" role="status"><strong>${mapped}/${equippedIds.length}</strong> ${en?'equipped slots have a matched icon.':'felszerelt helyhez találtunk ikont.'}</p>`:''}
   <div class="local-pack-actions"><label>${en?'Import private icon ZIP':'Saját ikon ZIP betöltése'}
   <input id="localIconZip" type="file" accept=".zip,application/zip" aria-label="${en?'Choose local icon ZIP':'Helyi ikon ZIP kiválasztása'}"></label>
   ${summary.ready?'<button type="button" id="localIconForget">'+(en?'Remove private pack':'Helyi csomag törlése')+'</button>':''}
@@ -550,9 +553,11 @@ function localIconLibraryPanel(){
   ${summary.ready&&summary.skippedUnresolved>0?`<p class="local-pack-meta" role="status">${summary.skippedUnresolved} ${en?'unresolved clothing sprites were excluded without guessing an item slot. Other icons remain available.':'azonosítatlan ruházati ikont kihagytunk, mert nem tudjuk biztosan a felszerelési helyüket. A többi ikon használható.'}</p>`:''}
   ${summary.ready?`<p class="local-pack-meta">${en?'Current item':'Aktív item'}: <strong>${esc(NAMES[S.active])}</strong> · ${esc(identity.equipmentType||'unknown')} · ${identity.degree}DG ·
   ${distinct.length} ${en?'matching candidate image(s)':'illeszkedő képfajta'}. ${msg}</p>
-  ${buttons?'<div class="local-icon-gallery">'+buttons+'</div>':''}
-  ${distinct.length>50?'<p class="local-pack-meta">'+(en?'First 50 candidates shown. Narrow the item code.':'Az első 50 jelölt látszik. Szűkíts itemkóddal.')+'</p>':''}
-  ${selected?'<button type="button" id="localIconClearChoice">'+(en?'Clear selected picture':'Kiválasztott kép visszavonása')+'</button>':''}`:
+  ${buttons?`<details class="local-icon-override"><summary>${en?'Optional manual override (not required)':'Kézi felülbírálás (nem kötelező)'}</summary>
+   <div class="local-icon-gallery">${buttons}</div>
+   ${distinct.length>50?'<p class="local-pack-meta">'+(en?'First 50 candidates shown. Narrow the item code.':'Az első 50 jelölt látszik. Szűkíts itemkóddal.')+'</p>':''}
+   ${selected?'<button type="button" id="localIconClearChoice">'+(en?'Restore automatic matching':'Vissza az automatikus párosításhoz')+'</button>':''}
+   </details>`:''}`:
   '<p class="local-pack-meta">'+msg+'</p>'}
   <p class="local-pack-meta">${en?'No game login, bot, packet or API integration. Original game images are not included in the public website.':
   'Nincs játékbelépés, bot, packet vagy API-integráció. A nyilvános weboldal nem tartalmaz eredeti játékikonokat.'}</p>
@@ -1701,6 +1706,7 @@ function topControls(){refreshServerPicker();refreshSetPicker();let c=currentCfg
  $('#degreeInput').value=c.degree;
  $('#weaponSel').innerHTML=Object.entries(WEAPON_GROUPS).map(([group,entries])=>`<optgroup label="${esc(group)}">${entries.map(([id,label])=>`<option value="${esc(id)}" ${id===wid?'selected':''}>${esc(label)}</option>`).join('')}</optgroup>`).join('');
  $('#apparelStyleSel').innerHTML=Object.entries(APPAREL_STYLES).map(([key,style])=>`<option value="${key}" ${key===normalizeApparelStyle(S.apparelStyle)?'selected':''}>${esc(style[UI_LANG])}</option>`).join('');
+ $('#iconGenderSel').value=normalizeIconGender(S.iconGender);
  $('#goalSel').value=String(S.goal);
  $('#weaponTip').innerHTML=`<b>${esc(w.label)}</b> · ${w.shield?'Shield használható, beleszámít a szettbe':'Nincs Shield, a Shield statjai nem számítanak bele'} · ${critRequired(wid)?'Critical: kötelező (állítható)':'Critical: opcionális (állítható)'} · külön fegyveradatlap a(z) ${S.cap} CAP-hoz`;
  document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('active',x.dataset.tab===S.tab));}
@@ -2873,6 +2879,7 @@ $('#capQuick').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();chooseCap(e.
 $('#degreeInput').onchange=e=>{switchDegreeModel(e.target.value);lastSim=null;save();paint();};
 $('#weaponSel').onchange=e=>{S.weaponByCap[S.cap]=normalizeWeapon(e.target.value);S.weapon=S.weaponByCap[S.cap];lastSim=null;save();paint();};
 $('#apparelStyleSel').onchange=e=>{S.apparelStyle=normalizeApparelStyle(e.target.value);save();paint();};
+$('#iconGenderSel').onchange=e=>{S.iconGender=normalizeIconGender(e.target.value);save();paint();};
 $('#goalSel').onchange=e=>{S.goal=Math.max(1,Math.min(100,num(e.target.value)||75));save();paint();};
 $('#applyGoalAll').onclick=()=>{if(confirmUI(`Az összes ${S.cap} CAP-os item célját ${percent(S.goal)} értékre állítsam?`)){for(const id of IDS)itm(id).goalPct=S.goal;lastSim=null;save();paint();toast('Az összes item saját célja frissítve.');}};
 document.querySelectorAll('[data-tab]').forEach(el=>el.onclick=()=>{S.tab=el.dataset.tab;save();paint();});
