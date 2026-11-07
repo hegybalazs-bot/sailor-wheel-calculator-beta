@@ -569,8 +569,8 @@ function autoIconFor(id){
  const path=lib.iconURL(chosen.assetSha256);
  return path?{...chosen,path}:null;
 }
-function localIconLibraryPanel()return '';}
-function userIconPanel()return '';}
+function localIconLibraryPanel(){return '';}
+function userIconPanel(){return '';}
 function uiIcon(kind,key){
  const item=kind==='item';
  if(item&&validUserIconData(S?.userIcons?.[key])){
