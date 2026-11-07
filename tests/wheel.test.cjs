@@ -1903,7 +1903,7 @@ test('automatic Sailor icons appear immediately after ZIP load without any item 
  assert.match(hooks.uiIcon('item','head'),/blob:automatic-hat/);
  assert.match(hooks.itemLabel('head'),/Automatikusan párosított/);
  assert.doesNotMatch(hooks.uiIcon('item','chest'),/blob:automatic-hat/);
- assert.match(hooks.localIconLibraryPanel(),/1\/12/);
+ assert.match(hooks.localIconLibraryPanel(),/1\/11/,'spear loadout has no equipped shield');
  assert.match(hooks.localIconLibraryPanel(),/Nem kell itemenként választani/);
  assert.equal(s.localIconSelections,undefined,'auto matching must not create per-item overrides');
  s.tab='set';hooks.paint();
