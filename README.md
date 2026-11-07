@@ -242,3 +242,15 @@ A 140 CAP-re korábban elmentett **üres vagy hiányzó MP referencia** az aktí
 ## Kompakt munkafelület – kevesebb görgetés
 
 A **Szett & itemek** nézetben az öt részből álló, felül rögzített munkafelület-váltóval közvetlenül nyitható a **⚔ Itemek / Wheel**, **⚖ Balance / Cél**, **📊 Elemzés**, **🧠 Optimalizálás / SET-ek**, és **🧰 Megosztás / Eszközök**. Egyszerre csak a kiválasztott munkaterület látható. Az itemek gyors ikonsávjában 12 felszerelés közül választhatsz vízszintesen, a teljes SET-áttekintő külön lenyitható. Az itemszerkesztőben a szabálymagyarázat, haladó Blue/Wheel-funkciók, HP/MP/Rate-mezők és előzmények szintén összecsukhatók. Ezek **csak megjelenítési változások**: a Wheel-adatok, szerverprofilok, CAP-ok, statmaximumok és JSON-mentések változatlanul működnek. Mobilon is vízszintesen görgethető a felső menü, és a nyomtatási nézet megőrzi a részek tartalmát.
+
+
+## Publikus játékosoldal és fejlesztői előnézet
+
+**Publikus kalkulátor:** [publikus.html](publikus.html) — éles Render-útvonal: `https://sailor-wheel-calculator-beta.onrender.com/publikus.html`.
+
+A publikus nézet önálló, külön URL-en működik, és **nincsenek benne képfeltöltő vagy ikon ZIP-importáló felületek, itemkód/Ikon Degree mezők, admin DEMO-SET gombok és admin forrásellenőrző űrlapok**. A látogatók a saját Wheel-soraikat, céljaikat, CAP- és szerverprofiljaikat **saját böngészőjükben** kezelik. A JSON mentés/betöltés megmarad, ez nem képfeltöltés a weboldal szerverére. A nyilvános oldalon a megfelelő, szabadon terjeszthető ikonkészlet hiányában a saját vektoros helyettesítők jelennek meg; ha a látogató böngészőjében egy korábban betöltött privát ikoncsomag már megvan, azt a böngésző helyben megjelenítheti. A weboldal soha nem tölti fel a játék grafikáit.
+
+**Fejlesztői előnézet:** [index.html](index.html) — megőrzi a korábbi manuális ikondiagnosztikai eszközöket. Az itemkód és az ikon-Degree itt sem zavarja a fő itemszerkesztőt: a „Haladó Blue-típusok” alatt, az opcionális ikonazonosító részben található.
+
+**Fontos:** ez két külön *felület*, nem hitelesített admin/jogosultsági rendszer. A publikus útvonal nem tartalmaz ikonfeltöltési lehetőséget, de a fejlesztői előnézet URL-jét a statikus tárhely önmagában nem védi hozzáférés-ellenőrzéssel. Valódi, kizárólag adminoknak elérhető kezelőfelülethez később szerveroldali bejelentkezés/jogosultság vagy privát deploy kell.
+
