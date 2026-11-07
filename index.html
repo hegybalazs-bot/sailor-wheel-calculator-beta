@@ -2202,7 +2202,7 @@ function setView(){
     ${premiumLoadoutPanel()}${shellCards()}${itemList()}</details>
     <div id="wheel-items" class="workspace-item-editor">${editPanel()}</div>
     <p class="info">${en?'Wheel data saves automatically. Export JSON for backup.':'A Wheel-adatokat automatikusan mentjük. Biztonsági mentéshez exportálj JSON-t.'}</p>`},
-  {id:'balance',icon:'⚖',label:'Balance / Cél',body:balancePanel()+balanceTargetPanel()},
+  {id:'balance',icon:'⚖',label:en?'Balance / Target':'Balance / Cél',body:balancePanel()+balanceTargetPanel()},
   {id:'analytics',icon:'📊',label:en?'Analysis':'Elemzés',
    body:premiumAnalyticsPanel()+overviewTable()+blueTypeCountPanel()},
   {id:'planner',icon:'🧠',label:en?'Optimize / Compare':'Optimalizálás / SET-ek',
@@ -2778,7 +2778,7 @@ function bindRendered(){
  if(next)next.onclick=()=>{if(stageIndex<2)setWheelPlannerField('stage',WHEEL_PLANNER_STAGES[stageIndex+1]);};
  const goEditor=$('#wheelGoEditor');
  if(goEditor)goEditor.onclick=()=>{
-  S.tab='set';save();paint();
+  S.tab='set';WORKSPACE_ACTIVE='items';save();paint();
   document.querySelector('#wheel-items')?.scrollIntoView?.({behavior:'smooth',block:'start'});
  };
  document.querySelectorAll('[data-demo-cap]').forEach(el=>el.onclick=()=>{
