@@ -150,6 +150,27 @@ function candidates(identity){
   (a.weaponType||null)===(identity.weaponType||null)&&
   (!code||a.itemCodes.includes(code)));
 }
+/* Deterministic local icon lookup. Unlike manual selection, a candidate is auto-displayed
+ * ONLY when the selected item identity + character gender resolve to one sprite.
+ * A placeholder reused across four or more independent apparel slots is never auto-selected.
+ * This doesn't make unreviewed client artwork "verified".
+ */
+function autoCandidate(identity,gender='man'){
+ if(!['man','woman'].includes(gender))return null;
+ const matched=candidates(identity).filter(a=>a.gender==null||a.gender===gender);
+ if(!matched.length)return null;
+ const hashes=new Set(matched.map(x=>x.assetSha256));
+ if(hashes.size!==1)return null; // Art ambiguities cannot be resolved from metadata.
+ const chosen=matched[0];
+ if(['head','shoulder','chest','hands','legs','foot'].includes(chosen.slot)){
+  const usedSlots=new Set(state.icons.filter(a=>a.region===chosen.region&&
+   a.equipmentType===chosen.equipmentType&&a.degree===chosen.degree&&
+   a.assetSha256===chosen.assetSha256&&
+   (a.gender==null||a.gender===gender)).map(a=>a.slot));
+  if(usedSlots.size>=4)return null; // 12DG placeholder reused across clothing slots.
+ }
+ return chosen;
+}
 function iconURL(hash){
  if(!active()||!SHA.test(String(hash))||!state.images.has(hash))return null;
  if(!state.urls.has(hash))state.urls.set(hash,g.URL.createObjectURL(new Blob([state.images.get(hash)],{type:'image/png'})));
@@ -201,6 +222,6 @@ async function clear(){
  try{await dbAction('readwrite',s=>s.delete(KEY));}catch(_){}
  return true;
 }
-g.WHEEL_LOCAL_PACK={importFile,importBuffer,restore,clear,summary,candidates,iconURL,
+g.WHEEL_LOCAL_PACK={importFile,importBuffer,restore,clear,summary,candidates,autoCandidate,iconURL,
  extractStoredZip,validateZip};
 })(window);
