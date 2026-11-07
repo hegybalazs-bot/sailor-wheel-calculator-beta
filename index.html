@@ -401,6 +401,7 @@ function normalizeApparelStyle(input){
 // Keep sprites out of browser save data. A future verified static manifest populates this list.
 const VERIFIED_ICON_ASSETS=Array.isArray(window.WHEEL_ICON_ASSETS_V1)?window.WHEEL_ICON_ASSETS_V1:[];
 const ICON_SPRITE_PATH=/^assets\/icons\/(?:[A-Za-z0-9_-]+\/)*[A-Za-z0-9_-]+\.(?:png|webp)$/;
+function normalizeIconGender(value){return value==='woman'?'woman':'man';}
 function iconIdentity(id){
  const obj=itm(id),base=Number(currentCfg().degree);
  const override=Number(obj?.iconDegree);
@@ -502,10 +503,19 @@ function manuallySelectedIconFor(id){
  const identity=iconIdentity(id),key=localIconChoiceKey(identity);
  const hash=S.localIconSelections?.[key];
  if(typeof hash!=='string'||!/^[a-f0-9]{64}$/.test(hash))return null;
- const record=lib.candidates(identity).find(x=>x.assetSha256===hash);
+ const record=lib.candidates(identity).find(x=>x.assetSha256===hash&&
+  (x.gender==null||x.gender===normalizeIconGender(S.iconGender)));
  if(!record)return null;
  const path=lib.iconURL(hash);
  return path?{...record,path}:null;
+}
+function autoIconFor(id){
+ const lib=window.WHEEL_LOCAL_PACK;
+ if(!lib?.summary?.().ready||typeof lib.autoCandidate!=='function')return null;
+ const chosen=lib.autoCandidate(iconIdentity(id),normalizeIconGender(S.iconGender));
+ if(!chosen)return null;
+ const path=lib.iconURL(chosen.assetSha256);
+ return path?{...chosen,path}:null;
 }
 function localIconLibraryPanel(){
  const en=UI_LANG==='en',lib=window.WHEEL_LOCAL_PACK,summary=lib?.summary?.()||{ready:false,count:0,images:0};
@@ -572,6 +582,8 @@ function uiIcon(kind,key){
  if(item){
   const selected=manuallySelectedIconFor(key);
   if(selected)return `<span class="sro-icon sro-icon--item sro-icon--custom" data-icon-source="local-manual" aria-hidden="true"><img alt="" loading="lazy" src="${esc(selected.path)}"></span>`;
+  const automatic=autoIconFor(key);
+  if(automatic)return `<span class="sro-icon sro-icon--item sro-icon--custom" data-icon-source="local-auto" aria-hidden="true"><img alt="" loading="lazy" src="${esc(automatic.path)}"></span>`;
   const sprite=verifiedIconFor(key);
   if(sprite)return `<span class="sro-icon sro-icon--item sro-icon--custom" data-icon-source="verified" aria-hidden="true"><img alt="" loading="lazy" src="${esc(sprite.path)}"></span>`;
  }
@@ -585,6 +597,8 @@ function itemLabel(id){
   (UI_LANG==='en'?'Custom slot icon (all degrees)':'Saját slotikon (minden Degree)'):
   manuallySelectedIconFor(id)?
    (UI_LANG==='en'?'Locally selected candidate · not server verified':'Helyben kiválasztott jelölt · nem hitelesített'):
+  autoIconFor(id)?
+   (UI_LANG==='en'?'Automatically matched local candidate · not server verified':'Automatikusan párosított helyi ikonjelölt · nem hitelesített'):
   verifiedIconFor(id)?
    (UI_LANG==='en'?'Verified inventory icon':'Ellenőrzött inventory ikon'):
    (UI_LANG==='en'?'Stylized placeholder; no verified sprite for this item yet':'Stilizált helyettesítő; ehhez az itemhez még nincs ellenőrzött ikon');
@@ -795,7 +809,7 @@ const num=x=>{let n=Number(x);return Number.isFinite(n)?n:0};
 const r2=x=>(Math.round(x*10)/10).toLocaleString('hu-HU');
 function freshConfig(cap){return {degree:DEFAULT_DEGREE[cap]||9, maxSTR:STR_INT_CHOICE_MAX,maxINT:STR_INT_CHOICE_MAX,maxAR:cap===90?40:60,maxBR:100,maxCRIT:3,maxHP:cap>=130?2300:BONUS_HP_MP_REF[cap]??null,maxMP:BONUS_HP_MP_REF[cap]??null,maxDUR:200,maxPARRY:cap>=130?60:BONUS_PARRY_REF[cap]??null,maxFREEZE:20,referenceMaxV42:true,gradeMax:{Normal:8,SoS:9,SoM:10,Sun:11},weaponMinAttackLines:2,weaponMinAttackTotal:cap===90?80:100,weaponMinPerfectAttackLines:cap===90?2:0,weaponMinBlockLines:1,weaponMinBlockValue:100,weaponMinStats:12,shieldMinBlockLines:1,shieldMinBlockValue:100,critMin:1,critIdeal:2,chances:{STR:'',INT:'',AR:'',BR:'',CRIT:'',OTHER:''},lineMode:'fixed'};}
 function freshItem(id){let targets={shoulder:7,hands:7,foot:7,head:5,chest:5,legs:5,necklace:4,earring:4,ring1:4,ring2:4,weapon:3,shield:3};return {grade:'SoS',count:0,target:targets[id],goalPct:75,rows:[],history:[],maxRowsByGrade:{},bonusStats:{HP:'',MP:'',PARRY:'',FREEZE:''}};}
-function initial(){let cfg={},sets={},weaponByCap={};for(let cap of CAPS){cfg[cap]=freshConfig(cap);sets[cap]={};weaponByCap[cap]='ch_spear';for(const id of IDS)sets[cap][id]=freshItem(id);}return {cap:90,weapon:'ch_spear',weaponByCap,apparelStyle:'unknown',goal:75,active:'shoulder',tab:'set',cfg,sets};}
+function initial(){let cfg={},sets={},weaponByCap={};for(let cap of CAPS){cfg[cap]=freshConfig(cap);sets[cap]={};weaponByCap[cap]='ch_spear';for(const id of IDS)sets[cap][id]=freshItem(id);}return {cap:90,weapon:'ch_spear',weaponByCap,apparelStyle:'unknown',iconGender:'man',goal:75,active:'shoulder',tab:'set',cfg,sets};}
 let S;let legacyMigrated=false;
 try{
  const stored=localStorage.getItem(STORAGE);
@@ -942,6 +956,7 @@ function captureSet(cap){return {
  weaponInventory:copyJSON(S.weaponInventory[cap]),
  weapon:normalizeWeapon(S.weaponByCap[cap]),
  apparelStyle:normalizeApparelStyle(S.apparelStyle),
+ iconGender:normalizeIconGender(S.iconGender),
  wheelPlanner:copyJSON(cap===S.cap?cleanWheelPlanner(S.wheelPlanner):cleanWheelPlanner(activeEntry(cap)?.data?.wheelPlanner)),
  critOverrides:copyJSON(S.critOverrides[cap]),
  balanceBase:copyJSON(S.balanceBases?.[cap]||freshBalanceBase())
@@ -949,7 +964,7 @@ function captureSet(cap){return {
 function freshSetData(cap,weapon){
  const items={};for(const id of IDS)items[id]=freshItem(id);
  const inv={};for(const wid of Object.keys(WEAPONS))inv[wid]=freshItem('weapon');
- return {items,weaponInventory:inv,weapon:normalizeWeapon(weapon||'ch_spear'),apparelStyle:'unknown',wheelPlanner:freshWheelPlanner(),critOverrides:{},balanceBase:freshBalanceBase()};
+ return {items,weaponInventory:inv,weapon:normalizeWeapon(weapon||'ch_spear'),apparelStyle:'unknown',iconGender:normalizeIconGender(S.iconGender),wheelPlanner:freshWheelPlanner(),critOverrides:{},balanceBase:freshBalanceBase()};
 }
 function activeBank(cap=S.cap){return S.setBank[cap];}
 function activeEntry(cap=S.cap){let b=activeBank(cap);return b?.entries?.find(x=>x.id===b.activeId)||null;}
@@ -962,6 +977,7 @@ function applySetEntry(cap,entry){
  S.sets[cap]=safeItems;S.weaponInventory[cap]=safeInv;
  S.weaponByCap[cap]=normalizeWeapon(d.weapon);
  S.apparelStyle=normalizeApparelStyle(d.apparelStyle);
+ S.iconGender=normalizeIconGender(d.iconGender);
  if(cap===S.cap)S.wheelPlanner=cleanWheelPlanner(d.wheelPlanner);
  S.critOverrides[cap]=copyJSON(d.critOverrides||{});
  S.balanceBases[cap]=copyJSON(d.balanceBase||freshBalanceBase());
@@ -985,6 +1001,7 @@ function normalizeSetBank(){
    applySetEntry(cap,bank.entries.find(e=>e.id===bank.activeId));
  }
  S.apparelStyle=normalizeApparelStyle(activeEntry(S.cap)?.data?.apparelStyle);
+ S.iconGender=normalizeIconGender(activeEntry(S.cap)?.data?.iconGender);
  S.schemaVersion=SCHEMA_VERSION;
 }
 normalizeSetBank();
@@ -1675,7 +1692,7 @@ function chooseCap(value){
   S.sets[cap]=Object.fromEntries(IDS.map(id=>[id,freshItem(id)]));
   normalizeGoals();applyStrIntChoiceRange();applyBonusReferenceV42();applyRateRulesV43();initializeDegreeModels();applyFixedStatLimits();normalizeSetBank();
  }
- S.cap=cap;S.weapon=weaponId(cap);S.apparelStyle=normalizeApparelStyle(activeEntry(cap)?.data?.apparelStyle);S.wheelPlanner=cleanWheelPlanner(activeEntry(cap)?.data?.wheelPlanner);S.active='shoulder';lastSim=null;
+ S.cap=cap;S.weapon=weaponId(cap);S.apparelStyle=normalizeApparelStyle(activeEntry(cap)?.data?.apparelStyle);S.iconGender=normalizeIconGender(activeEntry(cap)?.data?.iconGender);S.wheelPlanner=cleanWheelPlanner(activeEntry(cap)?.data?.wheelPlanner);S.active='shoulder';lastSim=null;
  save();paint();return true;
 }
 function topControls(){refreshServerPicker();refreshSetPicker();let c=currentCfg(),wid=weaponId(),w=WEAPONS[wid];
