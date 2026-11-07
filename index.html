@@ -2209,6 +2209,21 @@ function setView(){
  ${WORKSPACE_ACTIVE===p.id?'':'hidden'}>${p.body}</section>`).join('');
 }
 
+function chooseWorkspace(panel,scroll=false){
+ if(!WORKSPACE_PANELS.includes(panel))return false;
+ WORKSPACE_ACTIVE=panel;
+ document.querySelectorAll('[data-workspace-pane]').forEach(el=>{
+  el.hidden=el.dataset.workspacePane!==panel;
+ });
+ document.querySelectorAll('[data-workspace-go]').forEach(el=>{
+  const selected=el.dataset.workspaceGo===panel;
+  el.setAttribute('aria-selected',String(selected));
+  el.classList.toggle('selected',selected);
+ });
+ if(scroll)document.querySelector('.workspace-nav')?.scrollIntoView?.({behavior:'smooth',block:'start'});
+ return true;
+}
+
 /* Emerald demo toolkit — informational stages, not claims of game-server drop odds. */
 
 /* Read-only planning state: values are entered manually in the browser, never sent to a game client. */
@@ -2698,6 +2713,11 @@ function paint(){
 function toast(txt){txt=translateText(txt);let old=$('.toast');if(old)old.remove();let x=document.createElement('div');x.className='toast';x.textContent=txt;document.body.append(x);clearTimeout(toastTimer);toastTimer=setTimeout(()=>x.remove(),2700);}
 function adjustState(){let id=S.active,ob=itm(id),lim=itemLimit(ob);if(ob.count>lim){ob.count=lim;ob.rows=ob.rows.slice(0,lim);toast('Figyelem: a grade maximumára csökkent a sorok száma!');}if(ob.count<0)ob.count=0;while(ob.rows.length<ob.count)ob.rows.push({type:'',value:''});}
 function bindRendered(){
+ document.querySelectorAll('[data-workspace-go]').forEach(el=>el.onclick=()=>chooseWorkspace(el.dataset.workspaceGo,true));
+ document.querySelectorAll('[data-editor-fold]').forEach(el=>el.ontoggle=()=>{
+  const key=el.dataset.editorFold;
+  if(Object.prototype.hasOwnProperty.call(EDITOR_FOLDS,key))EDITOR_FOLDS[key]=el.open;
+ });
  const reOpenLocalPanel=()=>{
   const wasOpen=Boolean(document.querySelector('.local-icons-panel')?.open);
   paint();
@@ -2830,8 +2850,9 @@ function bindRendered(){
   lastSim=null;save();paint();
  });
  document.querySelectorAll('[data-item]').forEach(b=>b.onclick=()=>{
- const fromLoadout=b.dataset.loadout==='true';
- S.active=b.dataset.item;lastSim=null;save();paint();
+ const fromLoadout=b.dataset.loadout==='true',target=b.dataset.item;
+ if(!IDS.includes(target))return;
+ S.active=target;WORKSPACE_ACTIVE='items';lastSim=null;save();paint();
  if(fromLoadout)document.querySelector('#wheel-items')?.scrollIntoView?.({behavior:'smooth',block:'start'});
 });
  document.querySelectorAll('[data-icon-itemcode]').forEach(el=>el.onchange=()=>{
