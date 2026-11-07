@@ -537,6 +537,7 @@ function localIconLibraryPanel(){
   </div>
   <p class="local-pack-meta">${en?'The pack is stored locally in this browser (IndexedDB, when available); only its image IDs enter a SET backup. Re-import the ZIP on a different device.':
   'A képek ebben a böngészőben tárolódnak (ha elérhető: IndexedDB); a SET-mentésbe csak a választott képek azonosítói kerülnek. Más eszközön töltsd be újra a ZIP-et.'}</p>
+  ${summary.ready&&summary.skippedUnresolved>0?`<p class="local-pack-meta" role="status">${summary.skippedUnresolved} ${en?'unresolved clothing sprites were excluded without guessing an item slot. Other icons remain available.':'azonosítatlan ruházati ikont kihagytunk, mert nem tudjuk biztosan a felszerelési helyüket. A többi ikon használható.'}</p>`:''}
   ${summary.ready?`<p class="local-pack-meta">${en?'Current item':'Aktív item'}: <strong>${esc(NAMES[S.active])}</strong> · ${esc(identity.equipmentType||'unknown')} · ${identity.degree}DG ·
   ${distinct.length} ${en?'matching candidate image(s)':'illeszkedő képfajta'}. ${msg}</p>
   ${buttons?'<div class="local-icon-gallery">'+buttons+'</div>':''}
@@ -2596,6 +2597,7 @@ function bindRendered(){
    const result=await window.WHEEL_LOCAL_PACK.importFile(file);
    reOpenLocalPanel();
    toast((UI_LANG==='en'?'Local icon pack loaded: ':'Helyi ikoncsomag betöltve: ')+result.count+
+    (result.skippedUnresolved?' · '+result.skippedUnresolved+(UI_LANG==='en'?' unresolved skipped':' azonosítatlan kihagyva'):'')+
     (result.persisted?'':' · '+(UI_LANG==='en'?'session only':'csak erre a munkamenetre')));
   }catch(err){alertUI((UI_LANG==='en'?'Icon pack failed: ':'Ikoncsomag-hiba: ')+err.message);}
   packUpload.value='';
