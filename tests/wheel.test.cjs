@@ -1868,3 +1868,19 @@ test('local icon pack UI renders a safe manual import fallback in HU and EN',()=
  assert.match(html,/<script src="assets\/icons\/local-pack\.js"><\/script>/);
  assert.match(html,/local-icon-gallery/);
 });
+
+test('Sailor local import UI reports unresolved _ca sprites without blocking other icons',()=>{
+ const {hooks,window}=boot();
+ window.WHEEL_LOCAL_PACK={
+  summary:()=>({ready:true,count:1153,images:1031,skippedUnresolved:120}),
+  candidates:()=>[],iconURL:()=>null
+ };
+ const hu=hooks.localIconLibraryPanel();
+ assert.match(hu,/120 azonosítatlan ruházati ikont kihagytunk/);
+ assert.match(hu,/A többi ikon használható/);
+ assert.match(hu,/1153 jelölt/);
+ hooks.setUiLanguage('en');
+ const en=hooks.localIconLibraryPanel();
+ assert.match(en,/120 unresolved clothing sprites were excluded/);
+ assert.match(en,/Other icons remain available/);
+});

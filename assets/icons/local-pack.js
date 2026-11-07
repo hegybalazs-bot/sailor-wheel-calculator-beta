@@ -67,6 +67,26 @@ function pngOK(bytes){
  if(!bytes||bytes.length<24)return false;
  return PNG===Array.from(bytes.subarray(0,8),v=>v.toString(16).padStart(2,'0')).join('');
 }
+/* Some client _ca artwork records have no proven equipment slot.
+ * They are safe to ignore, never safe to guess as a specific slot.
+ * All other malformed records still reject the ZIP.
+ */
+function isUnresolvedCaCandidate(entry,files){
+ if(!entry||typeof entry!=='object'||entry.category!=='equipment'||
+  entry.slot!==null||entry.matchStatus!=='candidate'||entry.reviewStatus!=='pending'||
+  !['ch','eu'].includes(entry.region)||!['man','woman'].includes(entry.gender)||
+  !Number.isInteger(entry.degree)||entry.degree<1||entry.degree>10||
+  !IMAGE_PATH.test(entry.assetPath)||!SHA.test(entry.assetSha256)||
+  entry.assetPath!=='sprites/'+entry.assetSha256.slice(0,20)+'.png'||
+  !files.has(entry.assetPath))return false;
+ const m=/^icon\/item\/(china|europe)\/(man_item|woman_item)\/(clothes|heavy|light)_(\d{2})_ca\.ddj$/i.exec(entry.sourcePath||'');
+ if(!m||Number(m[4])!==entry.degree||
+  (m[1]==='china'?'ch':'eu')!==entry.region||
+  (m[2]==='man_item'?'man':'woman')!==entry.gender)return false;
+ const expected=m[1]==='china'?{clothes:'garment',heavy:'armor',light:'protector'}:
+  {clothes:'robe',heavy:'heavy_armor',light:'light_armor'};
+ return expected[m[3]]===entry.equipmentType;
+}
 function normalizeRecord(entry,files){
  if(!entry||typeof entry!=='object'||entry.category!=='equipment'||
   entry.matchStatus!=='candidate'||entry.reviewStatus!=='pending'||
@@ -93,8 +113,10 @@ async function validateZip(buffer){
   !manifest.icons.length||manifest.icons.length>1500)fail('This is not a supported local Sailor review pack.');
  if(!g.crypto?.subtle)fail('Secure browser image hashing is unavailable (HTTPS required).');
  const icons=[],images=new Map();
+ let skippedUnresolved=0;
  for(const entry of manifest.icons){
   if(entry.category==='wheel_candidate')continue; // Unproven Wheel coupon sprites are intentionally not mapped.
+  if(isUnresolvedCaCandidate(entry,files)){skippedUnresolved++;continue;}
   const e=normalizeRecord(entry,files);
   if(!e)fail('Invalid icon candidate metadata.');
   const bytes=files.get(e.assetPath);
@@ -113,7 +135,7 @@ async function validateZip(buffer){
   tested.add(digest);
  }
  return {icons,images:new Map([...images].map(([hash,p])=>[hash,files.get(p)])),
-  urls:new Map(),status:'ready'};
+  urls:new Map(),status:'ready',skippedUnresolved};
 }
 function setState(next){
  for(const value of state.urls.values())g.URL.revokeObjectURL(value);
@@ -133,7 +155,7 @@ function iconURL(hash){
  if(!state.urls.has(hash))state.urls.set(hash,g.URL.createObjectURL(new Blob([state.images.get(hash)],{type:'image/png'})));
  return state.urls.get(hash);
 }
-function summary(){return {ready:active(),count:state.icons.length,images:state.images.size};}
+function summary(){return {ready:active(),count:state.icons.length,images:state.images.size,skippedUnresolved:state.skippedUnresolved||0};}
 function openDatabase(){
  if(!g.indexedDB)return Promise.resolve(null);
  return new Promise((resolve,reject)=>{
