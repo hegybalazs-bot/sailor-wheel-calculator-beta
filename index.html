@@ -344,6 +344,58 @@ background:radial-gradient(circle at 28% 15%,#453656,#1c2136 66%,#102329);box-sh
 .slot-compare-wrap{margin-top:22px;padding-top:16px;border-top:1px solid #346a66}
 .slot-compare-wrap h4{margin:0 0 6px}
 @media print{.slot-compare-scroll{overflow:visible}.slot-compare-table{min-width:0;font-size:10px}}
+
+/* Emerald compact workspace — one visible work area at a time. */
+.workspace-nav{display:flex;gap:6px;overflow-x:auto;position:sticky;top:0;z-index:35;
+ padding:9px 10px;background:#081a1bfa;border:1px solid #2d6757;border-radius:12px;
+ margin-bottom:14px;scrollbar-width:thin;box-shadow:0 7px 20px #0005}
+.workspace-nav button{flex:0 0 auto;white-space:nowrap;border:1px solid #285d51;
+ background:#112b2c;color:#b5e1d2;font-size:12px;font-weight:740;padding:10px 13px}
+.workspace-nav button.selected,.workspace-nav button[aria-selected="true"]{
+ background:#185941;border-color:#44efa7;color:#f3fff9;box-shadow:inset 0 0 0 1px #44efa747}
+.workspace-nav button:focus-visible,.workspace-item-button:focus-visible{
+ outline:2px solid #60ffba;outline-offset:2px}
+.workspace-pane[hidden]{display:none!important}
+.workspace-pane{min-width:0;scroll-margin-top:65px}
+.workspace-item-strip{display:flex;gap:7px;position:sticky;top:60px;z-index:25;
+ overflow-x:auto;scrollbar-width:thin;padding:8px;background:#0a1b1cef;
+ border:1px solid #356653;border-radius:12px;margin:0 0 12px}
+.workspace-item-button{min-width:82px;max-width:120px;flex:0 0 auto;
+ display:flex;flex-direction:column;align-items:center;gap:4px;
+ background:#102a2a;border:1px solid #2b514d;border-radius:9px;padding:7px 9px;
+ color:#c6e3dc;font-weight:700;font-size:11px}
+.workspace-item-button.selected,.workspace-item-button[aria-pressed="true"]{
+ background:#174d39;border:1px solid #47f3ad;color:#fff}
+.workspace-item-button .sro-icon{width:32px;height:32px}
+.workspace-item-button span:last-child{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.workspace-fold{background:#0d2224;border:1px solid #2b594b;border-radius:12px;
+ margin:11px 0;padding:0 12px}
+.workspace-fold>summary{list-style:none;cursor:pointer;padding:12px 4px;
+ font-weight:780;color:#b5f8d6;user-select:none}
+.workspace-fold>summary::-webkit-details-marker{display:none}
+.workspace-fold>summary::before{content:"▸";display:inline-block;margin-right:9px;
+ color:#5ef3aa;transition:transform .15s}
+.workspace-fold[open]>summary::before{transform:rotate(90deg)}
+.workspace-fold>summary:focus-visible{outline:2px solid #5ef3aa;outline-offset:3px}
+.workspace-fold[open]{padding-bottom:12px}
+.workspace-full-set .premium-armory{margin-top:5px}
+.workspace-full-set .itemlist{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+.workspace-item-editor{scroll-margin-top:140px}
+.workspace-item-editor>.panel{margin-top:12px}
+.editor-fold-content{padding:5px 3px 12px}
+.workspace-pane .workspace-fold .panel{margin-top:10px}
+@media(max-width:780px){
+ .workspace-nav{padding:6px;gap:5px}
+ .workspace-nav button{padding:9px;font-size:11px}
+ .workspace-item-strip{top:54px;padding:5px}
+ .workspace-item-button{min-width:70px;padding:5px 7px}
+ .workspace-item-button .sro-icon{width:27px;height:27px}
+}
+@media print{
+ .workspace-nav,.workspace-item-strip{display:none!important}
+ .workspace-pane[hidden]{display:block!important}
+}
+
 </style>
 </head>
 <body><div class="shell">
@@ -2117,7 +2169,45 @@ function premiumAnalyticsPanel(){
  </section>`;
 }
 
-function setView(){return sharedSetPreviewPanel()+adminShowcasePanel()+premiumLoadoutPanel()+shellCards()+`<nav class="wheel-jumps" aria-label="Gyors ugrás a kalkulátor részeihez"><a href="#premium-set">🛡 SET</a><a href="#premium-analytics">${UI_LANG==='en'?'📊 Analytics':'📊 Elemzés'}</a><a href="#wheel-items">⚔ Wheel-sorok</a><a href="#wheel-balance">⚖ Balance</a><a href="#wheel-target">🎯 Célsegéd</a><a href="#wheel-optimize">🧠 Optimalizáló</a><a href="#wheel-compare">🔁 SET-ek</a></nav>`+balancePanel()+`<div class="content" id="wheel-items">${itemList()}${editPanel()}</div>${balanceTargetPanel()}${premiumAnalyticsPanel()}${optimizerPanel()}${blueTypeCountPanel()}${overviewTable()}${setComparePanel()}${shareToolsPanel()}${backupReminderPanel()}<div class="notice">Az egyedi célszázalékok és a sorok automatikusan mentődnek. Biztonsági mentéshez használd a <b>Mentés JSON-ba</b> gombot.</div>`;}
+/* Compact UI-only workspace: no changes to Wheel maths, SETs or game icons. */
+const WORKSPACE_PANELS=['items','balance','analytics','planner','extras'];
+let WORKSPACE_ACTIVE='items';
+const EDITOR_FOLDS={guide:false,tools:false,bonus:false,history:false,overview:false};
+function quickItemStrip(){
+ const en=UI_LANG==='en';
+ return `<nav class="workspace-item-strip" aria-label="${en?'Choose equipment to edit':'Felszerelés gyors kiválasztása'}">${IDS.map(id=>{
+  const v=check(id),active=S.active===id;
+  return `<button type="button" data-item="${id}" class="workspace-item-button ${active?'selected':''}"
+    aria-pressed="${active}" title="${esc(NAMES[id])} · ${esc(v.count+'/'+v.limit)}">
+    ${uiIcon('item',id)}<span>${esc(NAMES[id])}</span></button>`;
+ }).join('')}</nav>`;
+}
+function setView(){
+ const en=UI_LANG==='en';
+ const sections=[
+  {id:'items',icon:'⚔',label:en?'Items / Wheel':'Itemek / Wheel',
+   body:`${quickItemStrip()}<details class="workspace-fold workspace-full-set" data-editor-fold="overview" ${EDITOR_FOLDS.overview?'open':''}>
+    <summary>${en?'Full SET overview':'Teljes SET áttekintése'}</summary>
+    ${premiumLoadoutPanel()}${shellCards()}${itemList()}</details>
+    <div id="wheel-items" class="workspace-item-editor">${editPanel()}</div>
+    <p class="info">${en?'Wheel data saves automatically. Export JSON for backup.':'A Wheel-adatokat automatikusan mentjük. Biztonsági mentéshez exportálj JSON-t.'}</p>`},
+  {id:'balance',icon:'⚖',label:'Balance / Cél',body:balancePanel()+balanceTargetPanel()},
+  {id:'analytics',icon:'📊',label:en?'Analysis':'Elemzés',
+   body:premiumAnalyticsPanel()+overviewTable()+blueTypeCountPanel()},
+  {id:'planner',icon:'🧠',label:en?'Optimize / Compare':'Optimalizálás / SET-ek',
+   body:optimizerPanel()+setComparePanel()},
+  {id:'extras',icon:'🧰',label:en?'Sharing / Tools':'Megosztás / Eszközök',
+   body:adminShowcasePanel()+shareToolsPanel()+backupReminderPanel()}
+ ];
+ if(!WORKSPACE_PANELS.includes(WORKSPACE_ACTIVE))WORKSPACE_ACTIVE='items';
+ return sharedSetPreviewPanel()+`<nav class="workspace-nav" role="tablist" aria-label="${en?'Calculator workspace':'Kalkulátor munkafelület'}">
+ ${sections.map(p=>`<button type="button" role="tab" class="${WORKSPACE_ACTIVE===p.id?'selected':''}"
+ data-workspace-go="${p.id}" aria-selected="${WORKSPACE_ACTIVE===p.id}"
+ aria-controls="workspace-${p.id}" id="workspace-tab-${p.id}">${p.icon} ${esc(p.label)}</button>`).join('')}</nav>`+
+ sections.map(p=>`<section id="workspace-${p.id}" role="tabpanel" aria-labelledby="workspace-tab-${p.id}"
+ class="workspace-pane ${p.id==='items'?'workspace-main':''}" data-workspace-pane="${p.id}"
+ ${WORKSPACE_ACTIVE===p.id?'':'hidden'}>${p.body}</section>`).join('');
+}
 
 /* Emerald demo toolkit — informational stages, not claims of game-server drop odds. */
 
