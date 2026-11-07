@@ -98,3 +98,7 @@ The product is still **Beta**, not final v5.0. Remaining release requirements: i
 
 **No per-item picture picking is required after importing the user-owned browser ZIP.** The website now selects unique local candidates automatically from CH/EU, apparel family, weapon, Degree, item code and a single **Character / Icon gender** preference (Male by default for legacy SETs). A real apparel family must still be set if the existing SET says `Not set`. Missing, ambiguous and reused 12DG placeholder artwork safely falls back to SVG. Manual overrides remain optional. Source art is stored in your own browser only and never communicates with the game.
 
+
+## Compact workspace — less scrolling
+
+Inside **SET & items**, the sticky top workspace switcher offers **⚔ Items / Wheel**, **⚖ Balance / Target**, **📊 Analysis**, **🧠 Optimize / Compare**, and **🧰 Sharing / Tools**. Only the active work area is visible. A horizontal, sticky 12-item icon strip lets you change equipment without scrolling through the full SET overview, which is still available in an optional expander. Detailed explanations, advanced Blue/Wheel controls, HP/MP/Rate inputs, and previous rolls are also collapsible. These are **presentation-only changes**: SETs, CAP/degree limits, Wheel statistics, server profiles and JSON backup contents are preserved. Both workspace tabs and item icons remain touch-scrollable on mobile; print CSS exposes the complete report.
