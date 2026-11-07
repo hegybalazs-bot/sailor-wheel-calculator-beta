@@ -65,3 +65,13 @@ Browser importer expects a ZIP with `manifest.json`:
 }
 ```
 Example values above are illustrative, not verified game data; the hash and filename are placeholders.
+
+
+### 2026-11-07 original ZIP compatibility fix
+
+The first `Sailor_Ikoncsomag_Bongeszobe.zip` includes **120 apparel `_ca.ddj` source sprites** whose slot is `null` because their exact meaning was not established. The original import rejected the *entire* ZIP as `Invalid icon candidate metadata`.
+
+The browser importer now **skips exactly these recognized unresolved records**, leaves them unassigned, and retains all 1,153 identifiable equipment candidates. Only this narrow `_ca` pattern is skipped; invalid metadata for other records still causes a rejected import. The source path, region, gender, apparel family, Degree, image name and source digest must still agree. The gallery reports how many unresolved records were skipped.
+
+The smaller `Sailor_Ikoncsomag_Bongeszobe_Javitott.zip` (1,153 equipment records, 1,031 PNGs) can also be imported; it contains no unresolved `_ca` candidates. **Neither ZIP requires uploading original sprites to GitHub/Render.** The code remains strictly browser-local. Browser import and reload E2E are still not verified in real mobile/desktop devices.
+
