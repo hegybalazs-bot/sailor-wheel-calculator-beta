@@ -110,3 +110,64 @@ test('browser importer is strictly file-local and cannot fetch client or server 
  assert.doesNotMatch(js,/phBot|sbot|game packet|client hook/i);
  assert.match(js,/indexedDB/);assert.match(js,/SHA-256/);
 });
+
+test('original Sailor ZIP loads valid equipment while skipping unresolved _ca apparel sprites',async()=>{
+ const {api}=mock();
+ const full=packageWith(m=>{
+  m.icons.push({
+   category:'equipment',region:'ch',equipmentType:'garment',slot:null,degree:9,
+   gender:'man',weaponType:null,grade:null,itemCodes:['ITEM_CH_M_CLOTHES_09_CA_A'],
+   assetPath:name,assetSha256:sha,sourcePath:'icon/item/china/man_item/clothes_09_ca.ddj',
+   matchStatus:'candidate',reviewStatus:'pending'
+  });
+  return m;
+ });
+ const result=await api.importBuffer(full);
+ assert.equal(result.ready,true);
+ assert.equal(result.count,1);
+ assert.equal(result.skippedUnresolved,1);
+ assert.equal(api.candidates({region:'ch',equipmentType:'jewelry',slot:'earring',degree:9,weaponType:null}).length,1);
+ assert.equal(api.candidates({region:'ch',equipmentType:'garment',slot:'head',degree:9,weaponType:null}).length,0);
+});
+
+test('malformed null-slot and false _ca metadata still fail the import',async()=>{
+ const {api}=mock();
+ const make=(change)=>packageWith(m=>{
+  m.icons.push({
+   category:'equipment',region:'ch',equipmentType:'garment',slot:null,degree:9,
+   gender:'man',weaponType:null,grade:null,itemCodes:[],
+   assetPath:name,assetSha256:sha,sourcePath:'icon/item/china/man_item/clothes_09_ca.ddj',
+   matchStatus:'candidate',reviewStatus:'pending',
+   ...change
+  });
+  return m;
+ });
+ for(const change of [
+  {sourcePath:'icon/item/china/man_item/clothes_09_hat.ddj'},
+  {equipmentType:'weapon'},
+  {degree:10},
+  {region:'eu'},
+  {matchStatus:'verified'},
+  {assetSha256:'a'.repeat(64)}
+ ]){
+  await assert.rejects(api.importBuffer(make(change)),/Invalid icon candidate metadata/);
+ }
+});
+
+test('importing a corrected pack after an original pack preserves candidate identity',async()=>{
+ const {api}=mock();
+ const repaired=await api.importBuffer(packageWith());
+ assert.equal(repaired.ready,true);
+ assert.equal(repaired.skippedUnresolved,0);
+ assert.equal(repaired.count,1);
+ const old=packageWith(m=>{
+  m.icons.push({
+   category:'equipment',region:'eu',equipmentType:'heavy_armor',slot:null,degree:10,
+   gender:'woman',assetPath:name,assetSha256:sha,sourcePath:'icon/item/europe/woman_item/heavy_10_ca.ddj',
+   matchStatus:'candidate',reviewStatus:'pending'
+  });return m;
+ });
+ const imported=await api.importBuffer(old);
+ assert.equal(imported.count,1);
+ assert.equal(imported.skippedUnresolved,1);
+});
