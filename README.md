@@ -238,3 +238,7 @@ A 140 CAP-re korábban elmentett **üres vagy hiányzó MP referencia** az aktí
 
 **A ZIP betöltése után már nem kell egyesével ikonokat választani.** Az oldal automatikusan párosítja a CH/EU, ruhatípus, fegyver, Degree, itemkód és karakternem alapján ismert képeket a SET-ben. A férfi/női ikonokhoz egy közös **Karakter / Icon gender** mező tartozik (régi SET-ben alapból férfi). A jelenlegi ruhatípust továbbra is meg kell adni, ha eddig `Nincs megadva` volt. A bizonytalan, hiányzó vagy 12DG-s helyettesítő képnél a jól ismert SVG-ikon marad. Kézi felülbírálás van, de **nem kötelező**. A képek továbbra is a saját böngésződben maradnak, a játékot nem befolyásolják.
 
+
+## Kompakt munkafelület – kevesebb görgetés
+
+A **Szett & itemek** nézetben az öt részből álló, felül rögzített munkafelület-váltóval közvetlenül nyitható a **⚔ Itemek / Wheel**, **⚖ Balance / Cél**, **📊 Elemzés**, **🧠 Optimalizálás / SET-ek**, és **🧰 Megosztás / Eszközök**. Egyszerre csak a kiválasztott munkaterület látható. Az itemek gyors ikonsávjában 12 felszerelés közül választhatsz vízszintesen, a teljes SET-áttekintő külön lenyitható. Az itemszerkesztőben a szabálymagyarázat, haladó Blue/Wheel-funkciók, HP/MP/Rate-mezők és előzmények szintén összecsukhatók. Ezek **csak megjelenítési változások**: a Wheel-adatok, szerverprofilok, CAP-ok, statmaximumok és JSON-mentések változatlanul működnek. Mobilon is vízszintesen görgethető a felső menü, és a nyomtatási nézet megőrzi a részek tartalmát.
