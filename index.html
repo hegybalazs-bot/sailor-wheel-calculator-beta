@@ -344,6 +344,58 @@ background:radial-gradient(circle at 28% 15%,#453656,#1c2136 66%,#102329);box-sh
 .slot-compare-wrap{margin-top:22px;padding-top:16px;border-top:1px solid #346a66}
 .slot-compare-wrap h4{margin:0 0 6px}
 @media print{.slot-compare-scroll{overflow:visible}.slot-compare-table{min-width:0;font-size:10px}}
+
+/* Emerald compact workspace — one visible work area at a time. */
+.workspace-nav{display:flex;gap:6px;overflow-x:auto;position:sticky;top:0;z-index:35;
+ padding:9px 10px;background:#081a1bfa;border:1px solid #2d6757;border-radius:12px;
+ margin-bottom:14px;scrollbar-width:thin;box-shadow:0 7px 20px #0005}
+.workspace-nav button{flex:0 0 auto;white-space:nowrap;border:1px solid #285d51;
+ background:#112b2c;color:#b5e1d2;font-size:12px;font-weight:740;padding:10px 13px}
+.workspace-nav button.selected,.workspace-nav button[aria-selected="true"]{
+ background:#185941;border-color:#44efa7;color:#f3fff9;box-shadow:inset 0 0 0 1px #44efa747}
+.workspace-nav button:focus-visible,.workspace-item-button:focus-visible{
+ outline:2px solid #60ffba;outline-offset:2px}
+.workspace-pane[hidden]{display:none!important}
+.workspace-pane{min-width:0;scroll-margin-top:65px}
+.workspace-item-strip{display:flex;gap:7px;position:sticky;top:60px;z-index:25;
+ overflow-x:auto;scrollbar-width:thin;padding:8px;background:#0a1b1cef;
+ border:1px solid #356653;border-radius:12px;margin:0 0 12px}
+.workspace-item-button{min-width:82px;max-width:120px;flex:0 0 auto;
+ display:flex;flex-direction:column;align-items:center;gap:4px;
+ background:#102a2a;border:1px solid #2b514d;border-radius:9px;padding:7px 9px;
+ color:#c6e3dc;font-weight:700;font-size:11px}
+.workspace-item-button.selected,.workspace-item-button[aria-pressed="true"]{
+ background:#174d39;border:1px solid #47f3ad;color:#fff}
+.workspace-item-button .sro-icon{width:32px;height:32px}
+.workspace-item-button span:last-child{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.workspace-fold{background:#0d2224;border:1px solid #2b594b;border-radius:12px;
+ margin:11px 0;padding:0 12px}
+.workspace-fold>summary{list-style:none;cursor:pointer;padding:12px 4px;
+ font-weight:780;color:#b5f8d6;user-select:none}
+.workspace-fold>summary::-webkit-details-marker{display:none}
+.workspace-fold>summary::before{content:"▸";display:inline-block;margin-right:9px;
+ color:#5ef3aa;transition:transform .15s}
+.workspace-fold[open]>summary::before{transform:rotate(90deg)}
+.workspace-fold>summary:focus-visible{outline:2px solid #5ef3aa;outline-offset:3px}
+.workspace-fold[open]{padding-bottom:12px}
+.workspace-full-set .premium-armory{margin-top:5px}
+.workspace-full-set .itemlist{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+.workspace-item-editor{scroll-margin-top:140px}
+.workspace-item-editor>.panel{margin-top:12px}
+.editor-fold-content{padding:5px 3px 12px}
+.workspace-pane .workspace-fold .panel{margin-top:10px}
+@media(max-width:780px){
+ .workspace-nav{padding:6px;gap:5px}
+ .workspace-nav button{padding:9px;font-size:11px}
+ .workspace-item-strip{top:54px;padding:5px}
+ .workspace-item-button{min-width:70px;padding:5px 7px}
+ .workspace-item-button .sro-icon{width:27px;height:27px}
+}
+@media print{
+ .workspace-nav,.workspace-item-strip{display:none!important}
+ .workspace-pane[hidden]{display:block!important}
+}
+
 </style>
 </head>
 <body><div class="shell">
@@ -1756,15 +1808,23 @@ function maximaQuickPanel(){
  <div class="maxima-grid">${fields.map(([key,label])=>`<label>${statLabel(key.replace(/^max/,"").toUpperCase(),label)}<input type="number" inputmode="decimal" min="1" max="${key==='maxSTR'||key==='maxINT'?11:key==='maxDUR'?200:key==='maxCRIT'?3:99999}" ${['maxSTR','maxINT','maxDUR'].includes(key)||(S.cap>=130&&['maxHP','maxPARRY'].includes(key))?'readonly title="Rögzített, ellenőrzött maximum"':''} data-config="${key}" aria-label="${label} maximum ${c.degree}DG fokozaton" value="${esc(c[key]??'')}" placeholder="Kézi maximum"></label>`).join('')}</div></section>`;
 }
 function editPanel(){let id=S.active,ob=itm(id),v=check(id),c=currentCfg();let limit=itemLimit(ob,c);let hasWarn=v.issues.length||v.extra.length;return `<section class="panel"><h2 class="item-editor-head">${itemLabel(id)} ${statusP(v)}</h2><div class="item-goal-banner item-${v.color}"><div><b>Teljes Wheel-minőség: ${percent(v.itemPct)}</b> · Saját cél: <b>${percent(v.goalPct)}</b> · ${v.wheelComplete?'Minden pontozott sor kitöltve':`${v.qualityFilled}/${v.qualityRows} pontozott sor értéke kitöltve`}</div><div class="progress"><div style="width:${Math.min(100,v.itemPct??0)}%"></div></div><div class="info">A teljes Wheel-minőség minden számszerű, kiválasztott sor kézzel megadott vagy CAP/DG maximumához viszonyított %-ának átlaga. Egy sor = egy szavazat. Durability/Egyéb nincs pontozva. A hiányzó sorérték 0%-kal szerepel, de a státusz a kitöltésig nem végleges.</div></div><div class="formrow mb"><label>Item grade<select data-item-field="grade">${optionList({Normal:'Normal',SoS:'SoS / Magic',SoM:'SoM / Rare',Sun:'Sun / Legend'},ob.grade)}</select></label><label>${UI_LANG==='en'?'Icon Degree (optional)':'Ikon Degree – opcionális'}<input type="number" min="1" max="20" step="1" placeholder="SET DG: ${esc(c.degree)}" title="Csak az item ikonját módosítja, a statmaximumokat nem." data-icon-degree value="${esc(ob.iconDegree??'')}"></label><label>${UI_LANG==='en'?'Icon item code (optional)':'Ikon itemkód (opcionális)'}<input type="text" maxlength="128" data-icon-itemcode value="${esc(ob.iconItemCode??'')}" autocomplete="off" placeholder="ITEM_CH_..." title="Only for verified inventory-icon matching; never changes item stats."></label><label>Valódi Wheel-sorok száma<input type="number" min="0" max="${limit}" data-item-field="count" value="${esc(ob.count)}"></label><label>Célzott STR/INT sorok<input type="number" min="0" max="${limit}" data-item-field="target" value="${esc(ob.target)}"></label><label>Elérni kívánt Wheel-minőség (%)<input type="number" min="1" max="100" step="0.1" data-item-field="goalPct" value="${esc(ob.goalPct)}"></label><label>CAP alap ${esc(ob.grade)} sormax<input type="number" min="1" max="30" data-grade-max="${esc(ob.grade)}" value="${esc(c.gradeMax[ob.grade])}"></label><label>Kézi MAX SOR ehhez az itemhez (${esc(ob.grade)})<input type="number" min="1" max="30" data-item-max="${esc(ob.grade)}" value="${esc(ob.maxRowsByGrade?.[ob.grade]??'')}" title="Kézi sorlimit csak ehhez az itemhez és fokozathoz; ha üres, CAP-alapértéket használ." placeholder="Alapértelmezett: ${esc(c.gradeMax[ob.grade])}"></label>${id==='weapon'?`<label>Critical kötelező ehhez a fegyverhez?<select id="critReqSel"><option value="yes" ${critRequired()?'selected':''}>Igen</option><option value="no" ${!critRequired()?'selected':''}>Nem</option></select></label>`:''}</div>
-<div class="notice" style="margin-bottom:12px"><b>${esc(ob.grade)} max. STR / INT elmélet:</b> ${limit} sor × +${Math.max(num(c.maxSTR),num(c.maxINT))} = <b>+${limit*Math.max(num(c.maxSTR),num(c.maxINT))} STR+INT összesen</b> (ha minden Wheel-sor stat). Csak STR-ből vagy csak INT-ből is legfeljebb +${limit*Math.max(num(c.maxSTR),num(c.maxINT))} lehet, de egyszerre a kettő összege nem lehet +${2*limit*Math.max(num(c.maxSTR),num(c.maxINT))}. A sorlimit és a célzott stat-sorok száma kézzel állítható. A táblázatban minden sor modellhatára külön is felülírható; STR/INT esetén a megadható értékek tartománya is követi ezt.<hr style="border:0;border-top:1px solid var(--border);margin:8px 0"><b>STR / INT:</b> alapból választható +1…+11, kézi maximummal módosítható. A megadott STR/INT maximum jelenleg csak a kalkulátor ideiglenes értékelési alapja, <b>nem igazolt szervermaximum</b>.</div><div class="rulehint">${id==='weapon'?`Kötelező: Attack Rate legalább ${c.weaponMinAttackLines} sor (${c.weaponMinPerfectAttackLines??0} tökéletes) / összesen ${c.weaponMinAttackTotal}; ${Number(c.maxAR)===40&&Number(c.weaponMinAttackTotal)>80?"40/sor maximum mellett a 100+ összeghez minimum 3 Attack Rate sor szükséges; ":""} Blocking Rate ${c.weaponMinBlockLines} tökéletes sor; STR+INT ≥ ${c.weaponMinStats}; ${critRequired()?`Critical ≥ ${c.critMin} sor.`:`Critical opcionális.`} Fegyvertípus: ${esc(WEAPONS[weaponId()].label)}.`:id==='shield'?`Shield: legalább ${c.shieldMinBlockLines} darab 100%-os Blocking Rate sor. Az STR/INT a szettbe csak pajzsot használó fegyvernél számít bele.`:`Cél: ${ob.target} darab STR/INT sor és legalább ${percent(v.goalPct)} teljes Wheel-minőség. A saját célszázalékodat te állíthatod.`}</div>
+<details class="workspace-fold editor-fold" data-editor-fold="guide" ${EDITOR_FOLDS.guide?'open':''}>
+<summary>${UI_LANG==='en'?'Detailed score and item rules':'Részletes magyarázatok és szabályok'}</summary><div class="editor-fold-content">
+<div class="notice" style="margin-bottom:12px"><b>${esc(ob.grade)} max. STR / INT elmélet:</b> ${limit} sor × +${Math.max(num(c.maxSTR),num(c.maxINT))} = <b>+${limit*Math.max(num(c.maxSTR),num(c.maxINT))} STR+INT összesen</b> (ha minden Wheel-sor stat). Csak STR-ből vagy csak INT-ből is legfeljebb +${limit*Math.max(num(c.maxSTR),num(c.maxINT))} lehet, de egyszerre a kettő összege nem lehet +${2*limit*Math.max(num(c.maxSTR),num(c.maxINT))}. A sorlimit és a célzott stat-sorok száma kézzel állítható. A táblázatban minden sor modellhatára külön is felülírható; STR/INT esetén a megadható értékek tartománya is követi ezt.<hr style="border:0;border-top:1px solid var(--border);margin:8px 0"><b>STR / INT:</b> alapból választható +1…+11, kézi maximummal módosítható. A megadott STR/INT maximum jelenleg csak a kalkulátor ideiglenes értékelési alapja, <b>nem igazolt szervermaximum</b>.</div><div class="rulehint">${id==='weapon'?`Kötelező: Attack Rate legalább ${c.weaponMinAttackLines} sor (${c.weaponMinPerfectAttackLines??0} tökéletes) / összesen ${c.weaponMinAttackTotal}; ${Number(c.maxAR)===40&&Number(c.weaponMinAttackTotal)>80?"40/sor maximum mellett a 100+ összeghez minimum 3 Attack Rate sor szükséges; ":""} Blocking Rate ${c.weaponMinBlockLines} tökéletes sor; STR+INT ≥ ${c.weaponMinStats}; ${critRequired()?`Critical ≥ ${c.critMin} sor.`:`Critical opcionális.`} Fegyvertípus: ${esc(WEAPONS[weaponId()].label)}.`:id==='shield'?`Shield: legalább ${c.shieldMinBlockLines} darab 100%-os Blocking Rate sor. Az STR/INT a szettbe csak pajzsot használó fegyvernél számít bele.`:`Cél: ${ob.target} darab STR/INT sor és legalább ${percent(v.goalPct)} teljes Wheel-minőség. A saját célszázalékodat te állíthatod.`}</div></div></details>
+<details class="workspace-fold editor-fold" data-editor-fold="tools" ${EDITOR_FOLDS.tools?'open':''}>
+<summary>${UI_LANG==='en'?'Advanced Blue types, Wheel planner and max values':'Haladó Blue-típusok, Wheel-tervező és maximumok'}</summary><div class="editor-fold-content">
 ${blueCatalogPanel(id)}
 ${keepOrRerollPanel(id)}
 ${autoWheelChancePanel(id,true)}
 ${wheelPlanPanel(ob,limit)}
  ${maximaQuickPanel()}
+</div></details>
 ${v.count?`<div class="notice" style="margin-bottom:9px"><b>🛠 Kézi modellhatár:</b> minden sor negyedik oszlopában megadhatod a saját feltételezett 100%-os maximumodat. Az üres mező az adott CAP alapmaximumát használja. Koppints a zöld keretes számmezőre a sor maximumának szerkesztéséhez. Alapból a CAP/DG maximum látszik; a beírt korábbi sorértékeket nem töröljük.</div><div class="rowtable-wrap"><table class="rowtable"><thead><tr><th>#</th><th>Típus</th><th>Valós érték</th><th>Kézi modellhatár / sor (100%)</th><th>Minőség</th></tr></thead><tbody>${Array.from({length:Math.max(0,Math.min(30,v.count))},(_,i)=>{let row=ob.rows[i]||{type:'',value:''},max=effectiveRowMax(row,c),base=rowMax(row.type,c),qual=max&&row.value!==''&&row.value!=null?r2(num(row.value)/max*100)+'%':'—';return `<tr><td data-label="#">${i+1}</td><td data-label="Típus"><span class="sro-row-type-icon">${row.type?uiIcon("stat",row.type):""}</span><select data-row-type="${i}"><option value="">– válassz –</option>${optionList(allowedTypes(id,row.type),row.type)}</select></td><td data-label="Valós érték">${rowValueEditor(row,i)}</td><td data-label="100%-os MAX / sor">${row.type==='DUR'||row.type==='OTHER'?'Nem pontozott':`<input type="number" min="1" max="99999" step="${row.type==='FREEZE'?'0.1':'1'}" data-row-model-max="${i}" aria-label="${i+1}. sor egyedi maximuma" value="${esc(max??'')}" class="row-model-input" inputmode="decimal" placeholder="Add meg" title="Kézzel szerkeszthető maximum; a CAP/DG alapértékét megadva újra örökli a változásokat.">`}</td><td data-label="Minőség">${row.type==='DUR'||row.type==='OTHER'?'—':qual}</td></tr>`}).join('')}</tbody></table><datalist id="suggestedAR90"><option value="5"><option value="10"><option value="20"><option value="30"><option value="40"></datalist></div>`:`<div class="notice">Állítsd be felül, hány Wheel-sor lett az itemen, majd töltsd ki a sorokat. Nincs előre kitalált eredmény.</div>`}
+<details class="workspace-fold editor-fold" data-editor-fold="bonus" ${EDITOR_FOLDS.bonus?'open':''}>
+<summary>${UI_LANG==='en'?'HP / MP / Parry and Rate inputs':'HP / MP / Parry és Rate mezők'}</summary><div class="editor-fold-content">
 ${bonusStatsPanel(ob,c)}
 ${rateStatsPanel(ob,c)}
+</div></details>
 <div class="stats"><div class="stat"><small>STR – rollminőség</small><strong style="color:var(--green)">+${r2(v.str)} · ${percent(v.strQuality)}</strong><small>${v.strRows} sor · max. +${r2(v.strPotential)}</small></div><div class="stat"><small>INT – rollminőség</small><strong style="color:var(--blue)">+${r2(v.int)} · ${percent(v.intQuality)}</strong><small>${v.intRows} sor · max. +${r2(v.intPotential)}</small></div><div class="stat"><small>STR/INT sorok</small><strong>${v.statRows}/${ob.target}</strong><small>Valós / célzott sorok</small></div><div class="stat"><small>STR + INT rollminőség</small><strong>${percent(v.statQuality)}</strong><small>+${r2(v.stats)} / +${r2(v.strPotential+v.intPotential)}</small></div></div>
  <div class="notice" style="margin:12px 0"><b>Valódi sorösszetétel:</b> ${v.strRows} STR + ${v.intRows} INT + ${v.count-v.strRows-v.intRows} egyéb = ${v.count} sor.
  <b>STR+INT aktuális / választott STR+INT sorok max.:</b> +${r2(v.stats)} / +${r2(v.strPotential+v.intPotential)} (${percent(v.statQuality)}).
@@ -1777,9 +1837,12 @@ ${v.issues.length?`<div class="warnbox"><b>Adathiba:</b> ${v.issues.map(esc).joi
 ${v.count>0&&(!v.complete||!v.wheelComplete)?`<div class="warnbox">Néhány sor típusa vagy értéke még hiányzik, esetleg a CAP-hoz nincs megadva maximum. A teljes Wheel-minőség csak kitöltött, ismert maximumú sorokkal lesz végleges.</div>`:''}
 ${v.count>0&&v.extra.length?`<div class="warnbox"><b>Nem teljesülő feltételek:</b> ${v.extra.map(esc).join(' · ')}</div>`:''}
 <div class="actions"><button class="primary" id="snapshotBtn">✓ Aktuális pörgetés mentése</button><button id="goChance">🎲 Esélyek erre az itemre</button><button class="danger" id="resetItemBtn">Item törlése</button></div>
+<details class="workspace-fold editor-fold" data-editor-fold="history" ${EDITOR_FOLDS.history?'open':''}>
+<summary>${UI_LANG==='en'?'Roll history and earlier Wheel comparison':'Pörgetési előzmények és Wheel-összehasonlítás'}</summary><div class="editor-fold-content">
 ${wheelComparePanel(id,ob)}
  ${wheelStatsPanel(id,ob)}
  ${ob.history?.length?`<h3>Korábbi pörgetések (${ob.history.length})</h3><div class="history">${ob.history.slice().reverse().slice(0,10).map(h=>`<div>${esc(h.time)} · ${h.count} sor · STR +${h.str}, INT +${h.int} · Attack ${h.ar} / Block ${h.br} · ${esc(h.status)}</div>`).join('')}</div>`:'<p class="info">Még nem mentettél el korábbi pörgetést. A jelenlegi sorok ettől függetlenül automatikusan mentődnek.</p>'}
+</div></details>
 </section>`;}
 // v4.9.2: Parry recorded as Wheel rows is different from manually entered item Parry.
 function parryWheelOverview(obj,cfg=currentCfg()){
@@ -2117,7 +2180,60 @@ function premiumAnalyticsPanel(){
  </section>`;
 }
 
-function setView(){return sharedSetPreviewPanel()+adminShowcasePanel()+premiumLoadoutPanel()+shellCards()+`<nav class="wheel-jumps" aria-label="Gyors ugrás a kalkulátor részeihez"><a href="#premium-set">🛡 SET</a><a href="#premium-analytics">${UI_LANG==='en'?'📊 Analytics':'📊 Elemzés'}</a><a href="#wheel-items">⚔ Wheel-sorok</a><a href="#wheel-balance">⚖ Balance</a><a href="#wheel-target">🎯 Célsegéd</a><a href="#wheel-optimize">🧠 Optimalizáló</a><a href="#wheel-compare">🔁 SET-ek</a></nav>`+balancePanel()+`<div class="content" id="wheel-items">${itemList()}${editPanel()}</div>${balanceTargetPanel()}${premiumAnalyticsPanel()}${optimizerPanel()}${blueTypeCountPanel()}${overviewTable()}${setComparePanel()}${shareToolsPanel()}${backupReminderPanel()}<div class="notice">Az egyedi célszázalékok és a sorok automatikusan mentődnek. Biztonsági mentéshez használd a <b>Mentés JSON-ba</b> gombot.</div>`;}
+/* Compact UI-only workspace: no changes to Wheel maths, SETs or game icons. */
+const WORKSPACE_PANELS=['items','balance','analytics','planner','extras'];
+let WORKSPACE_ACTIVE='items';
+const EDITOR_FOLDS={guide:false,tools:false,bonus:false,history:false,overview:false};
+function quickItemStrip(){
+ const en=UI_LANG==='en';
+ return `<nav class="workspace-item-strip" aria-label="${en?'Choose equipment to edit':'Felszerelés gyors kiválasztása'}">${IDS.map(id=>{
+  const v=check(id),active=S.active===id;
+  return `<button type="button" data-item="${id}" class="workspace-item-button ${active?'selected':''}"
+    aria-pressed="${active}" title="${esc(NAMES[id])} · ${esc(v.count+'/'+v.limit)}">
+    ${uiIcon('item',id)}<span>${esc(NAMES[id])}</span></button>`;
+ }).join('')}</nav>`;
+}
+function setView(){
+ const en=UI_LANG==='en';
+ const sections=[
+  {id:'items',icon:'⚔',label:en?'Items / Wheel':'Itemek / Wheel',
+   body:`${quickItemStrip()}<details class="workspace-fold workspace-full-set" data-editor-fold="overview" ${EDITOR_FOLDS.overview?'open':''}>
+    <summary>${en?'Full SET overview':'Teljes SET áttekintése'}</summary>
+    ${premiumLoadoutPanel()}${shellCards()}${itemList()}</details>
+    <div id="wheel-items" class="workspace-item-editor">${editPanel()}</div>
+    <p class="info">${en?'Wheel data saves automatically. Export JSON for backup.':'A Wheel-adatokat automatikusan mentjük. Biztonsági mentéshez exportálj JSON-t.'}</p>`},
+  {id:'balance',icon:'⚖',label:en?'Balance / Target':'Balance / Cél',body:balancePanel()+balanceTargetPanel()},
+  {id:'analytics',icon:'📊',label:en?'Analysis':'Elemzés',
+   body:premiumAnalyticsPanel()+overviewTable()+blueTypeCountPanel()},
+  {id:'planner',icon:'🧠',label:en?'Optimize / Compare':'Optimalizálás / SET-ek',
+   body:optimizerPanel()+setComparePanel()},
+  {id:'extras',icon:'🧰',label:en?'Sharing / Tools':'Megosztás / Eszközök',
+   body:adminShowcasePanel()+shareToolsPanel()+backupReminderPanel()}
+ ];
+ if(!WORKSPACE_PANELS.includes(WORKSPACE_ACTIVE))WORKSPACE_ACTIVE='items';
+ return sharedSetPreviewPanel()+`<nav class="workspace-nav" role="tablist" aria-label="${en?'Calculator workspace':'Kalkulátor munkafelület'}">
+ ${sections.map(p=>`<button type="button" role="tab" class="${WORKSPACE_ACTIVE===p.id?'selected':''}"
+ data-workspace-go="${p.id}" aria-selected="${WORKSPACE_ACTIVE===p.id}"
+ aria-controls="workspace-${p.id}" id="workspace-tab-${p.id}">${p.icon} ${esc(p.label)}</button>`).join('')}</nav>`+
+ sections.map(p=>`<section id="workspace-${p.id}" role="tabpanel" aria-labelledby="workspace-tab-${p.id}"
+ class="workspace-pane ${p.id==='items'?'workspace-main':''}" data-workspace-pane="${p.id}"
+ ${WORKSPACE_ACTIVE===p.id?'':'hidden'}>${p.body}</section>`).join('');
+}
+
+function chooseWorkspace(panel,scroll=false){
+ if(!WORKSPACE_PANELS.includes(panel))return false;
+ WORKSPACE_ACTIVE=panel;
+ document.querySelectorAll('[data-workspace-pane]').forEach(el=>{
+  el.hidden=el.dataset.workspacePane!==panel;
+ });
+ document.querySelectorAll('[data-workspace-go]').forEach(el=>{
+  const selected=el.dataset.workspaceGo===panel;
+  el.setAttribute('aria-selected',String(selected));
+  el.classList.toggle('selected',selected);
+ });
+ if(scroll)document.querySelector('.workspace-nav')?.scrollIntoView?.({behavior:'smooth',block:'start'});
+ return true;
+}
 
 /* Emerald demo toolkit — informational stages, not claims of game-server drop odds. */
 
@@ -2608,6 +2724,11 @@ function paint(){
 function toast(txt){txt=translateText(txt);let old=$('.toast');if(old)old.remove();let x=document.createElement('div');x.className='toast';x.textContent=txt;document.body.append(x);clearTimeout(toastTimer);toastTimer=setTimeout(()=>x.remove(),2700);}
 function adjustState(){let id=S.active,ob=itm(id),lim=itemLimit(ob);if(ob.count>lim){ob.count=lim;ob.rows=ob.rows.slice(0,lim);toast('Figyelem: a grade maximumára csökkent a sorok száma!');}if(ob.count<0)ob.count=0;while(ob.rows.length<ob.count)ob.rows.push({type:'',value:''});}
 function bindRendered(){
+ document.querySelectorAll('[data-workspace-go]').forEach(el=>el.onclick=()=>chooseWorkspace(el.dataset.workspaceGo,true));
+ document.querySelectorAll('[data-editor-fold]').forEach(el=>el.ontoggle=()=>{
+  const key=el.dataset.editorFold;
+  if(Object.prototype.hasOwnProperty.call(EDITOR_FOLDS,key))EDITOR_FOLDS[key]=el.open;
+ });
  const reOpenLocalPanel=()=>{
   const wasOpen=Boolean(document.querySelector('.local-icons-panel')?.open);
   paint();
@@ -2657,7 +2778,7 @@ function bindRendered(){
  if(next)next.onclick=()=>{if(stageIndex<2)setWheelPlannerField('stage',WHEEL_PLANNER_STAGES[stageIndex+1]);};
  const goEditor=$('#wheelGoEditor');
  if(goEditor)goEditor.onclick=()=>{
-  S.tab='set';save();paint();
+  S.tab='set';WORKSPACE_ACTIVE='items';save();paint();
   document.querySelector('#wheel-items')?.scrollIntoView?.({behavior:'smooth',block:'start'});
  };
  document.querySelectorAll('[data-demo-cap]').forEach(el=>el.onclick=()=>{
@@ -2740,8 +2861,9 @@ function bindRendered(){
   lastSim=null;save();paint();
  });
  document.querySelectorAll('[data-item]').forEach(b=>b.onclick=()=>{
- const fromLoadout=b.dataset.loadout==='true';
- S.active=b.dataset.item;lastSim=null;save();paint();
+ const fromLoadout=b.dataset.loadout==='true',target=b.dataset.item;
+ if(!IDS.includes(target))return;
+ S.active=target;WORKSPACE_ACTIVE='items';lastSim=null;save();paint();
  if(fromLoadout)document.querySelector('#wheel-items')?.scrollIntoView?.({behavior:'smooth',block:'start'});
 });
  document.querySelectorAll('[data-icon-itemcode]').forEach(el=>el.onchange=()=>{

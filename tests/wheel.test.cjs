@@ -55,7 +55,7 @@ function boot(){
  state:()=>S,html:()=>document.querySelector('#root').innerHTML,translateText,translateMarkup,setUiLanguage,helpViewEnglish,promptUI,confirmUI,alertUI,validServerState,profileCaps,
  save,paint,createSet,selectSet,recordWheelSnapshot,
  wheelHistoryStats,wheelComparison,optimizedLinePlan,balanceTargetAdvice,
- getSetComparison,compareSetSlots,setSlotComparePanel,balanceThreshold,balanceMetrics,qualifiedWheelStats,chooseCap,rowValueEditor,itemBlueInventory,blueInventoryView,addServerProfile,renameServerProfile,switchServerProfile,currentServerName,exportAllProfiles,importAllProfiles,applyFixedStatLimits,switchDegreeModel,blueTypesFor,blueCatalogKey,BLUE_BASE,setBlueTypes,resetBlueTypes,blueCatalogWarnings,blueCatalogPanel,blueTypeCountPanel,visiblePlanTypes,chanceWeightsFor,ensureChanceWeights,chancesComplete,rowMax,penOneBlueEstimate,keepOrRerollAdvice,keepOrRerollPanel,validUserIconData,setUserIcon,clearUserIcon,userIconPanel,localIconLibraryPanel,localIconChoiceKey,manuallySelectedIconFor,autoIconFor,normalizeIconGender,uiIcon,itemLabel,statLabel,itemList,editPanel,iconIdentity,verifiedIconFor,verifiedWheelIconFor,wheelToolIcon,VERIFIED_ICON_ASSETS,normalizeApparelStyle,autoWheelEstimate,autoWheelChancePanel,chanceView,interactiveWheelPlanner,wheelPlannerFor,setWheelPlannerField,cleanWheelPlanner,wheelStagesPanel,wheelCostPanel,calculateCost,costPlanFor,adminDemoData,createAdminDemo,adminShowcasePanel,shareSetSnapshot,validateSharedSet,encodeSharedSet,decodeSharedSet,sharedSetPreviewPanel,evidenceFor,evidenceKey,evidencePanel,adminReviewReport,shellCards,parryWheelOverview,parryWheelOverviewCell,overviewValidWheelStats,overviewItemView,overviewSummary,overviewTable,check,total,premiumSlotMetrics,premiumSetInsights,premiumLoadoutPanel,premiumAnalyticsPanel,noteBackupExport,backupReminderState
+ getSetComparison,compareSetSlots,setSlotComparePanel,balanceThreshold,balanceMetrics,qualifiedWheelStats,chooseCap,rowValueEditor,itemBlueInventory,blueInventoryView,addServerProfile,renameServerProfile,switchServerProfile,currentServerName,exportAllProfiles,importAllProfiles,applyFixedStatLimits,switchDegreeModel,blueTypesFor,blueCatalogKey,BLUE_BASE,setBlueTypes,resetBlueTypes,blueCatalogWarnings,blueCatalogPanel,blueTypeCountPanel,visiblePlanTypes,chanceWeightsFor,ensureChanceWeights,chancesComplete,rowMax,penOneBlueEstimate,keepOrRerollAdvice,keepOrRerollPanel,validUserIconData,setUserIcon,clearUserIcon,userIconPanel,localIconLibraryPanel,localIconChoiceKey,manuallySelectedIconFor,autoIconFor,normalizeIconGender,quickItemStrip,chooseWorkspace,WORKSPACE_PANELS:()=>WORKSPACE_PANELS,workspaceActive:()=>WORKSPACE_ACTIVE,editorFolds:()=>EDITOR_FOLDS,uiIcon,itemLabel,statLabel,itemList,editPanel,iconIdentity,verifiedIconFor,verifiedWheelIconFor,wheelToolIcon,VERIFIED_ICON_ASSETS,normalizeApparelStyle,autoWheelEstimate,autoWheelChancePanel,chanceView,interactiveWheelPlanner,wheelPlannerFor,setWheelPlannerField,cleanWheelPlanner,wheelStagesPanel,wheelCostPanel,calculateCost,costPlanFor,adminDemoData,createAdminDemo,adminShowcasePanel,shareSetSnapshot,validateSharedSet,encodeSharedSet,decodeSharedSet,sharedSetPreviewPanel,evidenceFor,evidenceKey,evidencePanel,adminReviewReport,shellCards,parryWheelOverview,parryWheelOverviewCell,overviewValidWheelStats,overviewItemView,overviewSummary,overviewTable,check,total,premiumSlotMetrics,premiumSetInsights,premiumLoadoutPanel,premiumAnalyticsPanel,noteBackupExport,backupReminderState
 };`,sandbox,{timeout:5000});
  return {hooks:sandbox.hooks,document,store,inputs,window:sandbox.window};
 }
@@ -185,7 +185,8 @@ test('v4.9: responsive navigation and inputs persist with strict validation',()=
  const {hooks,inputs}=boot(),s=hooks.state();
  const navigation=hooks.html();
  assert.match(navigation,/id="wheel-items"/);
- assert.match(navigation,/href="#wheel-balance"/);
+ assert.match(navigation,/data-workspace-go="balance"/);
+ assert.match(navigation,/role="tablist"/);
  assert.match(navigation,/id="wheel-optimize"/);
  assert.match(navigation,/id="wheel-compare"/);
  const field=key=>inputs['[data-balance-field]'].find(el=>el.dataset.balanceField===key);
@@ -1987,4 +1988,84 @@ test('automatic icon UI remains bilingual and private, manual gallery optional o
  assert.match(hooks.localIconLibraryPanel(),/Optional manual override \(not required\)/);
  assert.match(hooks.localIconLibraryPanel(),/No individual icon clicks are required/);
  assert.doesNotMatch(hooks.localIconLibraryPanel(),/fetch\(|WebSocket/);
+});
+
+
+test('compact workspace defaults to item editor with other long sections hidden',()=>{
+ const {hooks}=boot(),html=hooks.html();
+ assert.match(html,/role="tablist" aria-label="Kalkulátor munkafelület"/);
+ assert.match(html,/data-workspace-pane="items"/);
+ assert.match(html,/data-workspace-pane="balance"\s+hidden/);
+ assert.match(html,/data-workspace-pane="analytics"\s+hidden/);
+ assert.match(html,/data-workspace-pane="planner"\s+hidden/);
+ assert.match(html,/data-workspace-pane="extras"\s+hidden/);
+ assert.match(html,/class="workspace-item-strip"/);
+ assert.equal((html.match(/class="workspace-item-button/g)||[]).length,12);
+ assert.match(html,/data-editor-fold="overview"\s*>/,'full 12-slot SET is folded by default');
+ assert.match(html,/data-editor-fold="guide"\s*>/);
+ assert.match(html,/data-editor-fold="tools"\s*>/);
+ assert.match(html,/data-editor-fold="bonus"\s*>/);
+ assert.match(html,/data-editor-fold="history"\s*>/);
+ assert.match(html,/id="wheel-items"/);
+});
+
+test('workspace navigation switches areas without changing SET data or stat calculations',()=>{
+ const {hooks}=boot(),s=hooks.state();
+ s.sets[90].head.count=1;
+ s.sets[90].head.rows=[{type:'STR',value:7}];
+ const before=JSON.stringify(s.sets[90]),str=hooks.total().str;
+ assert.equal(hooks.chooseWorkspace('balance'),true);
+ hooks.paint();
+ assert.equal(hooks.workspaceActive(),'balance');
+ assert.match(hooks.html(),/data-workspace-pane="balance"\s*>/);
+ assert.match(hooks.html(),/data-workspace-pane="items"\s+hidden/);
+ assert.match(hooks.html(),/id="wheel-balance"/);
+ assert.equal(hooks.chooseWorkspace('analytics'),true);
+ hooks.paint();
+ assert.match(hooks.html(),/data-workspace-pane="analytics"\s*>/);
+ assert.equal(hooks.chooseWorkspace('planner'),true);
+ hooks.paint();
+ assert.match(hooks.html(),/data-workspace-pane="planner"\s*>/);
+ assert.equal(hooks.chooseWorkspace('extras'),true);
+ hooks.paint();
+ assert.match(hooks.html(),/data-workspace-pane="extras"\s*>/);
+ assert.equal(hooks.chooseWorkspace('unknown'),false);
+ assert.equal(hooks.workspaceActive(),'extras');
+ assert.equal(hooks.chooseWorkspace('items'),true);
+ hooks.paint();
+ assert.match(hooks.html(),/data-workspace-pane="items"\s*>/);
+ assert.equal(JSON.stringify(s.sets[90]),before);
+ assert.equal(hooks.total().str,str);
+});
+
+test('compact workspace remains bilingual, touch-scrollable and print-safe',()=>{
+ const {hooks}=boot();
+ assert.match(html,/\.workspace-nav\{display:flex/);
+ assert.match(html,/\.workspace-item-strip\{display:flex/);
+ assert.match(html,/@media\(max-width:780px\)/);
+ assert.match(html,/\.workspace-pane\[hidden\]\{display:none!important\}/);
+ assert.match(html,/@media print\{[\s\S]*?\.workspace-pane\[hidden\]\{display:block!important\}/);
+ assert.equal(hooks.setUiLanguage('en'),true);
+ assert.match(hooks.html(),/Items \/ Wheel/);
+ assert.match(hooks.html(),/Balance \/ Target/);
+ assert.match(hooks.html(),/Optimize \/ Compare/);
+ assert.doesNotMatch(hooks.quickItemStrip(),/data-workspace-go/);
+ assert.match(hooks.quickItemStrip(),/aria-pressed="true"/);
+});
+
+test('editor advanced input panels and old SET overview are collapsed without deleting controls',()=>{
+ const {hooks}=boot(),state=hooks.state();
+ state.sets[90].shoulder.count=1;
+ state.sets[90].shoulder.rows=[{type:'STR',value:6}];
+ hooks.paint();
+ const root=hooks.html();
+ for(const fold of ['overview','guide','tools','bonus','history'])
+  assert.match(root,new RegExp('data-editor-fold="'+fold+'"'));
+ assert.match(root,/data-blue-type/);
+ assert.match(root,/data-row-type=/);
+ assert.match(root,/data-bonus-stat=/);
+ assert.match(root,/id="snapshotBtn"/);
+ assert.match(root,/id="localIconZip"/);
+ assert.equal(hooks.editorFolds().overview,false);
+ assert.equal(hooks.editorFolds().bonus,false);
 });
