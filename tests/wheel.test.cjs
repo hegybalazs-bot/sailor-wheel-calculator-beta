@@ -572,8 +572,9 @@ test('v4.9.6: PNG/WebP upload restrictions, clearing and labelled inputs',()=>{
  assert.ok(hooks.uiIcon('item','hands').includes('<svg'));
  const panel=hooks.userIconPanel();
  assert.equal((panel.match(/data-custom-icon="/g)||[]).length,12);
- assert.ok(panel.includes('Media.pk2'));
- assert.ok(panel.includes('felszerelési helyenként'));
+ assert.ok(panel.includes('opcionális kézi felülbírálás'));
+ assert.ok(panel.includes('minden Degree-nél felülírja'));
+ assert.ok(panel.includes('data-custom-icon="hands"'));
 });
 
 test('v4.9.6: perfect shoulder cannot improve under same-types uniform-value model',()=>{
