@@ -77,6 +77,7 @@ function isUnresolvedCaCandidate(entry,files){
   !['ch','eu'].includes(entry.region)||!['man','woman'].includes(entry.gender)||
   !Number.isInteger(entry.degree)||entry.degree<1||entry.degree>10||
   !IMAGE_PATH.test(entry.assetPath)||!SHA.test(entry.assetSha256)||
+  entry.assetPath!=='sprites/'+entry.assetSha256.slice(0,20)+'.png'||
   !files.has(entry.assetPath))return false;
  const m=/^icon\/item\/(china|europe)\/(man_item|woman_item)\/(clothes|heavy|light)_(\d{2})_ca\.ddj$/i.exec(entry.sourcePath||'');
  if(!m||Number(m[4])!==entry.degree||
