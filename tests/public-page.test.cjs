@@ -113,3 +113,14 @@ test('Silkroad feedback and public save status use correct beta naming and no pr
  assert.match(publicHtml,/✓ Set saved in this browser/);
  assert.doesNotMatch(publicHtml,/Emerald v5 preview set saved|Emerald v5 előzetes SET mentve/);
 });
+
+test('public calculator links to a distinct same-origin one-time icon recovery page',()=>{
+ assert.match(publicHtml,/href="ikon-helyreallitas\.html"/);
+ assert.doesNotMatch(publicHtml,/id="iconPack"|id="localIconZip"|data-pick-local-icon/);
+ const recovery=fs.readFileSync(path.join(__dirname,'..','ikon-helyreallitas.html'),'utf8');
+ assert.match(recovery,/WHEEL_LOCAL_PACK\.importFile\(file\)/);
+ assert.match(recovery,/WHEEL_LOCAL_PACK\.restore\(\)/);
+ assert.match(recovery,/90 CAP, 9DG/);
+ assert.match(recovery,/fájlokat nem/);
+ assert.doesNotMatch(recovery,/admin|data-custom-icon|data-icon-itemcode/i);
+});
