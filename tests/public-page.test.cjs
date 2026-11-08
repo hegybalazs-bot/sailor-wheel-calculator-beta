@@ -39,7 +39,7 @@ function boot(html){
 
 test('public calculator is its own indexable URL, not an admin preview',()=>{
  assert.match(publicHtml,/<meta name="robots" content="index,follow">/);
- assert.match(publicHtml,/<title>Wheel Calculator – Silkroad SET és Wheel kalkulátor<\/title>/);
+ assert.match(publicHtml,/<title>Silkroad Wheel Calculator – SET és Wheel kalkulátor<\/title>/);
  assert.match(publicHtml,/EMERALD · PUBLIC/);
  assert.doesNotMatch(publicHtml.slice(0,publicHtml.indexOf('<script>')),/Admin Demo|ADMIN PREVIEW/);
  assert.match(base,/href="publikus\.html"/);
