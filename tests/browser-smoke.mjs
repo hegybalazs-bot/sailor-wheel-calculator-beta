@@ -12,7 +12,7 @@ import assert from 'node:assert/strict';
 const root=resolve('.'),shots=join(root,'artifacts','browser');
 const require=createRequire(import.meta.url);
 const {build}=require('../tools/build-public.cjs');
-build(); // Test the real five-file release bundle, not repository-root publishing.
+build(); // Test the real public-only release bundle, not repository-root publishing.
 const publicRoot=join(root,'dist-public');
 await mkdir(shots,{recursive:true});
 const mime={'.html':'text/html;charset=utf-8','.js':'application/javascript;charset=utf-8','.json':'application/json;charset=utf-8','.css':'text/css;charset=utf-8'};
@@ -100,6 +100,7 @@ try{
     assert.equal(response.status(),404,path+' should not be included in the public bundle');
    }
    for(const publicPath of ['/','/index.html','/publikus.html','/visszajelzes.html',
+    '/ikon-helyreallitas.html',
     '/assets/icons/local-pack.js','/assets/icons/manifest.js']){
     const response=await context.request.get(origin+publicPath);
     assert.equal(response.status(),200,publicPath+' must remain available');
@@ -108,6 +109,38 @@ try{
   }finally{await context.close();}
  });
 
+
+ await check('90 CAP private icons recover once on same public origin and persist across reload',async()=>{
+  const {context,page,errors}=await newPage({width:1100,height:850});
+  const requests=[];
+  page.on('request',request=>{
+   if(request.method()!=='GET')requests.push(request.url()+' '+request.method());
+  });
+  try{
+   await page.goto(origin+'/');
+   await page.waitForSelector('#root [data-workspace-go="items"]');
+   assert.equal(await page.locator('[data-icon-source="local-auto"]').count(),0);
+   assert.equal(await page.locator('input[accept*="zip"]').count(),0,'player calculator has no ZIP/image uploader');
+   await page.locator('a[href="ikon-helyreallitas.html"]').click();
+   await page.waitForURL('**/ikon-helyreallitas.html');
+   assert.match(await page.locator('h1').innerText(),/90 CAP/);
+   await page.locator('#iconPack').setInputFiles({
+    name:'test-private-9dg.zip',mimeType:'application/zip',buffer:syntheticPack()
+   });
+   await page.waitForFunction(()=>document.querySelector('#message')?.dataset.level==='ok',null,{timeout:16000});
+   assert.match(await page.locator('#message').innerText(),/1 jelölt/);
+   await page.selectOption('#language','en');
+   assert.match(await page.locator('#message').innerText(),/1 candidates/);
+   await page.locator('a[href="index.html"]').click();
+   await page.waitForSelector('#root [data-icon-source="local-auto"]',{timeout:12000});
+   assert.equal(await page.locator('input[accept*="zip"]').count(),0);
+   await page.reload();
+   await page.waitForSelector('#root [data-icon-source="local-auto"]',{timeout:12000});
+   assert.deepEqual(requests,[],'private sprite transfer must remain in-browser');
+   assert.deepEqual(errors,[]);
+   await page.screenshot({path:join(shots,'recovered-9dg-icon-player.png'),fullPage:true});
+  }finally{await context.close();}
+ });
  await check('Silkroad feedback page switches language and copies current beta report',async()=>{
   const {context,page,errors}=await newPage({width:880,height:780});
   try{
