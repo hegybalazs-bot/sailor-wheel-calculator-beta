@@ -107,6 +107,26 @@ try{
    assert.deepEqual(errors,[]);
   }finally{await context.close();}
  });
+
+ await check('Silkroad feedback page switches language and copies current beta report',async()=>{
+  const {context,page,errors}=await newPage({width:880,height:780});
+  try{
+   await context.grantPermissions(['clipboard-read','clipboard-write']);
+   await page.goto(origin+'/visszajelzes.html');
+   assert.match(await page.title(),/Silkroad Wheel Calculator/);
+   assert.match(await page.locator('h1').innerText(),/Silkroad Wheel Calculator/);
+   await page.selectOption('#feedbackLanguage','en');
+   assert.match(await page.locator('h1').innerText(),/Feedback/);
+   await page.locator('#current').fill('A test example for the public beta feedback');
+   await page.locator('#copy').click();
+   const copied=await page.evaluate(()=>navigator.clipboard.readText());
+   assert.match(copied,/Emerald v5 BETA/);
+   assert.match(copied,/A test example for the public beta feedback/);
+   await page.locator('a[href="index.html"]').click();
+   await page.waitForSelector('#root [data-workspace-go="items"]');
+   assert.deepEqual(errors,[]);
+  }finally{await context.close();}
+ });
  await check('keyboard disclosures and landscape viewport allow access to all settings',async()=>{
   const {context,page,errors}=await newPage({width:844,height:390});
   try{
