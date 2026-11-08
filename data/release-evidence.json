@@ -18,7 +18,16 @@
       "blueCatalog": "pending",
       "lineLimits": "pending",
       "statMaximums": "pending",
-      "officialOdds": "unknown"
+      "officialOdds": "unknown",
+      "verifiedBy": null,
+      "reviewedAt": null,
+      "sources": {
+        "blueCatalog": null,
+        "lineLimits": null,
+        "statMaximums": null,
+        "officialOdds": null
+      },
+      "oddsMethodology": null
     },
     {
       "cap": 100,
@@ -26,7 +35,16 @@
       "blueCatalog": "pending",
       "lineLimits": "pending",
       "statMaximums": "pending",
-      "officialOdds": "unknown"
+      "officialOdds": "unknown",
+      "verifiedBy": null,
+      "reviewedAt": null,
+      "sources": {
+        "blueCatalog": null,
+        "lineLimits": null,
+        "statMaximums": null,
+        "officialOdds": null
+      },
+      "oddsMethodology": null
     },
     {
       "cap": 110,
@@ -34,7 +52,16 @@
       "blueCatalog": "pending",
       "lineLimits": "pending",
       "statMaximums": "pending",
-      "officialOdds": "unknown"
+      "officialOdds": "unknown",
+      "verifiedBy": null,
+      "reviewedAt": null,
+      "sources": {
+        "blueCatalog": null,
+        "lineLimits": null,
+        "statMaximums": null,
+        "officialOdds": null
+      },
+      "oddsMethodology": null
     },
     {
       "cap": 120,
@@ -42,7 +69,16 @@
       "blueCatalog": "pending",
       "lineLimits": "pending",
       "statMaximums": "pending",
-      "officialOdds": "unknown"
+      "officialOdds": "unknown",
+      "verifiedBy": null,
+      "reviewedAt": null,
+      "sources": {
+        "blueCatalog": null,
+        "lineLimits": null,
+        "statMaximums": null,
+        "officialOdds": null
+      },
+      "oddsMethodology": null
     },
     {
       "cap": 125,
@@ -50,7 +86,16 @@
       "blueCatalog": "pending",
       "lineLimits": "pending",
       "statMaximums": "pending",
-      "officialOdds": "unknown"
+      "officialOdds": "unknown",
+      "verifiedBy": null,
+      "reviewedAt": null,
+      "sources": {
+        "blueCatalog": null,
+        "lineLimits": null,
+        "statMaximums": null,
+        "officialOdds": null
+      },
+      "oddsMethodology": null
     },
     {
       "cap": 130,
@@ -58,7 +103,16 @@
       "blueCatalog": "pending",
       "lineLimits": "pending",
       "statMaximums": "pending",
-      "officialOdds": "unknown"
+      "officialOdds": "unknown",
+      "verifiedBy": null,
+      "reviewedAt": null,
+      "sources": {
+        "blueCatalog": null,
+        "lineLimits": null,
+        "statMaximums": null,
+        "officialOdds": null
+      },
+      "oddsMethodology": null
     },
     {
       "cap": 140,
@@ -66,7 +120,16 @@
       "blueCatalog": "pending",
       "lineLimits": "pending",
       "statMaximums": "pending",
-      "officialOdds": "unknown"
+      "officialOdds": "unknown",
+      "verifiedBy": null,
+      "reviewedAt": null,
+      "sources": {
+        "blueCatalog": null,
+        "lineLimits": null,
+        "statMaximums": null,
+        "officialOdds": null
+      },
+      "oddsMethodology": null
     }
   ],
   "gameMechanics": [
@@ -74,19 +137,28 @@
       "name": "Wheel of Fate",
       "status": "reference_only",
       "evidenceUrl": "https://pvpboard.com/en/silkroad/sailor-online",
-      "needs": "Count-change rules and per-grade caps on current 90 CAP server"
+      "needs": "Count-change rules and per-grade caps on current 90 CAP server",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "officialEvidenceUrl": null
     },
     {
       "name": "Wheel of Fortune",
       "status": "reference_only",
       "evidenceUrl": "https://pvpboard.com/en/silkroad/sailor-online",
-      "needs": "Allowed Blue types, their probabilities and preserving line count"
+      "needs": "Allowed Blue types, their probabilities and preserving line count",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "officialEvidenceUrl": null
     },
     {
       "name": "Feather Pen of Fortune",
       "status": "reference_only",
       "evidenceUrl": "https://pvpboard.com/en/silkroad/sailor-online",
-      "needs": "Affected line selection, value distribution and whether type remains"
+      "needs": "Affected line selection, value distribution and whether type remains",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "officialEvidenceUrl": null
     }
   ],
   "equipmentVerification": {
@@ -123,7 +195,9 @@
     "publicRedistribution": "permission_pending",
     "originalClientImageMatch": "local_candidate_only",
     "missing": "12–15DG outfit inventory sprites; existing 12DG placeholders should not be accepted as authentic",
-    "allowedPublicAssets": "Only original program-created SVG fallback art"
+    "allowedPublicAssets": "Only original program-created SVG fallback art",
+    "rightsHolder": null,
+    "reuseLicenseUrl": null
   },
   "qa": {
     "unitTests": "automated",
@@ -139,6 +213,30 @@
     "renderAutoDeployWebhook": "unverified",
     "manualDeployMayBeRequired": true,
     "adminAccess": "not_authenticated",
-    "publicPlayerUrl": "https://sailor-wheel-calculator-beta.onrender.com/publikus.html"
+    "publicPlayerUrl": "https://sailor-wheel-calculator-beta.onrender.com/publikus.html",
+    "renderWebhookProofUrl": null,
+    "adminAuthProofUrl": null
+  },
+  "qaEvidence": {
+    "physicalAndroid": {
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "proofUrl": null
+    },
+    "physicalIOS": {
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "proofUrl": null
+    },
+    "screenReader": {
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "proofUrl": null
+    },
+    "backupRoundtripPhysicalBrowsers": {
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "proofUrl": null
+    }
   }
 }
