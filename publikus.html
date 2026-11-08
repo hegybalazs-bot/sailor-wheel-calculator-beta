@@ -3145,12 +3145,12 @@ function inspectImportBackup(data){
 function backupImportConfirmation(details){
  const setLabel=details.sets||'?';
  return UI_LANG==='en'?
-  'IMPORT PREVIEW\\nServer profiles: '+details.count+'\\nActive server: '+details.name+
-  '\\nActive CAP: '+details.cap+'\\nSaved sets: '+setLabel+
-  '\\n\\nThe current browser data will be replaced. A JSON copy of the current data will be downloaded BEFORE importing. Check your downloads after continuing. Import now?':
-  'MENTÉS BETÖLTÉSE\\nSzerverprofilok: '+details.count+'\\nAktív szerver: '+details.name+
-  '\\nAktív CAP: '+details.cap+'\\nMentett SET-ek: '+setLabel+
-  '\\n\\nA jelenlegi böngészőadatok felülíródnak. Betöltés ELŐTT automatikusan letöltünk egy JSON-másolatot a mostani adatokról. Ellenőrizd a letöltést. Folytatod?';
+  'IMPORT PREVIEW\nServer profiles: '+details.count+'\nActive server: '+details.name+
+  '\nActive CAP: '+details.cap+'\nSaved sets: '+setLabel+
+  '\n\nThe current browser data will be replaced. A JSON copy of the current data will be downloaded BEFORE importing. Check your downloads after continuing. Import now?':
+  'MENTÉS BETÖLTÉSE\nSzerverprofilok: '+details.count+'\nAktív szerver: '+details.name+
+  '\nAktív CAP: '+details.cap+'\nMentett SET-ek: '+setLabel+
+  '\n\nA jelenlegi böngészőadatok felülíródnak. Betöltés ELŐTT automatikusan letöltünk egy JSON-másolatot a mostani adatokról. Ellenőrizd a letöltést. Folytatod?';
 }
 
 $('#importBtn').onclick=()=>$('#importFile').click();
