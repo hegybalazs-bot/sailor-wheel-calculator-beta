@@ -16,7 +16,7 @@ test('admin review matrix covers 7 CAPs, 6 gear families and 14 weapon types',()
  assert.equal(rows.filter(x=>x[1]===90&&x[5]==='shoulder').length,6);
 });
 test('admin review CSV never claims source blue types or model values are verified',()=>{
- const {header,records,path:out}=build();
+ const {header,records,path:out,focusedCount,focusedPath,focusedRecords}=build();
  assert(header.includes('official_type_probability'));
  assert(header.includes('verified_by_staff'));
  for(const row of records){
@@ -29,6 +29,14 @@ test('admin review CSV never claims source blue types or model values are verifi
  assert.match(text,/Sailor Online/);
  assert.match(text,/UNVERIFIED_REFERENCE_ONLY/);
  assert.equal(text.trim().split(/\r?\n/).length,421);
+ assert.equal(focusedCount,60);
+ assert.equal(focusedRecords.length,60);
+ assert(focusedRecords.every(row=>row[1]===90&&row[2]===9));
+ assert(focusedRecords.every(row=>row[row.length-1]==='UNVERIFIED_REFERENCE_ONLY'&&row.slice(8,19).every(v=>v==='')));
+ const starter=fs.readFileSync(focusedPath,'utf8');
+ assert(starter.startsWith('\ufeff'));
+ assert.equal(starter.trim().split(/\r?\n/).length,61);
+ assert(!starter.includes('"100"'));
 });
 test('generator rejects changes to the core 12 item list rather than silently dropping items',()=>{
  const broken=source.replace("shoulder:['STR','INT','PARRY','DUR'],",'');
