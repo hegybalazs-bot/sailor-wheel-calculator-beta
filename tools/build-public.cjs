@@ -33,7 +33,7 @@ function build(){
   assert(!/id="localIconZip"|data-custom-icon=|EMERALD v5 ADMIN PREVIEW|href="bemutato\.html"/.test(html));
  }
  const recovery=fs.readFileSync(path.join(dist,'ikon-helyreallitas.html'),'utf8');
- assert(recovery.includes('id="iconPack"')&&recovery.includes('assets/icons/local-pack.js'),'recovery must run in the player's own browser');
+ assert(recovery.includes('id="iconPack"')&&recovery.includes('assets/icons/local-pack.js'),'recovery imports images locally in browser');
  assert(!/id="localIconZip"|data-custom-icon=|ADMIN PREVIEW/.test(recovery),'no admin icon manager in recovery page');
  console.log('PUBLIC BUILD: '+list.join(', '));
  console.log('PUBLIC BUILD PASS — admin preview and client artwork excluded');
