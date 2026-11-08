@@ -2094,7 +2094,7 @@ test('manually entered Blue max stays explicit even when equal to the CAP defaul
  const head=s.sets[90].head;
  s.active='head';head.count=1;head.target=1;head.rows=[{type:'HP',value:300}];
  hooks.save();hooks.paint();
- const input=document.querySelectorAll('[data-row-model-max]')[0];
+ const input=inputs['[data-row-model-max]'][0];
  assert.ok(input,'the active item has a manual Blue maximum input');
  assert.equal(input.value,'','empty input inherits the current CAP/DG reference');
  assert.equal(hooks.rowMax('HP'),600);
