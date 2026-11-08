@@ -114,6 +114,10 @@ Inside **SET & items**, the sticky top workspace switcher offers **⚔ Items / W
 
 
 
+## Safe Render deployment (public-only)
+
+**Never publish the repository root (`.`) as the player site.** It contains development/admin-preview files and other internal resources. Configure the existing Render Static Site or a separate public site with **Build Command** `node tools/build-public.cjs`, **Publish Directory** `dist-public`, and branch `main`. Check that `/` and `/publikus.html` serve the player view and developer/admin paths are unavailable. This allowlisted build is **not** admin authentication: keep privileged administration behind a separate identity-aware host. The existing Render service must still be migrated by its operator; GitHub push auto-deploy remains an open issue. See [deployment instructions](docs/DEPLOY_PUBLIC_ONLY.md) and [tracking issue #29](https://github.com/hegybalazs-bot/sailor-wheel-calculator-beta/issues/29).
+
 ## Emerald v5 — beta QA and safe public delivery
 
 **Public player page:** https://sailor-wheel-calculator-beta.onrender.com/publikus.html
