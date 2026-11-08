@@ -1881,6 +1881,12 @@ function backupReminderPanel(){
     '✓ Az utolsó export indítása '+state.days+' napja volt. A következő emlékeztető 7 nap után jelenik meg.'}
     A SET-ek csak ebben a böngészőben tárolódnak; a JSON-t őrizd meg másik helyen is. Ez nem automatikus felhőmentés.</p>
   <button id="backupNowBtn" class="${state.due?'primary':'alt'}">↓ JSON-mentés indítása</button>
+  <details class="compact-manage" style="margin-top:12px"><summary>${UI_LANG==='en'?'Move my old web data':'Régi weboldal adatai áthozása'}</summary>
+  <p class="info">${UI_LANG==='en'?'Open the previous website, export its JSON backup, then import that file here. Saved SETs and CAP rules move with the JSON; private icon pictures need the separate local icon recovery page.':
+    'Nyisd meg a régi weboldalt, mentsd ki onnan JSON-ba a SET-eket, majd itt töltsd be azt a fájlt. A SET-ek és CAP-szabályok átjönnek; a privát ikonképeket külön, a helyi ikonvisszaállító oldalon kell betölteni.'}</p>
+  <p class="info"><a href="https://sailor-wheel-calculator-beta.onrender.com/publikus.html" target="_blank" rel="noopener noreferrer">${UI_LANG==='en'?'Open previous Wheel site':'Korábbi Wheel oldal megnyitása'}</a> ·
+  <a href="ikon-helyreallitas.html">${UI_LANG==='en'?'Restore local icons':'Helyi ikonok visszaállítása'}</a></p>
+  </details>
  </section>`;
 }
 function optionList(map,selected){return Object.entries(map).map(([v,l])=>`<option value="${esc(v)}" ${String(v)===String(selected)?'selected':''}>${esc(l)}</option>`).join('');}
