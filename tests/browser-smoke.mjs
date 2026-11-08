@@ -119,6 +119,47 @@ try{
    assert.deepEqual(errors,[]);
   }finally{await context.close();}
  });
+ await check('public JSON export restores own SET and target in a clean browser',async()=>{
+  const source=await newPage({width:1200,height:800});
+  const destination=await newPage({width:1200,height:800});
+  try{
+   await source.page.goto(origin+'/publikus.html');
+   await source.page.locator('#goalSel').fill('81');
+   await source.page.locator('#goalSel').dispatchEvent('change');
+   const [download]=await Promise.all([
+    source.page.waitForEvent('download',{timeout:12000}),
+    source.page.locator('#exportBtn').click()
+   ]);
+   const buffer=await readFile(await download.path());
+   const snapshot=JSON.parse(buffer.toString('utf8'));
+   assert.equal(typeof snapshot,'object');
+   await destination.page.goto(origin+'/publikus.html');
+   destination.page.on('dialog',dialog=>dialog.accept());
+   await destination.page.locator('#importFile').setInputFiles({
+    name:'wheel-backup.json',mimeType:'application/json',buffer
+   });
+   await destination.page.waitForFunction(()=>document.querySelector('#goalSel')?.value==='81',null,{timeout:12000});
+   assert.equal(await destination.page.locator('#goalSel').inputValue(),'81');
+   assert.deepEqual(source.errors,[]);
+   assert.deepEqual(destination.errors,[]);
+  }finally{await source.context.close();await destination.context.close();}
+ });
+ await check('public chance planner and rules pages render without browser errors',async()=>{
+  const {context,page,errors}=await newPage({width:1200,height:850});
+  try{
+   await page.goto(origin+'/publikus.html');
+   await page.locator('[data-tab="chance"]').click();
+   await page.waitForSelector('#root [data-wheel-stage="fate"]');
+   await page.locator('[data-wheel-stage="fortune"]').click();
+   await page.waitForSelector('#root [data-wheel-stage="pen"]');
+   await page.locator('[data-tab="rules"]').click();
+   await page.waitForSelector('#root');
+   assert.match(await page.locator('#root').innerText(),/90 CAP/i);
+   await page.locator('[data-tab="help"]').click();
+   assert.equal((await page.locator('#root').innerText()).length>150,true);
+   assert.deepEqual(errors,[]);
+  }finally{await context.close();}
+ });
  await check('developer preview imports private art and remembers it after reload',async()=>{
   const {context,page,errors}=await newPage({width:1440,height:900});
   try{
