@@ -128,8 +128,8 @@ test('public calculator links to a distinct same-origin one-time icon recovery p
 
 test('safe import preview validates profiles and previews CAP/SET counts without mutating state',()=>{
  const {audit}=boot(publicHtml);
- const prior=JSON.stringify(audit.state());
  const snapshot=audit.exportAllProfiles();
+ const prior=JSON.stringify(audit.state());
  const detail=audit.inspectImportBackup(snapshot);
  assert.equal(detail.count,1);
  assert.equal(detail.cap,90);
@@ -138,10 +138,10 @@ test('safe import preview validates profiles and previews CAP/SET counts without
  assert.match(audit.backupImportConfirmation(detail),/MENTÉS BETÖLTÉSE/);
  assert.match(audit.backupImportConfirmation(detail),/Szerverprofilok: 1/);
  assert.match(audit.backupImportConfirmation(detail),/automatikusan letöltünk/);
+ assert.equal(JSON.stringify(audit.state()),prior);
  audit.setLanguage('en');
  assert.match(audit.backupImportConfirmation(detail),/IMPORT PREVIEW/);
  assert.match(audit.backupImportConfirmation(detail),/downloaded BEFORE importing/);
- assert.equal(JSON.stringify(audit.state()),prior);
  assert.throws(()=>audit.inspectImportBackup({cfg:{},sets:{}}),/mentés/);
  const duplicate=structuredClone(snapshot);
  duplicate.serverProfiles.entries.push(structuredClone(duplicate.serverProfiles.entries[0]));
