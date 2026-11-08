@@ -100,3 +100,16 @@ test('compact Silkroad shell keeps all existing controls accessible in expandabl
   assert.match(page,/\.controls\{display:flex;flex-wrap:nowrap;overflow-x:auto/);
  }
 });
+
+
+test('Silkroad feedback and public save status use correct beta naming and no preview labels',()=>{
+ const feedback=fs.readFileSync(path.join(__dirname,'..','visszajelzes.html'),'utf8');
+ assert.match(feedback,/<title>Silkroad Wheel Calculator – Béta visszajelzés<\/title>/);
+ assert.match(feedback,/Silkroad caravan visual language/);
+ assert.match(feedback,/Emerald v5 BETA/);
+ assert.doesNotMatch(feedback,/Emerald v4\.10\.0/);
+ assert.match(publicHtml,/id="saveStatus" role="status" aria-live="polite"/);
+ assert.match(publicHtml,/✓ SET helyben mentve/);
+ assert.match(publicHtml,/✓ Set saved in this browser/);
+ assert.doesNotMatch(publicHtml,/Emerald v5 preview set saved|Emerald v5 előzetes SET mentve/);
+});
