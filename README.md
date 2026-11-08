@@ -254,3 +254,16 @@ A publikus nézet önálló, külön URL-en működik, és **nincsenek benne ké
 
 **Fontos:** ez két külön *felület*, nem hitelesített admin/jogosultsági rendszer. A publikus útvonal nem tartalmaz ikonfeltöltési lehetőséget, de a fejlesztői előnézet URL-jét a statikus tárhely önmagában nem védi hozzáférés-ellenőrzéssel. Valódi, kizárólag adminoknak elérhető kezelőfelülethez később szerveroldali bejelentkezés/jogosultság vagy privát deploy kell.
 
+
+
+## Emerald v5 — béta-minőségbiztosítás és biztonságos publikálás
+
+**Publikus felület:** https://sailor-wheel-calculator-beta.onrender.com/publikus.html
+
+A fejlesztési ág külön [Chromium böngészős teszteket](.github/workflows/browser-qa.yml) futtat: asztali/mobilnézet, CAP és JSON mentés-visszaállítás, Wheel-tervező, helyi ikoncsomag betöltése és IndexedDB. A képernyőképek a GitHub Actions mellékleteiben találhatók. A tényleges Android/iOS eszközökön történő vizsgálat továbbra is szükséges.
+
+`node tools/build-public.cjs` csak a publikus oldalhoz szükséges statikus fájlokat helyezi a `dist-public` mappába, az admin-előnézetet és a játék eredeti grafikáit kihagyva. A jelenlegi Render szolgáltatás **még nem** ezt a mappát publikálja; lásd [Publikus telepítési útmutató](docs/DEPLOY_PUBLIC_ONLY.md) és [GitHub #29](https://github.com/hegybalazs-bot/sailor-wheel-calculator-beta/issues/29). Az adminvédelemhez hitelesített, külön hosztolás kell.
+
+`node tools/release-gate.cjs` megmutatja a hitelesítés nélkül maradt adatokat; a `--stable` kapcsoló szándékosan blokkolja a stabil kiadást, amíg a Sailor adminok, a felhasználási jogosultak és valódi eszköztesztelők nem igazolták a kritikus feltételeket. A program soha nem kezel ismeretlen Wheel-esélyt hivatalosnak.
+
+Hasznos átadási dokumentumok: [Admin review (English)](docs/ADMIN_VERIFICATION_REQUEST_EN.md), [Béta kiadási jegyzet](docs/BETA_RELEASE_NOTES_HU.md), [Ellenőrzési nyilvántartás](data/release-evidence.json), [Roadmap](docs/ROADMAP_V5.md).
