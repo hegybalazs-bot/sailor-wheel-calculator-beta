@@ -1,0 +1,8 @@
+# Optional Render Blueprint for a SEPARATE, PUBLIC-ONLY static service.
+# This does not change the existing Render service until imported/applied by an authorized owner.
+services:
+  - type: web
+    name: sailor-wheel-calculator-public
+    runtime: static
+    buildCommand: node tools/build-public.cjs
+    staticPublishPath: dist-public

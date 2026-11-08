@@ -1,0 +1,242 @@
+{
+  "schemaVersion": 1,
+  "title": "Wheel Calculator — Emerald v5",
+  "stage": "beta",
+  "updatedAt": "2026-11-08",
+  "server": "Sailor Online",
+  "notice": "Community/player input and generic reference rules are NOT approved or measured Sailor Online server configuration.",
+  "adminApproval": {
+    "status": "pending",
+    "reviewer": null,
+    "reviewDate": null,
+    "evidenceUrl": null
+  },
+  "capScopes": [
+    {
+      "cap": 90,
+      "degree": 9,
+      "blueCatalog": "pending",
+      "lineLimits": "pending",
+      "statMaximums": "pending",
+      "officialOdds": "unknown",
+      "verifiedBy": null,
+      "reviewedAt": null,
+      "sources": {
+        "blueCatalog": null,
+        "lineLimits": null,
+        "statMaximums": null,
+        "officialOdds": null
+      },
+      "oddsMethodology": null
+    },
+    {
+      "cap": 100,
+      "degree": null,
+      "blueCatalog": "pending",
+      "lineLimits": "pending",
+      "statMaximums": "pending",
+      "officialOdds": "unknown",
+      "verifiedBy": null,
+      "reviewedAt": null,
+      "sources": {
+        "blueCatalog": null,
+        "lineLimits": null,
+        "statMaximums": null,
+        "officialOdds": null
+      },
+      "oddsMethodology": null
+    },
+    {
+      "cap": 110,
+      "degree": null,
+      "blueCatalog": "pending",
+      "lineLimits": "pending",
+      "statMaximums": "pending",
+      "officialOdds": "unknown",
+      "verifiedBy": null,
+      "reviewedAt": null,
+      "sources": {
+        "blueCatalog": null,
+        "lineLimits": null,
+        "statMaximums": null,
+        "officialOdds": null
+      },
+      "oddsMethodology": null
+    },
+    {
+      "cap": 120,
+      "degree": null,
+      "blueCatalog": "pending",
+      "lineLimits": "pending",
+      "statMaximums": "pending",
+      "officialOdds": "unknown",
+      "verifiedBy": null,
+      "reviewedAt": null,
+      "sources": {
+        "blueCatalog": null,
+        "lineLimits": null,
+        "statMaximums": null,
+        "officialOdds": null
+      },
+      "oddsMethodology": null
+    },
+    {
+      "cap": 125,
+      "degree": null,
+      "blueCatalog": "pending",
+      "lineLimits": "pending",
+      "statMaximums": "pending",
+      "officialOdds": "unknown",
+      "verifiedBy": null,
+      "reviewedAt": null,
+      "sources": {
+        "blueCatalog": null,
+        "lineLimits": null,
+        "statMaximums": null,
+        "officialOdds": null
+      },
+      "oddsMethodology": null
+    },
+    {
+      "cap": 130,
+      "degree": null,
+      "blueCatalog": "pending",
+      "lineLimits": "pending",
+      "statMaximums": "pending",
+      "officialOdds": "unknown",
+      "verifiedBy": null,
+      "reviewedAt": null,
+      "sources": {
+        "blueCatalog": null,
+        "lineLimits": null,
+        "statMaximums": null,
+        "officialOdds": null
+      },
+      "oddsMethodology": null
+    },
+    {
+      "cap": 140,
+      "degree": null,
+      "blueCatalog": "pending",
+      "lineLimits": "pending",
+      "statMaximums": "pending",
+      "officialOdds": "unknown",
+      "verifiedBy": null,
+      "reviewedAt": null,
+      "sources": {
+        "blueCatalog": null,
+        "lineLimits": null,
+        "statMaximums": null,
+        "officialOdds": null
+      },
+      "oddsMethodology": null
+    }
+  ],
+  "gameMechanics": [
+    {
+      "name": "Wheel of Fate",
+      "status": "reference_only",
+      "evidenceUrl": "https://pvpboard.com/en/silkroad/sailor-online",
+      "needs": "Count-change rules and per-grade caps on current 90 CAP server",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "officialEvidenceUrl": null
+    },
+    {
+      "name": "Wheel of Fortune",
+      "status": "reference_only",
+      "evidenceUrl": "https://pvpboard.com/en/silkroad/sailor-online",
+      "needs": "Allowed Blue types, their probabilities and preserving line count",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "officialEvidenceUrl": null
+    },
+    {
+      "name": "Feather Pen of Fortune",
+      "status": "reference_only",
+      "evidenceUrl": "https://pvpboard.com/en/silkroad/sailor-online",
+      "needs": "Affected line selection, value distribution and whether type remains",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "officialEvidenceUrl": null
+    }
+  ],
+  "equipmentVerification": {
+    "status": "pending",
+    "requiredRegion": [
+      "ch",
+      "eu"
+    ],
+    "requiredOutfitFamilies": [
+      "armor",
+      "protector",
+      "garment",
+      "heavy_armor",
+      "light_armor",
+      "robe"
+    ],
+    "requiredSlots": [
+      "head",
+      "shoulder",
+      "chest",
+      "hands",
+      "legs",
+      "foot",
+      "necklace",
+      "earring",
+      "ring",
+      "weapon",
+      "shield"
+    ],
+    "approvedItemEvidence": [],
+    "requiredImageEvidence": "game screenshot with visible slot, CAP/DG, Blue lines, maximum model / source information"
+  },
+  "icons": {
+    "publicRedistribution": "permission_pending",
+    "originalClientImageMatch": "local_candidate_only",
+    "missing": "12–15DG outfit inventory sprites; existing 12DG placeholders should not be accepted as authentic",
+    "allowedPublicAssets": "Only original program-created SVG fallback art",
+    "rightsHolder": null,
+    "reuseLicenseUrl": null
+  },
+  "qa": {
+    "unitTests": "automated",
+    "chromiumDesktop": "automation_added",
+    "chromiumMobileViewport": "automation_added",
+    "physicalAndroid": "not_run",
+    "physicalIOS": "not_run",
+    "screenReader": "not_run",
+    "backupRoundtripPhysicalBrowsers": "not_run"
+  },
+  "delivery": {
+    "mainBranch": "main",
+    "renderAutoDeployWebhook": "unverified",
+    "manualDeployMayBeRequired": true,
+    "adminAccess": "not_authenticated",
+    "publicPlayerUrl": "https://sailor-wheel-calculator-beta.onrender.com/publikus.html",
+    "renderWebhookProofUrl": null,
+    "adminAuthProofUrl": null
+  },
+  "qaEvidence": {
+    "physicalAndroid": {
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "proofUrl": null
+    },
+    "physicalIOS": {
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "proofUrl": null
+    },
+    "screenReader": {
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "proofUrl": null
+    },
+    "backupRoundtripPhysicalBrowsers": {
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "proofUrl": null
+    }
+  }
+}

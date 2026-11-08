@@ -11,4 +11,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node --test tests/*.test.cjs
+      - name: Run all deterministic unit and migration tests
+        run: node --test tests/*.test.cjs
+      - name: Validate current beta evidence and release blockers
+        run: node tools/release-gate.cjs
+      - name: Build safe public-only static bundle
+        run: node tools/build-public.cjs
+      - name: Store independently inspectable public-site artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheel-calculator-public-bundle
+          path: dist-public/
+          if-no-files-found: error
+          retention-days: 14

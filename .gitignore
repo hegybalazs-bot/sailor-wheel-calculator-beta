@@ -1,0 +1,5 @@
+# Generated public release directory and local browser screenshots
+/dist-public/
+/artifacts/browser/
+/node_modules/
+*.log
