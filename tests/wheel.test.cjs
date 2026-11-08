@@ -2090,7 +2090,7 @@ test('Silkroad theme is shared by preview and player page without remote artwork
 });
 
 test('manually entered Blue max stays explicit even when equal to the CAP default, and survives a reload',()=>{
- const {hooks,document,store}=boot(),s=hooks.state();
+ const {hooks,inputs,store}=boot(),s=hooks.state();
  const head=s.sets[90].head;
  s.active='head';head.count=1;head.target=1;head.rows=[{type:'HP',value:300}];
  hooks.save();hooks.paint();
