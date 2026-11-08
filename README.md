@@ -267,3 +267,8 @@ A fejlesztési ág külön [Chromium böngészős teszteket](.github/workflows/b
 `node tools/release-gate.cjs` megmutatja a hitelesítés nélkül maradt adatokat; a `--stable` kapcsoló szándékosan blokkolja a stabil kiadást, amíg a Sailor adminok, a felhasználási jogosultak és valódi eszköztesztelők nem igazolták a kritikus feltételeket. A program soha nem kezel ismeretlen Wheel-esélyt hivatalosnak.
 
 Hasznos átadási dokumentumok: [Admin review (English)](docs/ADMIN_VERIFICATION_REQUEST_EN.md), [Béta kiadási jegyzet](docs/BETA_RELEASE_NOTES_HU.md), [Ellenőrzési nyilvántartás](data/release-evidence.json), [Roadmap](docs/ROADMAP_V5.md).
+
+
+### Admin Blue-ellenőrző táblázat
+
+A GitHub Actions `wheel-blue-admin-review-template` nevű melléklete tartalmazza a **420 soros, CSV-formátumú** adminellenőrző táblázatot. A CAP 90/100/110/120/125/130/140, CH/EU ruhatípusok, fegyverek, pajzsok és ékszerek saját sorokat kaptak. Az eddigi iSRO Blue-alaplista kizárólag **nem hitelesített referencia**; a valódi Sailor maximumok, kockázatok és esélyek üresen várnak jóváhagyott adatot. Generálás: `node tools/export-admin-blue-review.cjs`.

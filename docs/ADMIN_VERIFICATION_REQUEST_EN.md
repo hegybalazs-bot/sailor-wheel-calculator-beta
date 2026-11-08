@@ -44,3 +44,10 @@ Please supply or confirm:
 For other CAPs (100, 110, 120, 125, 130, 140) repeat this template. No numerical claims will be marked official until traceable evidence exists.
 
 **Privacy/security:** No credentials, game client connection, phBot, item reading or game automation is requested. All game values are entered manually by the player.
+
+
+## Ready-to-fill verification worksheet
+
+GitHub Actions now generates the artifact `wheel-blue-admin-review-template` containing **Sailor_Blue_Verification_Template.csv** with **420 rows** covering all seven CAPs, the six CH/EU apparel families, four jewelry slots per region, fourteen weapon types and CH/EU shields. Each row includes the current generic Blue-type list **clearly labeled UNVERIFIED_REFERENCE_ONLY**. Columns for official possible types, Normal/SoS/SoM/Sun line maximums, per-type value limits, type probability, value distribution, evidence URL, reviewer and date are deliberately blank.
+
+Please fill in only rules and evidence you can confirm. Leave unknown probabilities blank; do not convert zero recorded examples into 0% odds. The Degree column is the calculator's present default reference; verify the actual Sailor season and item Degree separately. Provide this CSV back alongside any screenshots and published sources; no bot/client credentials or executable files are needed.
