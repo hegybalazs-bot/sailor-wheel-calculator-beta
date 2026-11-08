@@ -5,16 +5,16 @@
  */
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const base=path.resolve(__dirname,'..'),dist=path.join(base,'dist-public');
-const allowed=new Map([
+const allowed=[
  ['publikus.html','index.html'],
  ['publikus.html','publikus.html'],
  ['visszajelzes.html','visszajelzes.html'],
  ['assets/icons/manifest.js','assets/icons/manifest.js'],
  ['assets/icons/local-pack.js','assets/icons/local-pack.js']
-]);
+];
 function build(){
  fs.rmSync(dist,{recursive:true,force:true});fs.mkdirSync(dist,{recursive:true});
- for(const [i,[source,target]] of Array.from(allowed.entries()).entries()){
+ for(const [source,target] of allowed){
   const bytes=fs.readFileSync(path.join(base,source));
   const destination=path.join(dist,target);
   fs.mkdirSync(path.dirname(destination),{recursive:true});
@@ -25,7 +25,7 @@ function build(){
   const p=path.join(dir,entry.name);
   return entry.isDirectory()?walk(p):[path.relative(dist,p).replaceAll(path.sep,'/')];
  });
- const list=walk(dist).sort(),expected=[...allowed.values()].sort();
+ const list=walk(dist).sort(),expected=allowed.map(pair=>pair[1]).sort();
  assert.deepEqual(list,expected,'no extra files may leak into the public deployment');
  for(const file of ['index.html','publikus.html']){
   const html=fs.readFileSync(path.join(dist,file),'utf8');
