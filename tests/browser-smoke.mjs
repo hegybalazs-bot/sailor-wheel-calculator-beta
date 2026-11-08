@@ -119,6 +119,37 @@ try{
    assert.deepEqual(errors,[]);
   }finally{await context.close();}
  });
+
+ await check('compact player layout keeps CAP at hand, expands SET/server actions and persists CAP',async()=>{
+  const {context,page,errors}=await newPage({width:390,height:844});
+  try{
+   await page.goto(origin+'/publikus.html');
+   assert.equal(await page.locator('.beta-caution').evaluate(el=>el.open),false);
+   assert.equal(await page.locator('.serverbar > .compact-manage').evaluate(el=>el.open),false);
+   assert.equal(await page.locator('.setbar > .compact-manage').evaluate(el=>el.open),false);
+   assert.equal(await page.locator('#capSel').isVisible(),true);
+   const dims=await page.locator('.controls').evaluate(el=>({height:el.getBoundingClientRect().height,
+    scroll:el.scrollWidth,client:el.clientWidth}));
+   assert(dims.height<105,'quick character settings should be one row '+JSON.stringify(dims));
+   assert(dims.scroll>dims.client,'extra selectors should scroll inside the bar '+JSON.stringify(dims));
+   await page.locator('.setbar > .compact-manage summary').click();
+   assert.equal(await page.locator('#newSetBtn').isVisible(),true);
+   assert.equal(await page.locator('#deleteSetBtn').isVisible(),true);
+   await page.locator('.serverbar > .compact-manage summary').click();
+   assert.equal(await page.locator('#newServerBtn').isVisible(),true);
+   await page.locator('.beta-caution > summary').click();
+   assert.match(await page.locator('.beta-caution').innerText(),/NYILVÁNOS WHEEL CALCULATOR/);
+   await page.selectOption('#capSel','110');
+   await page.reload();
+   assert.equal(await page.locator('#capSel').inputValue(),'110');
+   await page.selectOption('#langSel','en');
+   assert.match(await page.locator('.beta-caution summary').innerText(),/BETA/);
+   assert.match(await page.locator('.setbar > .compact-manage summary').innerText(),/Manage sets/);
+   const widths=await page.evaluate(()=>({win:innerWidth,page:document.documentElement.scrollWidth}));
+   assert(widths.page-widths.win<=6,'no global horizontal overflow '+JSON.stringify(widths));
+   assert.deepEqual(errors,[]);
+  }finally{await context.close();}
+ });
  await check('public JSON export restores own SET and target in a clean browser',async()=>{
   const source=await newPage({width:1200,height:800});
   const destination=await newPage({width:1200,height:800});

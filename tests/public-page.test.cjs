@@ -83,3 +83,20 @@ test('public page retains HU/EN and never renders original art import UI',()=>{
  assert.doesNotMatch(audit.html(),/data-evidence/);
  assert.doesNotMatch(publicHtml,/name="image"|accept="image\/png|accept="\.zip,application\/zip"/);
 });
+
+
+test('compact Silkroad shell keeps all existing controls accessible in expandable management panels',()=>{
+ for(const page of [base,publicHtml]){
+  assert.match(page,/<details class="beta-caution">[\s\S]*?<summary>⚠ BÉTA/);
+  assert.match(page,/<details class="compact-manage"><summary>⚙ Szerver beállításai<\/summary>/);
+  assert.match(page,/<details class="compact-manage set-manage"><summary>⚙ SET kezelése<\/summary>/);
+  assert.match(page,/<div class="controls" role="group" aria-label="Gyors karakterbeállítások, vízszintesen görgethető">/);
+  for(const id of ['serverPicker','newServerBtn','renameServerBtn','setPicker','newSetBtn','copySetBtn','renameSetBtn','deleteSetBtn','capSel','degreeInput','weaponSel','apparelStyleSel','iconGenderSel','capQuick','capApply','goalSel','applyGoalAll','exportBtn','importBtn'])
+   assert.match(page,new RegExp('id="'+id+'"'),id);
+  const band=page.slice(page.indexOf('<div class="controls"'),page.indexOf('<div class="weapon-strip"'));
+  assert(band.indexOf('id="capSel"')<band.indexOf('id="degreeInput"'));
+  assert(band.indexOf('id="degreeInput"')<band.indexOf('id="weaponSel"'));
+  assert(band.indexOf('id="weaponSel"')<band.indexOf('id="capQuick"'));
+  assert.match(page,/\.controls\{display:flex;flex-wrap:nowrap;overflow-x:auto/);
+ }
+});
