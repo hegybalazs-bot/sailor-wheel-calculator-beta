@@ -24,3 +24,12 @@ jobs:
           path: dist-public/
           if-no-files-found: error
           retention-days: 14
+      - name: Generate 90–140 CAP Blue admin verification template
+        run: node tools/export-admin-blue-review.cjs
+      - name: Upload unverified admin Blue review worksheet
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheel-blue-admin-review-template
+          path: artifacts/review/Sailor_Blue_Verification_Template.csv
+          if-no-files-found: error
+          retention-days: 30
