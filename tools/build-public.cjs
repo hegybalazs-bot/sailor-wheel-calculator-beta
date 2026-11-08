@@ -8,6 +8,7 @@ const base=path.resolve(__dirname,'..'),dist=path.join(base,'dist-public');
 const allowed=[
  ['publikus.html','index.html'],
  ['publikus.html','publikus.html'],
+ ['ikon-helyreallitas.html','ikon-helyreallitas.html'],
  ['visszajelzes.html','visszajelzes.html'],
  ['assets/icons/manifest.js','assets/icons/manifest.js'],
  ['assets/icons/local-pack.js','assets/icons/local-pack.js']
@@ -31,6 +32,9 @@ function build(){
   const html=fs.readFileSync(path.join(dist,file),'utf8');
   assert(!/id="localIconZip"|data-custom-icon=|EMERALD v5 ADMIN PREVIEW|href="bemutato\.html"/.test(html));
  }
+ const recovery=fs.readFileSync(path.join(dist,'ikon-helyreallitas.html'),'utf8');
+ assert(recovery.includes('id="iconPack"')&&recovery.includes('assets/icons/local-pack.js'),'recovery must run in the player's own browser');
+ assert(!/id="localIconZip"|data-custom-icon=|ADMIN PREVIEW/.test(recovery),'no admin icon manager in recovery page');
  console.log('PUBLIC BUILD: '+list.join(', '));
  console.log('PUBLIC BUILD PASS — admin preview and client artwork excluded');
  return list;
