@@ -10,8 +10,8 @@ const script=html.match(/<script>([\s\S]*?)<\/script>/i)?.[1];
 assert.ok(script,'The application must have an inline JavaScript module');
 
 const plain=html=>html.replace(/<[^>]*>/g,'');
-function boot(){
- const elements={},store={},inputs={};
+function boot(seedStore={}){
+ const elements={},store={...seedStore},inputs={};
  const el=(selector)=>elements[selector]??={
   innerHTML:'',value:'',textContent:'',
   classList:{add(){},remove(){},toggle(){}},
@@ -28,9 +28,12 @@ function boot(){
    }else if(s==='[data-set-compare]'){
      htmlMatcher=/<select\b[^>]*data-set-compare="[^"]+"[^>]*>[\s\S]*?<\/select>/g;
      attr='setCompare';
+   }else if(s==='[data-row-model-max]'){
+     htmlMatcher=/<input\b[^>]*data-row-model-max="[^"]+"[^>]*>/g;
+     attr='rowModelMax';
    }else return [];
    const found=[...target.matchAll(htmlMatcher)].map(match=>{
-    const text=match[0],key=text.match(/data-(?:balance-field|set-compare)="([^"]+)"/)[1];
+    const text=match[0],key=text.match(/data-(?:balance-field|set-compare|row-model-max)="([^"]+)"/)[1];
     const value=text.match(/value="([^"]*)"/)?.[1]??'';
     return {dataset:{[attr]:key},value};
    });
@@ -55,7 +58,7 @@ function boot(){
  state:()=>S,html:()=>document.querySelector('#root').innerHTML,translateText,translateMarkup,setUiLanguage,helpViewEnglish,promptUI,confirmUI,alertUI,validServerState,profileCaps,
  save,paint,createSet,selectSet,recordWheelSnapshot,
  wheelHistoryStats,wheelComparison,optimizedLinePlan,balanceTargetAdvice,
- getSetComparison,compareSetSlots,setSlotComparePanel,balanceThreshold,balanceMetrics,qualifiedWheelStats,chooseCap,rowValueEditor,itemBlueInventory,blueInventoryView,addServerProfile,renameServerProfile,switchServerProfile,currentServerName,exportAllProfiles,importAllProfiles,applyFixedStatLimits,switchDegreeModel,blueTypesFor,blueCatalogKey,BLUE_BASE,setBlueTypes,resetBlueTypes,blueCatalogWarnings,blueCatalogPanel,blueTypeCountPanel,visiblePlanTypes,chanceWeightsFor,ensureChanceWeights,chancesComplete,rowMax,penOneBlueEstimate,keepOrRerollAdvice,keepOrRerollPanel,validUserIconData,setUserIcon,clearUserIcon,userIconPanel,localIconLibraryPanel,localIconChoiceKey,manuallySelectedIconFor,autoIconFor,normalizeIconGender,quickItemStrip,chooseWorkspace,WORKSPACE_PANELS:()=>WORKSPACE_PANELS,workspaceActive:()=>WORKSPACE_ACTIVE,editorFolds:()=>EDITOR_FOLDS,uiIcon,itemLabel,statLabel,itemList,editPanel,iconIdentity,verifiedIconFor,verifiedWheelIconFor,wheelToolIcon,VERIFIED_ICON_ASSETS,normalizeApparelStyle,autoWheelEstimate,autoWheelChancePanel,chanceView,interactiveWheelPlanner,wheelPlannerFor,setWheelPlannerField,cleanWheelPlanner,wheelStagesPanel,wheelCostPanel,calculateCost,costPlanFor,adminDemoData,createAdminDemo,adminShowcasePanel,shareSetSnapshot,validateSharedSet,encodeSharedSet,decodeSharedSet,sharedSetPreviewPanel,evidenceFor,evidenceKey,evidencePanel,adminReviewReport,shellCards,parryWheelOverview,parryWheelOverviewCell,overviewValidWheelStats,overviewItemView,overviewSummary,overviewTable,check,total,premiumSlotMetrics,premiumSetInsights,premiumLoadoutPanel,premiumAnalyticsPanel,noteBackupExport,backupReminderState
+ getSetComparison,compareSetSlots,setSlotComparePanel,balanceThreshold,balanceMetrics,qualifiedWheelStats,chooseCap,rowValueEditor,itemBlueInventory,blueInventoryView,addServerProfile,renameServerProfile,switchServerProfile,currentServerName,exportAllProfiles,importAllProfiles,applyFixedStatLimits,switchDegreeModel,blueTypesFor,blueCatalogKey,BLUE_BASE,setBlueTypes,resetBlueTypes,blueCatalogWarnings,blueCatalogPanel,blueTypeCountPanel,visiblePlanTypes,chanceWeightsFor,ensureChanceWeights,chancesComplete,rowMax,effectiveRowMax,penOneBlueEstimate,keepOrRerollAdvice,keepOrRerollPanel,validUserIconData,setUserIcon,clearUserIcon,userIconPanel,localIconLibraryPanel,localIconChoiceKey,manuallySelectedIconFor,autoIconFor,normalizeIconGender,quickItemStrip,chooseWorkspace,WORKSPACE_PANELS:()=>WORKSPACE_PANELS,workspaceActive:()=>WORKSPACE_ACTIVE,editorFolds:()=>EDITOR_FOLDS,uiIcon,itemLabel,statLabel,itemList,editPanel,iconIdentity,verifiedIconFor,verifiedWheelIconFor,wheelToolIcon,VERIFIED_ICON_ASSETS,normalizeApparelStyle,autoWheelEstimate,autoWheelChancePanel,chanceView,interactiveWheelPlanner,wheelPlannerFor,setWheelPlannerField,cleanWheelPlanner,wheelStagesPanel,wheelCostPanel,calculateCost,costPlanFor,adminDemoData,createAdminDemo,adminShowcasePanel,shareSetSnapshot,validateSharedSet,encodeSharedSet,decodeSharedSet,sharedSetPreviewPanel,evidenceFor,evidenceKey,evidencePanel,adminReviewReport,shellCards,parryWheelOverview,parryWheelOverviewCell,overviewValidWheelStats,overviewItemView,overviewSummary,overviewTable,check,total,premiumSlotMetrics,premiumSetInsights,premiumLoadoutPanel,premiumAnalyticsPanel,noteBackupExport,backupReminderState
 };`,sandbox,{timeout:5000});
  return {hooks:sandbox.hooks,document,store,inputs,window:sandbox.window};
 }
@@ -2068,4 +2071,52 @@ test('editor advanced input panels and old SET overview are collapsed without de
  assert.match(root,/id="localIconZip"/);
  assert.equal(hooks.editorFolds().overview,false);
  assert.equal(hooks.editorFolds().bonus,false);
+});
+
+
+test('Silkroad theme is shared by preview and player page without remote artwork',()=>{
+ const publicHtml=fs.readFileSync(path.join(__dirname,'..','publikus.html'),'utf8');
+ for(const markup of [html,publicHtml]){
+  assert.match(markup,/SILKROAD WHEEL CALCULATOR/);
+  assert.match(markup,/sro-route-ribbon/);
+  assert.match(markup,/JANGAN/);
+  assert.match(markup,/DONWHANG/);
+  assert.match(markup,/HOTAN/);
+  assert.match(markup,/Silkroad caravan theme/);
+  assert.match(markup,/row\.modelMax=value;/);
+  assert.doesNotMatch(markup,/Number\(base\)===value\)delete row\.modelMax/);
+  assert.match(markup,/placeholder="Alap: \$\{esc\(max\?\?'—'\)\}"/);
+ }
+});
+
+test('manually entered Blue max stays explicit even when equal to the CAP default, and survives a reload',()=>{
+ const {hooks,document,store}=boot(),s=hooks.state();
+ const head=s.sets[90].head;
+ s.active='head';head.count=1;head.target=1;head.rows=[{type:'HP',value:300}];
+ hooks.save();hooks.paint();
+ const input=document.querySelectorAll('[data-row-model-max]')[0];
+ assert.ok(input,'the active item has a manual Blue maximum input');
+ assert.equal(input.value,'','empty input inherits the current CAP/DG reference');
+ assert.equal(hooks.rowMax('HP'),600);
+ input.value='600';input.onchange();
+ assert.equal(hooks.state().sets[90].head.rows[0].modelMax,600,'manual intent must not be discarded because the current default matches');
+ assert.equal(hooks.effectiveRowMax(hooks.state().sets[90].head.rows[0]),600);
+ hooks.state().cfg[90].maxHP=900;
+ hooks.save();
+ const reload=boot(store);
+ assert.equal(reload.hooks.rowMax('HP'),900,'the changed inherited CAP reference survives reload');
+ assert.equal(reload.hooks.state().sets[90].head.rows[0].modelMax,600,'explicit row maximum survives same-origin update/reload');
+ assert.equal(reload.hooks.effectiveRowMax(reload.hooks.state().sets[90].head.rows[0]),600,'custom max takes priority over new CAP reference');
+ assert.match(reload.hooks.editPanel(),/row-model-input is-manual/);
+});
+
+test('CAP/DG custom Blue reference maximums are retained across page updates',()=>{
+ const {hooks,store}=boot(),s=hooks.state();
+ s.cfg[90].maxAR=47;
+ s.blueTypeMaxima={'90_9':{BURN:73}};
+ hooks.save();
+ const fresh=boot(store);
+ assert.equal(fresh.hooks.state().cfg[90].maxAR,47);
+ assert.equal(fresh.hooks.state().blueTypeMaxima['90_9'].BURN,73);
+ assert.equal(fresh.hooks.rowMax('BURN'),73);
 });
