@@ -121,7 +121,7 @@ try{
    await page.waitForSelector('#root [data-workspace-go="items"]');
    assert.equal(await page.locator('[data-icon-source="local-auto"]').count(),0);
    assert.equal(await page.locator('input[accept*="zip"]').count(),0,'player calculator has no ZIP/image uploader');
-   await page.locator('a[href="ikon-helyreallitas.html"]').click();
+   await page.locator('.icon-recovery-link').click();
    await page.waitForURL('**/ikon-helyreallitas.html');
    assert.match(await page.locator('h1').innerText(),/90 CAP/);
    await page.locator('#iconPack').setInputFiles({
@@ -234,6 +234,50 @@ try{
    assert.deepEqual(source.errors,[]);
    assert.deepEqual(destination.errors,[]);
   }finally{await source.context.close();await destination.context.close();}
+ });
+
+ await check('JSON import previews profile, saves previous state, restores new data and rejects unsafe files',async()=>{
+  const original=await newPage({width:1200,height:850});
+  const replacement=await newPage({width:1200,height:850});
+  try{
+   await original.page.goto(origin+'/');
+   await original.page.locator('#goalSel').fill('83');
+   await original.page.locator('#goalSel').press('Tab');
+   await replacement.page.goto(origin+'/');
+   await replacement.page.locator('#goalSel').fill('42');
+   await replacement.page.locator('#goalSel').press('Tab');
+   const [sourceDownload]=await Promise.all([
+    replacement.page.waitForEvent('download',{timeout:15000}),
+    replacement.page.locator('#exportBtn').click()
+   ]);
+   const incoming=await readFile(await sourceDownload.path());
+   assert.equal(JSON.parse(incoming.toString('utf8')).goal,42);
+   const dialogs=[];
+   original.page.on('dialog',dialog=>{
+    dialogs.push({type:dialog.type(),message:dialog.message()});
+    if(dialog.type()==='confirm')dialog.accept();else dialog.dismiss();
+   });
+   const [safetyDownload]=await Promise.all([
+    original.page.waitForEvent('download',{timeout:15000}),
+    original.page.locator('#importFile').setInputFiles({name:'restored-sets.json',mimeType:'application/json',buffer:incoming})
+   ]);
+   assert.match(safetyDownload.suggestedFilename(),/Import_Elotti_Mentes/);
+   const safety=JSON.parse((await readFile(await safetyDownload.path())).toString('utf8'));
+   assert.equal(safety.goal,83,'automatic rollback JSON contains previous value');
+   assert.match(dialogs[0]?.message||'',/MENTÉS BETÖLTÉSE/);
+   assert.match(dialogs[0]?.message||'',/Szerverprofilok: 1/);
+   await original.page.waitForFunction(()=>document.querySelector('#goalSel')?.value==='42',null,{timeout:15000});
+   await original.page.reload();
+   assert.equal(await original.page.locator('#goalSel').inputValue(),'42');
+   // A second, explicitly canceled import must leave the restored data unchanged.
+   original.page.removeAllListeners('dialog');
+   original.page.once('dialog',dialog=>dialog.dismiss());
+   await original.page.locator('#importFile').setInputFiles({name:'canceled-import.json',mimeType:'application/json',
+    buffer:Buffer.from(JSON.stringify(safety))});
+   assert.equal(await original.page.locator('#goalSel').inputValue(),'42');
+   assert.deepEqual(original.errors,[]);
+   assert.deepEqual(replacement.errors,[]);
+  }finally{await original.context.close();await replacement.context.close();}
  });
  await check('public desktop loads and has no admin image inputs',async()=>{
   const {context,page,errors}=await newPage({width:1440,height:900});

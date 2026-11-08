@@ -1824,6 +1824,12 @@ function backupReminderPanel(){
     '✓ Az utolsó export indítása '+state.days+' napja volt. A következő emlékeztető 7 nap után jelenik meg.'}
     A SET-ek csak ebben a böngészőben tárolódnak; a JSON-t őrizd meg másik helyen is. Ez nem automatikus felhőmentés.</p>
   <button id="backupNowBtn" class="${state.due?'primary':'alt'}">↓ JSON-mentés indítása</button>
+  <details class="compact-manage" style="margin-top:12px"><summary>${UI_LANG==='en'?'Move my old web data':'Régi weboldal adatai áthozása'}</summary>
+  <p class="info">${UI_LANG==='en'?'Open the previous website, export its JSON backup, then import that file here. Saved SETs and CAP rules move with the JSON; private icon pictures need the separate local icon recovery page.':
+    'Nyisd meg a régi weboldalt, mentsd ki onnan JSON-ba a SET-eket, majd itt töltsd be azt a fájlt. A SET-ek és CAP-szabályok átjönnek; a privát ikonképeket külön, a helyi ikonvisszaállító oldalon kell betölteni.'}</p>
+  <p class="info"><a href="https://sailor-wheel-calculator-beta.onrender.com/publikus.html" target="_blank" rel="noopener noreferrer">${UI_LANG==='en'?'Open previous Wheel site':'Korábbi Wheel oldal megnyitása'}</a> ·
+  <a href="ikon-helyreallitas.html">${UI_LANG==='en'?'Restore local icons':'Helyi ikonok visszaállítása'}</a></p>
+  </details>
  </section>`;
 }
 function optionList(map,selected){return Object.entries(map).map(([v,l])=>`<option value="${esc(v)}" ${String(v)===String(selected)?'selected':''}>${esc(l)}</option>`).join('');}
@@ -3118,12 +3124,56 @@ $('#applyGoalAll').onclick=()=>{if(confirmUI(`Az összes ${S.cap} CAP-os item c�
 document.querySelectorAll('[data-tab]').forEach(el=>el.onclick=()=>{S.tab=el.dataset.tab;save();paint();});
 function downloadBlob(name,contents,type='application/json'){let url=URL.createObjectURL(new Blob([contents],{type}));let a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),3000);}
 $('#exportBtn').onclick=()=>{downloadBlob('Wheel_Calculator_Backup_'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify(exportAllProfiles(),null,2));noteBackupExport();paint();toast(UI_LANG==='en'?'JSON export started – check the downloaded file.':'JSON-export indítva – ellenőrizd a letöltött fájlt.');};
+// Safe-import preview is intentionally read-only: no SET/CAP mutation before confirmation.
+const MAX_BACKUP_IMPORT_BYTES=10*1024*1024;
+function inspectImportBackup(data){
+ if(!validServerState(data))throw Error('Nem érvényes Wheel Calculator mentés.');
+ const raw=data.serverProfiles;
+ const countSets=state=>Object.values(state.setBank||{}).reduce((total,bank)=>
+  total+(Array.isArray(bank?.entries)?bank.entries.length:0),0);
+ if(raw==null)return {count:1,name:'Sailor Online (régi mentés)',cap:Number(data.cap)||90,sets:countSets(data),legacy:true};
+ if(!Array.isArray(raw.entries)||!raw.entries.length||raw.entries.length>30)
+  throw Error('A szerverprofilok száma hibás.');
+ const ids=new Set();
+ for(const entry of raw.entries){
+  if(!entry||typeof entry.id!=='string'||!entry.id.trim()||
+   typeof entry.name!=='string'||!entry.name.trim()||
+   !validServerState(entry.data)||ids.has(entry.id))
+   throw Error('Sérült vagy ismétlődő szerverprofil a mentésben.');
+  ids.add(entry.id);
+ }
+ const selected=raw.entries.find(x=>x.id===raw.activeId);
+ if(!selected)throw Error('A mentés aktív szerverprofilja hiányzik.');
+ return {count:raw.entries.length,name:selected.name.slice(0,60),
+  cap:Number(selected.data.cap)||90,
+  sets:raw.entries.reduce((total,e)=>total+countSets(e.data),0),legacy:false};
+}
+function backupImportConfirmation(details){
+ const setLabel=details.sets||'?';
+ return UI_LANG==='en'?
+  'IMPORT PREVIEW\nServer profiles: '+details.count+'\nActive server: '+details.name+
+  '\nActive CAP: '+details.cap+'\nSaved sets: '+setLabel+
+  '\n\nThe current browser data will be replaced. A JSON copy of the current data will be downloaded BEFORE importing. Check your downloads after continuing. Import now?':
+  'MENTÉS BETÖLTÉSE\nSzerverprofilok: '+details.count+'\nAktív szerver: '+details.name+
+  '\nAktív CAP: '+details.cap+'\nMentett SET-ek: '+setLabel+
+  '\n\nA jelenlegi böngészőadatok felülíródnak. Betöltés ELŐTT automatikusan letöltünk egy JSON-másolatot a mostani adatokról. Ellenőrizd a letöltést. Folytatod?';
+}
+
 $('#importBtn').onclick=()=>$('#importFile').click();
-$('#importFile').onchange=async e=>{let file=e.target.files?.[0];if(!file)return;
-try{let data=JSON.parse(await file.text());if(!data||!data.cfg||!data.sets||!data.cfg[90]||!data.sets[90])throw Error('Nem érvényes Wheel Calculator mentés.');
- if(confirmUI('Betöltöd a teljes mentést? A jelenlegi v4-es adatok felülíródnak. Előbb érdemes JSON-ba menteni.')){
-  importAllProfiles(data);toast('Mentés betöltve, szerverprofilok és SET-ek helyreállítva.');
- }}catch(err){alertUI('Nem sikerült betölteni: '+err.message)}e.target.value='';};
+$('#importFile').onchange=async e=>{const file=e.target.files?.[0];if(!file)return;
+try{
+ if(file.size>MAX_BACKUP_IMPORT_BYTES)throw Error('Túl nagy JSON-mentés (maximum 10 MB).');
+ const data=JSON.parse(await file.text()),preview=inspectImportBackup(data);
+ if(confirmUI(backupImportConfirmation(preview))){
+  // Fail closed if the pre-import backup cannot be initiated; never silently overwrite.
+  downloadBlob('Wheel_Calculator_Import_Elotti_Mentes_'+new Date().toISOString().slice(0,10)+'.json',
+    JSON.stringify(exportAllProfiles(),null,2));
+  importAllProfiles(data);
+  toast(UI_LANG==='en'?'Import complete. Check your pre-import backup download.':
+    'Mentés betöltve. Ellenőrizd az import előtti biztonsági mentést!');
+ }
+}catch(err){alertUI((UI_LANG==='en'?'Import failed: ':'Nem sikerült betölteni: ')+err.message)}
+e.target.value='';};
 $('#printBtn').onclick=()=>window.print();
 $('#serverPicker').onchange=e=>{if(!switchServerProfile(e.target.value)){toast('A szerverprofil betöltése nem sikerült.');paint();}};
 $('#newServerBtn').onclick=()=>{const name=promptUI('Új szerver neve (külön mentésekkel):','Új Silkroad szerver');if(name===null)return;if(!addServerProfile(name))toast('Adj meg érvényes nevet (maximum 30 szerver).');};

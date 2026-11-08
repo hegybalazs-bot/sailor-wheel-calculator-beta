@@ -31,6 +31,7 @@ function boot(html){
  vm.runInContext(inline(html)+`
 ;globalThis.audit={
  state:()=>S,html:()=>document.querySelector('#root').innerHTML,
+ inspectImportBackup,backupImportConfirmation,exportAllProfiles,
  paint,setLanguage:setUiLanguage,selectedTab:()=>S.tab,
  items:()=>itemList(),renderEditor:()=>editPanel()
 };`,sandbox,{timeout:7000});
@@ -123,4 +124,41 @@ test('public calculator links to a distinct same-origin one-time icon recovery p
  assert.match(recovery,/90 CAP, 9DG/);
  assert.match(recovery,/fájlokat nem/);
  assert.doesNotMatch(recovery,/admin|data-custom-icon|data-icon-itemcode/i);
+});
+
+test('safe import preview validates profiles and previews CAP/SET counts without mutating state',()=>{
+ const {audit}=boot(publicHtml);
+ const snapshot=audit.exportAllProfiles();
+ const prior=JSON.stringify(audit.state());
+ const detail=audit.inspectImportBackup(snapshot);
+ assert.equal(detail.count,1);
+ assert.equal(detail.cap,90);
+ assert.equal(detail.name,'Sailor Online');
+ assert(detail.sets>=7);
+ assert.match(audit.backupImportConfirmation(detail),/MENTÉS BETÖLTÉSE/);
+ assert.match(audit.backupImportConfirmation(detail),/Szerverprofilok: 1/);
+ assert.match(audit.backupImportConfirmation(detail),/automatikusan letöltünk/);
+ assert.equal(JSON.stringify(audit.state()),prior);
+ audit.setLanguage('en');
+ assert.match(audit.backupImportConfirmation(detail),/IMPORT PREVIEW/);
+ assert.match(audit.backupImportConfirmation(detail),/downloaded BEFORE importing/);
+ assert.throws(()=>audit.inspectImportBackup({cfg:{},sets:{}}),/mentés/);
+ const duplicate=structuredClone(snapshot);
+ duplicate.serverProfiles.entries.push(structuredClone(duplicate.serverProfiles.entries[0]));
+ assert.throws(()=>audit.inspectImportBackup(duplicate),/ismétlődő/);
+ const missing=structuredClone(snapshot);
+ missing.serverProfiles.activeId='not-present';
+ assert.throws(()=>audit.inspectImportBackup(missing),/hiányzik/);
+});
+test('safe import invokes pre-import JSON download before data replacement in both interfaces',()=>{
+ for(const html of [base,publicHtml]){
+  const download=html.indexOf("downloadBlob('Wheel_Calculator_Import_Elotti_Mentes_");
+  assert(download>0);
+  const importAt=html.indexOf('importAllProfiles(data);',download);
+  assert(importAt>download);
+  assert.match(html,/MAX_BACKUP_IMPORT_BYTES=10\*1024\*1024/);
+  assert.match(html,/inspectImportBackup\(data\)/);
+  assert.match(html,/Régi weboldal adatai áthozása/);
+  assert.match(html,/sailor-wheel-calculator-beta\.onrender\.com\/publikus\.html/);
+ }
 });
