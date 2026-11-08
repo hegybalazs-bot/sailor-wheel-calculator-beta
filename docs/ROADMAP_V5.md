@@ -40,7 +40,7 @@ Updated for the v5 Admin Preview (2026-11-06).
 
 ## 2026-11-08 — Implemented beta hardening and independently blocked sign-off
 
-- [x] **Chromium E2E on CI:** `.github/workflows/browser-qa.yml` runs 4 real browser scenarios (desktop player UI; CAP data persistence; 390px mobile viewport + HU/EN and overflow; developer import of a synthetically generated private ZIP and IndexedDB reload). Screenshot artifacts are uploaded. **Does not certify Android or iOS hardware.**
+- [x] **Chromium E2E on CI:** `.github/workflows/browser-qa.yml` runs 6 real browser scenarios (desktop player UI; CAP data persistence; 390px mobile viewport + HU/EN and overflow; JSON backup roundtrip in a clean browser; Wheel planning/rules pages; developer import of a synthetically generated private ZIP and IndexedDB reload). Screenshot artifacts are uploaded. **Does not certify Android or iOS hardware.**
 - [x] **Public-only build:** `node tools/build-public.cjs` emits exactly 5 allowlisted static site files in `dist-public`; no original game artwork, source data, admin preview or developer tooling is bundled. CI has a strict list/contents regression test and uploads the public release artifact.
 - [x] **Verification register:** `data/release-evidence.json` distinguishes candidate/player-submitted data from genuine administrative approval, 7 CAP scope statuses, unknown odds, logo/artwork licenses, actual QA and Render deployment.
 - [x] **Strict release-gate validator:** `node tools/release-gate.cjs` reports unverified items; `node tools/release-gate.cjs --stable` blocks mislabeling the beta stable while any material proof is missing. Verified claims require named, dated, linked evidence. Unit tests cover invalid and falsified statuses.
@@ -52,4 +52,4 @@ Updated for the v5 Admin Preview (2026-11-06).
 - [ ] **Existing Render service:** until publishDir moves from `.` to `dist-public`, the index-based developer preview remains publicly accessible. Authentication requires separate protected hosting; a secret link is not protection.
 - [ ] **Render auto-deploy:** issue #4 persists; independent git-push-triggered deployment must be proven without a manual API call.
 
-**Release rule:** `EmERALD v5 BETA` until *all* external gates are evidenced. Do not assert official Sailor probability data merely from unit tests or screenshots.
+**Release rule:** `Emerald v5 BETA` until *all* external gates are evidenced. Do not assert official Sailor probability data merely from unit tests or screenshots.
