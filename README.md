@@ -272,3 +272,6 @@ Hasznos átadási dokumentumok: [Admin review (English)](docs/ADMIN_VERIFICATION
 ### Admin Blue-ellenőrző táblázat
 
 A GitHub Actions `wheel-blue-admin-review-template` nevű melléklete tartalmazza a **420 soros, CSV-formátumú** adminellenőrző táblázatot. A CAP 90/100/110/120/125/130/140, CH/EU ruhatípusok, fegyverek, pajzsok és ékszerek saját sorokat kaptak. Az eddigi iSRO Blue-alaplista kizárólag **nem hitelesített referencia**; a valódi Sailor maximumok, kockázatok és esélyek üresen várnak jóváhagyott adatot. Generálás: `node tools/export-admin-blue-review.cjs`.
+
+
+**90 CAP / 9DG admin gyorsellenőrzés:** ugyanebben a GitHub Actions mellékletben megtalálható a `Sailor_90CAP_9DG_Admin_Verification.csv` is, mindössze **60 sorral**. Ezzel érdemes kezdeni; a 420 soros teljes változat megmarad a későbbi CAP-okhoz. A kézzel igazolandó szerverértékek és esélyek szándékosan üresek. Részletek: [adminellenőrzési kérés](docs/ADMIN_VERIFICATION_REQUEST_EN.md).
