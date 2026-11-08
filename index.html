@@ -3,7 +3,7 @@
 <head><meta name="robots" content="noindex,nofollow">
 <meta http-equiv="Content-Security-Policy" content="connect-src 'none'; object-src 'none'">
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Wheel Calculator – Emerald v5 Admin Preview</title>
+<title>Silkroad Wheel Calculator – Emerald v5 Admin Preview</title>
 <style>
 :root{--bg:#070e12;--surface:#101c21;--surface2:#14272b;--border:#294044;--text:#eff8f5;--muted:#8eaeac;--green:#43ff9a;--teal:#14cfa0;--blue:#4eb8fc;--red:#ff777d;--amber:#f6c36b}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 16% 0%,#102c26,transparent 42%),linear-gradient(165deg,#070e12,#090e18);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif;min-height:100vh}button,input,select{font:inherit}button{cursor:pointer;border:1px solid #35665e;background:#15342d;color:#e8fff6;border-radius:10px;padding:10px 13px;transition:.12s}button:hover{border-color:var(--green);background:#1c5140}button.primary{background:linear-gradient(100deg,#0c956a,#116e70);font-weight:800;color:white}button.alt{background:transparent;border-color:#33545b}button.danger{background:#351f26;border-color:#71323f;color:#ffd4d6}input,select{width:100%;border:1px solid #34555a;border-radius:8px;padding:9px 10px;color:var(--text);background:#0a1a1d;outline:0}input:focus,select:focus{border-color:var(--green);box-shadow:0 0 0 2px #27e6a326}input[type=number]{font-variant-numeric:tabular-nums}label{font-size:12px;font-weight:700;color:var(--muted);display:grid;gap:6px}h1,h2,h3,p{margin-top:0}h1{font-size:24px;margin-bottom:5px;letter-spacing:.4px}h2{font-size:19px;margin-bottom:13px}h3{font-size:15px;margin-bottom:9px}header{padding:23px 25px 18px;border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;align-items:center;background:#081416ad}.brand small{display:block;color:var(--muted);font-size:12px}.emblem{display:inline-flex;align-items:center;justify-content:center;background:#17402e;color:#63ffc4;border-radius:11px;width:39px;height:39px;margin-right:8px;box-shadow:0 0 25px #00e6882f}.head-actions{display:flex;gap:9px;flex-wrap:wrap}.shell{max-width:1600px;margin:auto}.controls{display:flex;gap:12px;flex-wrap:wrap;align-items:end;padding:15px 25px;border-bottom:1px solid var(--border)}.controls label{min-width:135px}.controls .grow{flex:1}.tabs{display:flex;gap:5px;padding:11px 25px;border-bottom:1px solid var(--border);overflow:auto}.tabs button{background:transparent;border:0;border-radius:6px 6px 0 0;color:var(--muted);white-space:nowrap}.tabs button.active{border-bottom:3px solid var(--green);color:var(--green);font-weight:800}.page{padding:20px 25px 36px}.cards{display:grid;grid-template-columns:repeat(5,minmax(130px,1fr));gap:12px;margin-bottom:18px}.card,.panel{background:linear-gradient(165deg,#122328,#0c181d);border:1px solid var(--border);border-radius:14px;padding:16px}.card .label{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);font-weight:700}.card .num{font-size:26px;font-weight:900;margin:8px 0 2px;color:#f8fffe;font-variant-numeric:tabular-nums}.card .sub{color:var(--muted);font-size:11px}.content{display:grid;grid-template-columns:minmax(225px,295px) minmax(520px,1fr);gap:16px}.itemlist{display:grid;gap:6px}.item{width:100%;display:flex;justify-content:space-between;align-items:center;text-align:left;gap:8px;background:#0c1c20;border:1px solid #274047}.item.active{background:#184035;border-color:#2fec9e}.item .nm{font-weight:760;font-size:13px}.item .tiny{display:block;color:var(--muted);font-size:11px;margin-top:4px}.pill{font-size:11px;padding:5px 7px;border-radius:99px;background:#1b3135;color:var(--muted);white-space:nowrap;border:1px solid #31505a}.pill.good{color:#a0ffcf;background:#143b2c;border-color:#298663}.pill.great{color:#eaffbb;background:#31502c;border-color:#8bc557}.pill.bad{color:#ffa1a8;background:#3d242b;border-color:#984650}.pill.warn{color:#ffd59a;background:#453421;border-color:#a57733}.formrow{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:12px}.formrow.two{grid-template-columns:repeat(2,minmax(120px,1fr))}.info{font-size:12px;color:var(--muted);line-height:1.55}.rulehint{border-left:3px solid var(--teal);padding:9px 11px;background:#0b3025a8;color:#c7f9e5;margin:13px 0;border-radius:4px;font-size:13px}.warnbox{background:#352815;border:1px solid #765729;border-radius:9px;padding:10px;color:#ffe5bd;font-size:12px;line-height:1.5;margin:12px 0}.rowtable{width:100%;border-collapse:collapse;margin:16px 0;font-size:13px}.rowtable th{text-align:left;color:var(--muted);font-size:11px;letter-spacing:.7px;text-transform:uppercase;background:#0b1a1e;padding:10px}.rowtable td{padding:8px 6px;border-bottom:1px solid #22363a}.rowtable td:first-child{width:40px;color:var(--muted);text-align:center}.rowtable select,.rowtable input{padding:7px 8px}.splitmetrics{display:grid;grid-template-columns:repeat(2,minmax(140px,1fr));gap:12px;margin-top:12px;padding:11px;background:#071a1c;border:1px solid #2a4b46;border-radius:10px;font-size:12px}.stats{display:grid;grid-template-columns:repeat(4,minmax(100px,1fr));gap:8px;margin-top:14px}.stat{padding:11px;background:#081a1b;border-radius:9px;border:1px solid #26423e}.stat strong{display:block;color:#e9fff8;font-size:20px}.stat small{color:var(--muted)}.progress{height:8px;border-radius:99px;background:#203d3a;overflow:hidden;margin-top:8px}.progress>div{height:100%;background:linear-gradient(90deg,#008a61,#50ffaf)}.actions{display:flex;flex-wrap:wrap;gap:8px;margin:13px 0}.history{max-height:140px;overflow:auto}.history div{font-size:12px;padding:6px;border-bottom:1px solid #254047;color:#a8c3c1}.layout2{display:grid;grid-template-columns:1.1fr 1fr;gap:15px}.tinytable{width:100%;border-collapse:collapse}.tinytable th,.tinytable td{border-bottom:1px solid var(--border);padding:9px;text-align:left;font-size:13px}.tinytable th{color:var(--muted)}.notice{margin-top:14px;background:#142925;border:1px solid #2b6451;padding:12px;border-radius:9px;font-size:12px;color:#a5dfce}.foot{padding:12px 25px;border-top:1px solid var(--border);color:var(--muted);font-size:11px}.toast{position:fixed;right:20px;bottom:22px;z-index:5;padding:12px 17px;color:#d6fff1;background:#144d3f;border:1px solid #69e3b4;border-radius:11px;box-shadow:0 4px 30px #0006}.hide{display:none}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.mb{margin-bottom:14px}.muted{color:var(--muted)}.feature{font-size:13px;line-height:1.7}.badgebox{display:inline-block;color:#8af7be;border:1px solid #326953;border-radius:7px;font-size:11px;padding:4px 7px;margin-left:7px}@media(max-width:1100px){.cards{grid-template-columns:repeat(3,1fr)}.content{grid-template-columns:220px minmax(400px,1fr)}.formrow{grid-template-columns:repeat(2,1fr)}}@media(max-width:780px){header,.controls,.tabs,.page{padding-left:12px;padding-right:12px}.cards{grid-template-columns:repeat(2,1fr)}.content,.layout2{grid-template-columns:1fr}.itemlist{grid-template-columns:repeat(2,1fr)}.formrow,.stats,.grid3{grid-template-columns:repeat(2,1fr)}.rowtable{font-size:11px}.rowtable td{padding:5px 3px}}
 
@@ -396,10 +396,121 @@ background:radial-gradient(circle at 28% 15%,#453656,#1c2136 66%,#102329);box-sh
  .workspace-pane[hidden]{display:block!important}
 }
 
+
+/* Silkroad caravan theme — original CSS illustration, no client artwork or remote assets. */
+:root{
+ --bg:#081018;--surface:#14202b;--surface2:#1e2b33;--border:#6c563a;
+ --text:#f7edd5;--muted:#bcae94;--green:#61e6ab;--teal:#41ccaa;
+ --blue:#9bcff3;--red:#ff8b91;--amber:#f1c172;
+}
+body{
+ background:
+ radial-gradient(ellipse at 18% -2%,#5b392b59 0,transparent 36%),
+ radial-gradient(ellipse at 94% 8%,#144d5260 0,transparent 34%),
+ repeating-linear-gradient(135deg,transparent 0 91px,#d5b57a08 92px 93px,transparent 94px 182px),
+ linear-gradient(165deg,#07121c 0%,#101620 50%,#0c121b 100%);
+ color:var(--text);
+}
+.shell{border-left:1px solid #81674639;border-right:1px solid #81674639;min-height:100vh}
+header{
+ isolation:isolate;position:relative;overflow:hidden;
+ background:
+ linear-gradient(105deg,#102b30e8 0%,#141e2bea 48%,#34251cea 100%),
+ repeating-linear-gradient(90deg,transparent 0 78px,#e7b77310 79px 80px);
+ border-bottom:1px solid #a27c48;
+ box-shadow:inset 0 -1px 0 #d3a86455,0 8px 28px #0206095c;
+}
+header::before{
+ content:"";pointer-events:none;position:absolute;z-index:-1;
+ width:330px;height:330px;right:5%;top:-180px;border-radius:50%;
+ border:1px solid #d6af6e69;opacity:.48;
+ background:
+ radial-gradient(circle at center,transparent 0 24%,#ebc58e24 24.5% 25.5%,transparent 26% 40%,#ebc58e36 40.5% 41%,transparent 42%),
+ repeating-conic-gradient(from 22.5deg,#ebc58e26 0deg 5deg,transparent 6deg 45deg);
+ box-shadow:0 0 0 18px #cba36c12,0 0 0 19px #cba36c30,inset 0 0 45px #cea36817;
+}
+header::after{
+ content:"";pointer-events:none;position:absolute;left:0;right:0;bottom:0;height:5px;
+ background:repeating-linear-gradient(90deg,transparent 0 18px,#ddae6f 19px 23px,transparent 24px 38px);
+ opacity:.58;
+}
+.brand{position:relative;z-index:1}
+.sro-era{
+ color:#e9be7c;font:700 10px/1.4 Segoe UI,Arial,sans-serif;letter-spacing:3px;
+ text-transform:uppercase;margin-bottom:6px;
+}
+.brand h1{font-family:Georgia,"Times New Roman",serif;letter-spacing:1.2px;
+ font-size:clamp(21px,2.2vw,31px);color:#ffefd0;text-shadow:0 2px 15px #000a}
+.brand small{color:#d3c4a8;line-height:1.5}
+.emblem{
+ background:radial-gradient(circle at 35% 25%,#63502e,#182d2f 75%);
+ color:#ffe0a0;border:1px solid #bd9356;box-shadow:0 0 0 3px #c9a86c19,0 0 24px #e7af4a33
+}
+.sro-route-ribbon{display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+ margin-top:9px;color:#d7b784;font:700 10px/1.3 Segoe UI,Arial,sans-serif;letter-spacing:1.3px}
+.sro-route-ribbon span{color:#8dceba;font-size:10px}
+.badgebox{border-color:#9f8456!important;background:#5d432b65!important;color:#ffdda5!important}
+.head-actions{position:relative;z-index:1}
+.head-actions button,.head-actions a{border-color:#90764d!important}
+.controls,.serverbar,.setbar{background:#121e29e8;border-color:#66543b!important}
+.tabs{background:#121b25cf;border-bottom-color:#86683e}
+.tabs button.active{color:#f6ca7f;border-bottom-color:#f0bf73}
+.tabs button:hover{color:#ffe0a9}
+.card,.panel,.premium-armory,.premium-analytics{
+ background:linear-gradient(150deg,#1c2a32 0%,#111e29 54%,#18222a 100%);
+ border-color:#735e43;
+ box-shadow:inset 0 1px 0 #efd5a511,0 7px 28px #03070a2a;
+}
+.card .label,.card .sub{color:#c5b597}
+.card .num{color:#fff0d3}
+h2,h3{color:#f8dfa9}
+button{border-color:#846846;background:linear-gradient(150deg,#2c3c3c,#273335);color:#fcebd0}
+button:hover{border-color:#e7b66e;background:#3c4740}
+button.primary{background:linear-gradient(110deg,#2d7658,#1d6262);border-color:#c59b59;color:#fff8e7}
+button.primary:hover{background:linear-gradient(110deg,#368e6a,#26797c)}
+input,select,textarea{background:#0d1c27;border-color:#736044;color:#f9ebd2}
+input:focus,select:focus,textarea:focus{border-color:#e8b86c;box-shadow:0 0 0 2px #eac27a30}
+a{color:#e9cb8d}
+a:hover{color:#ffe5ac}
+.item{background:#162630;border-color:#625239}
+.item.active{background:#24433a;border-color:#d6b171;box-shadow:inset 3px 0 0 #cfa76b}
+.workspace-nav{background:#14202bf5;border-color:#8e714b;box-shadow:0 8px 20px #02070b88}
+.workspace-nav button{background:#203138;color:#e2d3b7;border-color:#745f43}
+.workspace-nav button.selected,.workspace-nav button[aria-selected="true"]{
+ background:linear-gradient(125deg,#415344,#355950);border-color:#e4bc78;color:#fff2ce;
+ box-shadow:inset 0 -2px 0 #d7ac6e;
+}
+.workspace-item-strip{background:#101c27f5;border-color:#826843}
+.workspace-item-button{background:#182a34;border-color:#705a3b;color:#e4d6bb}
+.workspace-item-button.selected,.workspace-item-button[aria-pressed="true"]{
+ background:#264b41;border-color:#efc584;color:#fff6db
+}
+.workspace-fold{background:#172833;border-color:#6c604c}
+.workspace-fold>summary{color:#efcf94}
+.workspace-fold>summary::before{color:#e8b96f}
+.row-model-input{border-color:#c8a066!important;background:#173831}
+.row-model-input.is-manual{border-color:#eabd76!important;box-shadow:inset 3px 0 0 #d9aa63}
+.row-model-input:not(.is-manual){border-style:dashed!important}
+.rulehint{border-left-color:#deb16f;background:#343124ab;color:#f4e8d3}
+.pill,.notice{border-color:#746346}
+:focus-visible{outline:2px solid #ffd08b;outline-offset:2px}
+@media(max-width:780px){
+ header{padding:17px 15px}
+ .sro-era{font-size:9px;letter-spacing:2px}
+ .sro-route-ribbon{font-size:9px;gap:5px;margin-top:8px}
+ header::before{right:-135px;opacity:.25}
+ .brand h1{font-size:21px}
+}
+@media print{
+ body,header,.card,.panel{background:white!important;color:black!important;box-shadow:none!important}
+ header::before,header::after,.sro-route-ribbon{display:none!important}
+ .brand h1,h2,h3{color:#222!important}
+}
+
 </style>
 </head>
 <body><div class="shell">
-<header><div class="brand"><h1><span class="emblem">⚔</span>WHEEL CALCULATOR <span class="badgebox">EMERALD v5 ADMIN PREVIEW</span></h1><small>Szettkezelő · Wheel-sorok · STR/INT · Fegyver & Shield · Pörgetési esélymodell</small></div><div class="head-actions"><label class="lang-control" for="langSel">🌐 <span>Nyelv / Language</span><select id="langSel" aria-label="Language / Nyelv"><option value="hu">Magyar</option><option value="en">English</option></select></label><a href="publikus.html" target="_blank" rel="noopener" class="showcase-admin-link">🌍 Publikus oldal</a><a href="bemutato.html" target="_blank" rel="noopener" class="showcase-admin-link">🧭 Admin Demo</a><a href="visszajelzes.html" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;justify-content:center;border:1px solid #3c846f;border-radius:10px;padding:8px 12px;color:#afffdf;font-weight:700;text-decoration:none">📝 Hibajelentés / ötlet</a><button id="exportBtn">↓ Mentés JSON-ba</button><button id="importBtn">↑ Betöltés</button><button class="alt" id="printBtn">⎙ Nyomtatás</button><input type="file" id="importFile" accept=".json,application/json" class="hide"></div></header>
+<header><div class="brand"><div class="sro-era">✧ SILKROAD · THE CARAVAN ROUTE ✧</div><h1><span class="emblem">⚔</span>SILKROAD WHEEL CALCULATOR <span class="badgebox">EMERALD v5 ADMIN PREVIEW</span></h1><small>Szettkezelő · Wheel-sorok · STR/INT · Fegyver & Shield · Pörgetési esélymodell</small><div class="sro-route-ribbon" aria-hidden="true">JANGAN <span>◆ ─── ◆</span> DONWHANG <span>◆ ─── ◆</span> HOTAN <span>◆</span> FATE · FORTUNE · PEN</div></div><div class="head-actions"><label class="lang-control" for="langSel">🌐 <span>Nyelv / Language</span><select id="langSel" aria-label="Language / Nyelv"><option value="hu">Magyar</option><option value="en">English</option></select></label><a href="publikus.html" target="_blank" rel="noopener" class="showcase-admin-link">🌍 Publikus oldal</a><a href="bemutato.html" target="_blank" rel="noopener" class="showcase-admin-link">🧭 Admin Demo</a><a href="visszajelzes.html" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;justify-content:center;border:1px solid #3c846f;border-radius:10px;padding:8px 12px;color:#afffdf;font-weight:700;text-decoration:none">📝 Hibajelentés / ötlet</a><button id="exportBtn">↓ Mentés JSON-ba</button><button id="importBtn">↑ Betöltés</button><button class="alt" id="printBtn">⎙ Nyomtatás</button><input type="file" id="importFile" accept=".json,application/json" class="hide"></div></header>
 <div style="margin:12px 25px 0;padding:10px 15px;border:1px solid #997e35;border-radius:10px;background:#2c2514;color:#ffe4a5;font-size:12px"><b>NYILVÁNOS TESZTVÁLTOZAT:</b> a CAP / SoS / SoM / Sun maximumok kezdeti sablonértékek; szerverenként ellenőrzendők. A program nem kapcsolódik automatikusan semmilyen Silkroad szerverhez. A beírt adatok csak a böngésződben tárolódnak; készíts rendszeresen JSON mentést.</div><section class="serverbar" aria-label="Szerverprofil kezelése">
  <strong>🌐 Szerverprofil</strong>
  <label>Aktív szerver<select id="serverPicker" aria-label="Aktív Silkroad szerverprofil"></select></label>
@@ -1804,7 +1915,7 @@ function maximaQuickPanel(){
  const c=currentCfg();
  const fields=[['maxSTR','STR (+11 fix)'],['maxINT','INT (+11 fix)'],['maxDUR','Durability (200%)'],['maxHP','HP'],['maxMP','MP'],['maxPARRY','Parry'],['maxAR','Attack Rate'],['maxBR','Blocking Rate'],['maxCRIT','Critical (1–3)'],['maxFREEZE','Freezing (%)']];
  return `<section class="wheel-plan maxima-quick"><h3>🧮 100%-os maximumok — ${S.cap} CAP / ${c.degree}DG</h3>
- <div class="plan-guide">Kézzel szerkeszthető <b>matematikai referenciák</b>, nem igazolt szervermaximumok. Degree-nként külön mentjük, és a teljes SET-et ehhez mérjük. Az egyes Wheel-sorokhoz lent külön maximum is adható.</div>
+ <div class="plan-guide">Kézzel szerkeszthető <b>matematikai referenciák</b>, nem igazolt szervermaximumok. A CAP/DG és a szerverprofil saját értékei a meglévő mentésben maradnak; a kifejezetten megadott soronkénti Blue maximumot a frissítés nem írhatja felül. Az STR/INT, Durability és a 130+ HP/Parry korlátok továbbra is rögzítettek. Külön gépen használathoz készíts JSON-mentést.</div>
  <div class="maxima-grid">${fields.map(([key,label])=>`<label>${statLabel(key.replace(/^max/,"").toUpperCase(),label)}<input type="number" inputmode="decimal" min="1" max="${key==='maxSTR'||key==='maxINT'?11:key==='maxDUR'?200:key==='maxCRIT'?3:99999}" ${['maxSTR','maxINT','maxDUR'].includes(key)||(S.cap>=130&&['maxHP','maxPARRY'].includes(key))?'readonly title="Rögzített, ellenőrzött maximum"':''} data-config="${key}" aria-label="${label} maximum ${c.degree}DG fokozaton" value="${esc(c[key]??'')}" placeholder="Kézi maximum"></label>`).join('')}</div></section>`;
 }
 function editPanel(){let id=S.active,ob=itm(id),v=check(id),c=currentCfg();let limit=itemLimit(ob,c);let hasWarn=v.issues.length||v.extra.length;return `<section class="panel"><h2 class="item-editor-head">${itemLabel(id)} ${statusP(v)}</h2><div class="item-goal-banner item-${v.color}"><div><b>Teljes Wheel-minőség: ${percent(v.itemPct)}</b> · Saját cél: <b>${percent(v.goalPct)}</b> · ${v.wheelComplete?'Minden pontozott sor kitöltve':`${v.qualityFilled}/${v.qualityRows} pontozott sor értéke kitöltve`}</div><div class="progress"><div style="width:${Math.min(100,v.itemPct??0)}%"></div></div><div class="info">A teljes Wheel-minőség minden számszerű, kiválasztott sor kézzel megadott vagy CAP/DG maximumához viszonyított %-ának átlaga. Egy sor = egy szavazat. Durability/Egyéb nincs pontozva. A hiányzó sorérték 0%-kal szerepel, de a státusz a kitöltésig nem végleges.</div></div><div class="formrow mb"><label>Item grade<select data-item-field="grade">${optionList({Normal:'Normal',SoS:'SoS / Magic',SoM:'SoM / Rare',Sun:'Sun / Legend'},ob.grade)}</select></label><label>Valódi Wheel-sorok száma<input type="number" min="0" max="${limit}" data-item-field="count" value="${esc(ob.count)}"></label><label>Célzott STR/INT sorok<input type="number" min="0" max="${limit}" data-item-field="target" value="${esc(ob.target)}"></label><label>Elérni kívánt Wheel-minőség (%)<input type="number" min="1" max="100" step="0.1" data-item-field="goalPct" value="${esc(ob.goalPct)}"></label><label>CAP alap ${esc(ob.grade)} sormax<input type="number" min="1" max="30" data-grade-max="${esc(ob.grade)}" value="${esc(c.gradeMax[ob.grade])}"></label><label>Kézi MAX SOR ehhez az itemhez (${esc(ob.grade)})<input type="number" min="1" max="30" data-item-max="${esc(ob.grade)}" value="${esc(ob.maxRowsByGrade?.[ob.grade]??'')}" title="Kézi sorlimit csak ehhez az itemhez és fokozathoz; ha üres, CAP-alapértéket használ." placeholder="Alapértelmezett: ${esc(c.gradeMax[ob.grade])}"></label>${id==='weapon'?`<label>Critical kötelező ehhez a fegyverhez?<select id="critReqSel"><option value="yes" ${critRequired()?'selected':''}>Igen</option><option value="no" ${!critRequired()?'selected':''}>Nem</option></select></label>`:''}</div>
@@ -1824,7 +1935,7 @@ ${autoWheelChancePanel(id,true)}
 ${wheelPlanPanel(ob,limit)}
  ${maximaQuickPanel()}
 </div></details>
-${v.count?`<div class="notice" style="margin-bottom:9px"><b>🛠 Kézi modellhatár:</b> minden sor negyedik oszlopában megadhatod a saját feltételezett 100%-os maximumodat. Az üres mező az adott CAP alapmaximumát használja. Koppints a zöld keretes számmezőre a sor maximumának szerkesztéséhez. Alapból a CAP/DG maximum látszik; a beírt korábbi sorértékeket nem töröljük.</div><div class="rowtable-wrap"><table class="rowtable"><thead><tr><th>#</th><th>Típus</th><th>Valós érték</th><th>Kézi modellhatár / sor (100%)</th><th>Minőség</th></tr></thead><tbody>${Array.from({length:Math.max(0,Math.min(30,v.count))},(_,i)=>{let row=ob.rows[i]||{type:'',value:''},max=effectiveRowMax(row,c),base=rowMax(row.type,c),qual=max&&row.value!==''&&row.value!=null?r2(num(row.value)/max*100)+'%':'—';return `<tr><td data-label="#">${i+1}</td><td data-label="Típus"><span class="sro-row-type-icon">${row.type?uiIcon("stat",row.type):""}</span><select data-row-type="${i}"><option value="">– válassz –</option>${optionList(allowedTypes(id,row.type),row.type)}</select></td><td data-label="Valós érték">${rowValueEditor(row,i)}</td><td data-label="100%-os MAX / sor">${row.type==='DUR'||row.type==='OTHER'?'Nem pontozott':`<input type="number" min="1" max="99999" step="${row.type==='FREEZE'?'0.1':'1'}" data-row-model-max="${i}" aria-label="${i+1}. sor egyedi maximuma" value="${esc(max??'')}" class="row-model-input" inputmode="decimal" placeholder="Add meg" title="Kézzel szerkeszthető maximum; a CAP/DG alapértékét megadva újra örökli a változásokat.">`}</td><td data-label="Minőség">${row.type==='DUR'||row.type==='OTHER'?'—':qual}</td></tr>`}).join('')}</tbody></table><datalist id="suggestedAR90"><option value="5"><option value="10"><option value="20"><option value="30"><option value="40"></datalist></div>`:`<div class="notice">Állítsd be felül, hány Wheel-sor lett az itemen, majd töltsd ki a sorokat. Nincs előre kitalált eredmény.</div>`}
+${v.count?`<div class="notice" style="margin-bottom:9px"><b>🛠 Kézi Blue maximum:</b> az üres mező az aktuális CAP/DG alapértékét használja (szaggatott keret, „Alap” jelzés). A kézzel beírt szám arany keretet kap, és saját maximumként mentődik a SET-be – akkor is, ha most éppen megegyezik az alapértékkel. Weboldalfrissítéskor nem áll vissza automatikusan. Törölni csak a mező kiürítésével lehet. A régi dobásértékeket nem töröljük.</div><div class="rowtable-wrap"><table class="rowtable"><thead><tr><th>#</th><th>Típus</th><th>Valós érték</th><th>Kézi modellhatár / sor (100%)</th><th>Minőség</th></tr></thead><tbody>${Array.from({length:Math.max(0,Math.min(30,v.count))},(_,i)=>{let row=ob.rows[i]||{type:'',value:''},max=effectiveRowMax(row,c),base=rowMax(row.type,c),qual=max&&row.value!==''&&row.value!=null?r2(num(row.value)/max*100)+'%':'—';return `<tr><td data-label="#">${i+1}</td><td data-label="Típus"><span class="sro-row-type-icon">${row.type?uiIcon("stat",row.type):""}</span><select data-row-type="${i}"><option value="">– válassz –</option>${optionList(allowedTypes(id,row.type),row.type)}</select></td><td data-label="Valós érték">${rowValueEditor(row,i)}</td><td data-label="100%-os MAX / sor">${row.type==='DUR'||row.type==='OTHER'?'Nem pontozott':`<input type="number" min="1" max="99999" step="${row.type==='FREEZE'?'0.1':'1'}" data-row-model-max="${i}" aria-label="${i+1}. sor egyedi maximuma" value="${esc(row.modelMax??'')}" class="row-model-input ${row.modelMax!=null?'is-manual':''}" inputmode="decimal" placeholder="Alap: ${esc(max??'—')}" title="Üresen a CAP/DG alapmaximum érvényes. A beírt érték kifejezett kézi maximumként marad meg frissítés után is.">`}</td><td data-label="Minőség">${row.type==='DUR'||row.type==='OTHER'?'—':qual}</td></tr>`}).join('')}</tbody></table><datalist id="suggestedAR90"><option value="5"><option value="10"><option value="20"><option value="30"><option value="40"></datalist></div>`:`<div class="notice">Állítsd be felül, hány Wheel-sor lett az itemen, majd töltsd ki a sorokat. Nincs előre kitalált eredmény.</div>`}
 <details class="workspace-fold editor-fold" data-editor-fold="bonus" ${EDITOR_FOLDS.bonus?'open':''}>
 <summary>${UI_LANG==='en'?'HP / MP / Parry and Rate inputs':'HP / MP / Parry és Rate mezők'}</summary><div class="editor-fold-content">
 ${bonusStatsPanel(ob,c)}
@@ -2913,7 +3024,7 @@ function bindRendered(){
  };
  document.querySelectorAll('[data-row-type]').forEach(el=>el.onchange=()=>{let row=itm(S.active).rows[+el.dataset.rowType];row.type=el.value;row.value='';delete row.modelMax;save();lastSim=null;paint();});
  document.querySelectorAll('[data-row-value]').forEach(el=>el.onchange=()=>{let row=itm(S.active).rows[+el.dataset.rowValue];row.value=el.value===''?'':Math.max(0,num(el.value));save();lastSim=null;paint();});
- document.querySelectorAll('[data-row-model-max]').forEach(el=>el.onchange=()=>{const row=itm(S.active).rows[+el.dataset.rowModelMax],raw=el.value.trim();if(raw===''){delete row.modelMax;}else{const value=Number(raw),base=rowMax(row.type);if(!Number.isFinite(value)||value<=0||value>99999){toast('A modellmaximum 1 és 99999 közötti pozitív szám lehet.');paint();return;}if(base!=null&&Number(base)===value)delete row.modelMax;else row.modelMax=value;}lastSim=null;save();paint();});
+ document.querySelectorAll('[data-row-model-max]').forEach(el=>el.onchange=()=>{const row=itm(S.active).rows[+el.dataset.rowModelMax],raw=el.value.trim();if(raw===''){delete row.modelMax;}else{const value=Number(raw),base=rowMax(row.type);if(!Number.isFinite(value)||value<=0||value>99999){toast('A modellmaximum 1 és 99999 közötti pozitív szám lehet.');paint();return;}row.modelMax=value;}lastSim=null;save();paint();});
  document.querySelectorAll('[data-config]').forEach(el=>el.onchange=()=>{let k=el.dataset.config;if(['maxSTR','maxINT','maxDUR'].includes(k)||(S.cap>=130&&['maxHP','maxPARRY'].includes(k))){applyFixedStatLimits();paint();return;}currentCfg()[k]=el.value===''?null:Math.min(k==='maxCRIT'?3:99999,Math.max(1,num(el.value)));lastSim=null;save();paint();});
  document.querySelectorAll('[data-item-max]').forEach(el=>el.onchange=()=>{
    const ob=itm(S.active),grade=el.dataset.itemMax;
