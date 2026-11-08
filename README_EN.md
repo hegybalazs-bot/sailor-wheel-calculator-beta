@@ -137,3 +137,12 @@ The GitHub Actions artifact `wheel-blue-admin-review-template` contains a **420-
 
 
 **90 CAP / 9DG admin quick-start:** the same GitHub Actions artifact also contains `Sailor_90CAP_9DG_Admin_Verification.csv` with **60 rows** to review first. The complete 420-row file remains available for later CAPs. Server-specific official values and probabilities stay empty until independently verified. See [admin verification request](docs/ADMIN_VERIFICATION_REQUEST_EN.md).
+
+
+## Silkroad caravan theme and update-safe manual Blue maxima
+
+Both the player page and developer preview use a new **Silkroad-inspired** dark gold / jade caravan aesthetic using original CSS only, with no extracted game artwork shipped publicly.
+
+A row's 100% Blue max input is **empty by default** and shows the current CAP/DG reference as a placeholder. Entering a number stores an **explicit per-SET manual maximum**, even when it equals the inherited default today. Future site updates do not silently replace that value; clearing the input restores CAP/DG inheritance. Server profiles, CAP/DG defaults, item rolls and other saved sets remain on the existing `sailor-wheel-calculator-v4` storage key. Confirmed +11 STR/INT, 200 Durability, 2300 HP and 60 Parry at 130+ limits still apply.
+
+Local browser data can be lost if site storage is cleared or you switch browser/origin. **Export JSON regularly.** Unknown server probabilities remain unverified.
