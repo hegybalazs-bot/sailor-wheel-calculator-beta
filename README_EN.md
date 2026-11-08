@@ -125,3 +125,8 @@ The repo now runs a separate [real Chromium browser QA workflow](.github/workflo
 `node tools/release-gate.cjs` lists unresolved evidence; `--stable` rejects premature production/stable labels. Administrator-confirmed Blue types, actual rates and game artwork licenses cannot be substituted by guesses or CI success.
 
 References: [Sailor admin verification form](docs/ADMIN_VERIFICATION_REQUEST_EN.md), [Beta release notes](docs/BETA_RELEASE_NOTES_EN.md), [Evidence register](data/release-evidence.json), [Release roadmap](docs/ROADMAP_V5.md).
+
+
+### Admin Blue verification worksheet
+
+The GitHub Actions artifact `wheel-blue-admin-review-template` contains a **420-row CSV** across the seven CAPs, six CH/EU outfit classes, weapons, shields and jewelry. The existing generic iSRO Blue catalog is explicitly **unverified reference data**; server-specific limits, outcomes, probability columns and evidence fields are blank awaiting authorized Sailor verification. Generate locally with `node tools/export-admin-blue-review.cjs`.
