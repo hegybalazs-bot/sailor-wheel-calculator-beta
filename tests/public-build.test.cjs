@@ -6,7 +6,7 @@ test('production public build contains only allowlisted files and excludes admin
  const files=build(),dist=path.join(__dirname,'..','dist-public');
  assert.deepEqual(files,[
   'assets/icons/local-pack.js','assets/icons/manifest.js',
-  'index.html','publikus.html','visszajelzes.html'
+  'ikon-helyreallitas.html','index.html','publikus.html','visszajelzes.html'
  ]);
  const index=fs.readFileSync(path.join(dist,'index.html'),'utf8');
  assert.match(index,/EMERALD · PUBLIC/);
@@ -17,6 +17,13 @@ test('production public build contains only allowlisted files and excludes admin
  assert.equal(fs.existsSync(path.join(dist,'tests')),false);
  assert.equal(fs.existsSync(path.join(dist,'data')),false);
  assert.equal(fs.existsSync(path.join(dist,'index.html')),true);
+ const recovery=fs.readFileSync(path.join(dist,'ikon-helyreallitas.html'),'utf8');
+ assert.match(recovery,/id="iconPack" type="file" accept="\.zip,application\/zip"/);
+ assert.match(recovery,/WHEEL_LOCAL_PACK\.importFile/);
+ assert.match(recovery,/WHEEL_LOCAL_PACK\.restore/);
+ assert.match(recovery,/connect-src 'none'/);
+ assert.doesNotMatch(recovery,/data-custom-icon=|ADMIN PREVIEW/);
+ assert.match(index,/href="ikon-helyreallitas\.html"/);
  assert.equal(fs.readFileSync(path.join(dist,'index.html'),'utf8'),
   fs.readFileSync(path.join(dist,'publikus.html'),'utf8'));
 });
