@@ -121,7 +121,7 @@ try{
    await page.waitForSelector('#root [data-workspace-go="items"]');
    assert.equal(await page.locator('[data-icon-source="local-auto"]').count(),0);
    assert.equal(await page.locator('input[accept*="zip"]').count(),0,'player calculator has no ZIP/image uploader');
-   await page.locator('a[href="ikon-helyreallitas.html"]').click();
+   await page.locator('.icon-recovery-link').click();
    await page.waitForURL('**/ikon-helyreallitas.html');
    assert.match(await page.locator('h1').innerText(),/90 CAP/);
    await page.locator('#iconPack').setInputFiles({
