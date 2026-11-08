@@ -39,3 +39,26 @@ test('CAP 90 9DG remains explicitly pending and not published as official Sailor
  assert.equal(manifest.adminApproval.status,'pending');
  assert.equal(manifest.icons.publicRedistribution,'permission_pending');
 });
+
+test('cannot spoof verified CAP limits or official probabilities without source and methodology',()=>{
+ const a=copy(manifest);a.capScopes[0].blueCatalog='verified';
+ assert.throws(()=>checkEvidence(a),/requires reviewer/);
+ const b=copy(manifest);b.capScopes[0].officialOdds='verified';
+ assert.throws(()=>checkEvidence(b),/odds require/);
+});
+test('cannot claim copied game graphics have permission without rights holder and license',()=>{
+ const x=copy(manifest);x.icons.publicRedistribution='permission_granted';
+ assert.throws(()=>checkEvidence(x),/rights holder/);
+});
+test('cannot certify mobile devices or deployment without proof',()=>{
+ const x=copy(manifest);x.qa.physicalAndroid='passed';
+ assert.throws(()=>checkEvidence(x),/requires a reviewer/);
+ const y=copy(manifest);y.delivery.renderAutoDeployWebhook='verified';
+ assert.throws(()=>checkEvidence(y),/proof URL/);
+ const z=copy(manifest);z.delivery.adminAccess='authenticated';
+ assert.throws(()=>checkEvidence(z),/proof URL/);
+});
+test('cannot certify Wheel semantics from a third-party summary alone',()=>{
+ const x=copy(manifest);x.gameMechanics[0].status='verified';
+ assert.throws(()=>checkEvidence(x),/requires official source/);
+});
