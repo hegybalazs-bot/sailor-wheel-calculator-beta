@@ -278,3 +278,12 @@ A GitHub Actions `wheel-blue-admin-review-template` nevű melléklete tartalmazz
 
 
 **90 CAP / 9DG admin gyorsellenőrzés:** ugyanebben a GitHub Actions mellékletben megtalálható a `Sailor_90CAP_9DG_Admin_Verification.csv` is, mindössze **60 sorral**. Ezzel érdemes kezdeni; a 420 soros teljes változat megmarad a későbbi CAP-okhoz. A kézzel igazolandó szerverértékek és esélyek szándékosan üresek. Részletek: [adminellenőrzési kérés](docs/ADMIN_VERIFICATION_REQUEST_EN.md).
+
+
+## Silkroad karaván-téma és frissítésálló kézi Blue maximumok
+
+A fejlesztői és a publikus oldal közös, **Silkroad Online ihletésű** sötét-arany/jáde karaván-stílust kapott, kizárólag saját CSS-díszítéssel; eredeti kliensgrafika nem került a publikus csomagba.
+
+A Blue-sor 100%-os maximumának mezője alapból **üres**, és az aktuális CAP/DG referenciaértéket csak helyettesítő szövegként mutatja. Ha konkrét számot írsz be, az **kifejezett, SET-hez kötött kézi maximumként** tárolódik akkor is, ha megegyezik az adott pillanatban örökölt alapértékkel. A böngészős frissítés nem írja ezt felül. Törölni az érték kiürítésével lehet; a külön CAP/DG maximumok, szerverprofilok, SET-ek és régi dobások a korábbi `sailor-wheel-calculator-v4` mentési kulcson maradnak. A megerősített STR/INT +11, Durability 200, 130+ HP 2300 és Parry 60 korlátok továbbra is érvényesek.
+
+A helyi adatok böngésző- vagy tárhelytörléskor elveszhetnek, ezért rendszeres **JSON-export** ajánlott. A változtatás nem tesz bizonyítottá ismeretlen szerveresélyeket.
