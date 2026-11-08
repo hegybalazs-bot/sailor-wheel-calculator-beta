@@ -130,3 +130,6 @@ References: [Sailor admin verification form](docs/ADMIN_VERIFICATION_REQUEST_EN.
 ### Admin Blue verification worksheet
 
 The GitHub Actions artifact `wheel-blue-admin-review-template` contains a **420-row CSV** across the seven CAPs, six CH/EU outfit classes, weapons, shields and jewelry. The existing generic iSRO Blue catalog is explicitly **unverified reference data**; server-specific limits, outcomes, probability columns and evidence fields are blank awaiting authorized Sailor verification. Generate locally with `node tools/export-admin-blue-review.cjs`.
+
+
+**90 CAP / 9DG admin quick-start:** the same GitHub Actions artifact also contains `Sailor_90CAP_9DG_Admin_Verification.csv` with **60 rows** to review first. The complete 420-row file remains available for later CAPs. Server-specific official values and probabilities stay empty until independently verified. See [admin verification request](docs/ADMIN_VERIFICATION_REQUEST_EN.md).

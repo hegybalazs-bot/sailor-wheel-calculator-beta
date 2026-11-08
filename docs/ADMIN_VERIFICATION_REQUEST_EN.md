@@ -51,3 +51,8 @@ For other CAPs (100, 110, 120, 125, 130, 140) repeat this template. No numerical
 GitHub Actions now generates the artifact `wheel-blue-admin-review-template` containing **Sailor_Blue_Verification_Template.csv** with **420 rows** covering all seven CAPs, the six CH/EU apparel families, four jewelry slots per region, fourteen weapon types and CH/EU shields. Each row includes the current generic Blue-type list **clearly labeled UNVERIFIED_REFERENCE_ONLY**. Columns for official possible types, Normal/SoS/SoM/Sun line maximums, per-type value limits, type probability, value distribution, evidence URL, reviewer and date are deliberately blank.
 
 Please fill in only rules and evidence you can confirm. Leave unknown probabilities blank; do not convert zero recorded examples into 0% odds. The Degree column is the calculator's present default reference; verify the actual Sailor season and item Degree separately. Provide this CSV back alongside any screenshots and published sources; no bot/client credentials or executable files are needed.
+
+
+## Quick start for 90 CAP / 9DG reviewers
+
+The same GitHub Actions artifact now includes **`Sailor_90CAP_9DG_Admin_Verification.csv`**, a focused 60-row file, alongside the complete 420-row file. Start with the smaller one. It includes CH/EU armor families, accessories, weapons and shields for the 90 CAP / 9DG reference only. Fill the empty official fields and provide matching evidence; do not treat the prefilled generic Blue reference list as confirmed Sailor data. Send the reviewed file back for evidence-based integration. The remaining CAPs can follow after 90 CAP is confirmed.

@@ -6,6 +6,7 @@
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const source=path.resolve(__dirname,'../index.html');
 const output=path.resolve(__dirname,'../artifacts/review/Sailor_Blue_Verification_Template.csv');
+const focusedOutput=path.resolve(__dirname,'../artifacts/review/Sailor_90CAP_9DG_Admin_Verification.csv');
 const CAP_DG=[[90,9],[100,10],[110,11],[120,12],[125,13],[130,14],[140,15]];
 const APPAREL=[
  ['ch','armor'],['ch','protector'],['ch','garment'],
@@ -64,11 +65,16 @@ function csvCell(val){
 }
 function build(){
  const parsed=parseSource(fs.readFileSync(source,'utf8')),rows=makeRecords(parsed);
+ const focused=rows.filter(row=>row[1]===90&&row[2]===9);
+ assert.equal(focused.length,60,'90 CAP / 9DG review must cover all 60 equipment variants');
+ const csv=records=>'\ufeff'+[HEADER,...records].map(row=>row.map(csvCell).join(',')).join('\r\n')+'\r\n';
  fs.mkdirSync(path.dirname(output),{recursive:true});
- fs.writeFileSync(output,'\ufeff'+[HEADER,...rows].map(row=>row.map(csvCell).join(',')).join('\r\n')+'\r\n');
- console.log('ADMIN BLUE REVIEW TEMPLATE: 420 rows · 7 CAP scopes · 6 apparel families · 14 weapons · 2 shield regions');
+ fs.writeFileSync(output,csv(rows));
+ fs.writeFileSync(focusedOutput,csv(focused));
+ console.log('ADMIN BLUE REVIEW TEMPLATE: 420 rows across 7 CAPs; 60-row 90 CAP / 9DG starter file');
  console.log('All official Blue values, line limits and odds remain BLANK and UNVERIFIED.');
- return {count:rows.length,path:output,header:HEADER,records:rows};
+ return {count:rows.length,path:output,header:HEADER,records:rows,
+  focusedCount:focused.length,focusedPath:focusedOutput,focusedRecords:focused};
 }
 if(require.main===module)build();
 module.exports={parseSource,makeRecords,build};
