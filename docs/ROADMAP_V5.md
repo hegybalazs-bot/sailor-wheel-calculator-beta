@@ -36,3 +36,20 @@ Updated for the v5 Admin Preview (2026-11-06).
 - [x] JSON backup export including all server profiles, older Sailor-only import support.
 
 **Do not mark user-facing production readiness PASS solely from Node regression tests.** Real browser and game-data verification remain necessary.
+
+
+## 2026-11-08 — Implemented beta hardening and independently blocked sign-off
+
+- [x] **Chromium E2E on CI:** `.github/workflows/browser-qa.yml` runs 4 real browser scenarios (desktop player UI; CAP data persistence; 390px mobile viewport + HU/EN and overflow; developer import of a synthetically generated private ZIP and IndexedDB reload). Screenshot artifacts are uploaded. **Does not certify Android or iOS hardware.**
+- [x] **Public-only build:** `node tools/build-public.cjs` emits exactly 5 allowlisted static site files in `dist-public`; no original game artwork, source data, admin preview or developer tooling is bundled. CI has a strict list/contents regression test and uploads the public release artifact.
+- [x] **Verification register:** `data/release-evidence.json` distinguishes candidate/player-submitted data from genuine administrative approval, 7 CAP scope statuses, unknown odds, logo/artwork licenses, actual QA and Render deployment.
+- [x] **Strict release-gate validator:** `node tools/release-gate.cjs` reports unverified items; `node tools/release-gate.cjs --stable` blocks mislabeling the beta stable while any material proof is missing. Verified claims require named, dated, linked evidence. Unit tests cover invalid and falsified statuses.
+- [x] **Admin review and release documentation:** `docs/ADMIN_VERIFICATION_REQUEST_EN.md`, `docs/DEPLOY_PUBLIC_ONLY.md`, `docs/BETA_RELEASE_NOTES_HU.md` and `docs/BETA_RELEASE_NOTES_EN.md`.
+- [x] **Actionable backlog:** #28 admin-proven 90 CAP/9DG data; #29 private admin access & public-only Render deployment; #30 physical devices, screen readers and backup recovery. Existing #21 icon rights and #4 Render webhook stay open.
+- [ ] **Admin confirmation:** no direct Sailor 90 CAP/9DG Blue/max/actual odds report yet. Public community articles are references only.
+- [ ] **Original art permission:** candidate icons remain user-local; do not publish or counterfeit images for missing 12–15DG clothes.
+- [ ] **Physical user-device and assistive-technology QA:** not replaced by 390px Chromium.
+- [ ] **Existing Render service:** until publishDir moves from `.` to `dist-public`, the index-based developer preview remains publicly accessible. Authentication requires separate protected hosting; a secret link is not protection.
+- [ ] **Render auto-deploy:** issue #4 persists; independent git-push-triggered deployment must be proven without a manual API call.
+
+**Release rule:** `EmERALD v5 BETA` until *all* external gates are evidenced. Do not assert official Sailor probability data merely from unit tests or screenshots.
