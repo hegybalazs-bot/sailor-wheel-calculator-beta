@@ -18,3 +18,9 @@
 - Render publikus csomag `dist-public`-ra átállítása, valamint az automatikus GitHub→Render élesítés független igazolása (issue #4).
 
 **Nem állítjuk, hogy a bemutatott esélyek a Sailor szerver valódi dobási arányai.** A játék klienséhez sosem kapcsolódunk.
+
+## 2026-11-08 — kompakt Silkroad játékosnézet
+- A béta / nem hitelesített szervermaximum figyelmeztetés azonnal látható összefoglalót kapott, részletei kinyithatók.
+- A szerverprofil és a SET aktív választója látható, de a ritkábban használt létrehozás / átnevezés / másolás / törlés külön lenyitható kezelősávba került.
+- A CAP, Degree és fegyver a gyorsbeállító sáv elejére került; a többi karakterbeállítás vízszintes görgetéssel érhető el, így telefonon kevesebbet kell lefelé görgetni.
+- Az eredeti elem-azonosítók és helyi SET/Blue tárolás változatlanok. A béta továbbra sem hitelesített Sailor-adatbázis.
