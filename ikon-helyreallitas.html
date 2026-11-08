@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:">
+<title>Silkroad Wheel Calculator – Helyi ikonok visszaállítása</title>
+<style>
+:root{color-scheme:dark;--gold:#edc688;--jade:#7af3b9}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 18% 0%,#40382165,transparent 45%),radial-gradient(ellipse at 87% 3%,#183f4055,transparent 45%),linear-gradient(160deg,#080f19,#12242b 55%,#0b1720);font:15px/1.55 "Segoe UI",Arial,sans-serif;color:#e9f2e8}
+main{max-width:730px;margin:0 auto;padding:24px 16px 60px}
+a{color:var(--gold)}a:hover{text-decoration:none}
+h1{font-family:Georgia,serif;font-size:clamp(25px,5vw,37px);line-height:1.14;letter-spacing:.4px;color:#f8e5bd;margin:15px 0}
+h2{color:#efd09d;font-size:17px;margin:8px 0}
+header{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.eyebrow{font-size:12px;color:#ddbe82;letter-spacing:1.8px}
+.card{background:linear-gradient(145deg,#152b30,#10202a);border:1px solid #8f7249;border-radius:16px;padding:22px;margin:18px 0;box-shadow:0 14px 30px #0004}
+.card p{margin:8px 0 14px}
+.muted{color:#b9cec6}
+.number{display:inline-flex;align-items:center;justify-content:center;border:1px solid #bb8f5b;color:#f7dcab;border-radius:50%;width:30px;height:30px;font-weight:750;margin-right:8px}
+.steps p{margin:12px 0}
+.action-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.file-pick{background:#26584b;border:1px solid #caa36e;color:#fff4d8;display:inline-flex;align-items:center;gap:9px;border-radius:10px;padding:12px 16px;cursor:pointer;font-weight:750}
+.file-pick:hover{background:#346e5b}
+.file-pick:focus-within,a:focus-visible,select:focus-visible{outline:2px solid #fbd69d;outline-offset:3px}
+.file-pick input{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
+.back{display:inline-block;border:1px solid #a38759;border-radius:10px;background:#2a3b3b;text-decoration:none;color:#f6e5c5;padding:12px 16px;font-weight:700}
+select{background:#172c34;border:1px solid #9f7e57;color:#fff;padding:8px 12px;border-radius:9px;font:inherit}
+#message{min-height:45px;margin-top:17px;padding:11px 12px;border-left:3px solid #d6aa66;background:#3d332358;color:#f3dfb5;overflow-wrap:anywhere}
+#message[data-level="ok"]{border-color:#64dfa1;background:#19372c9e;color:#bafdd9}
+#message[data-level="error"]{border-color:#e87878;background:#482a2a;color:#ffe1e1}
+.small{font-size:12px;color:#bbd3c7}
+footer{border-top:1px solid #816b4a4a;margin-top:20px;padding-top:14px}
+@media(max-width:480px){.card{padding:16px}.file-pick,.back{width:100%;justify-content:center}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div class="eyebrow">✧ SILKROAD · EMERALD · PRIVATE ICON RECOVERY ✧</div>
+<label for="language">🌐 <select id="language" aria-label="Language / Nyelv"><option value="hu">Magyar</option><option value="en">English</option></select></label>
+</header>
+<h1 data-hu="⚔ 90 CAP ikonok visszaállítása" data-en="⚔ Restore 90 CAP icons">⚔ 90 CAP ikonok visszaállítása</h1>
+<p class="muted" data-hu="Az új webcím nem fér hozzá a régi webcím böngészőben tárolt képeihez. Nem törlődtek a régi helyről: ezen az új címen egyszer kell visszatölteni a saját ikoncsomagodat." data-en="The new website address cannot access pictures stored in the browser under the old address. They have not been deleted from the old site. Load your own icon pack once for this new address.">Az új webcím nem fér hozzá a régi webcím böngészőben tárolt képeihez. Nem törlődtek a régi helyről: ezen az új címen egyszer kell visszatölteni a saját ikoncsomagodat.</p>
+<div class="card">
+<h2 data-hu="Egyszeri helyi betöltés · nincs szerveres feltöltés" data-en="One-time local import · no server upload">Egyszeri helyi betöltés · nincs szerveres feltöltés</h2>
+<div class="steps">
+<p><span class="number">1</span><span data-hu="Válaszd ki a korábban előkészített Sailor_Ikoncsomag_Bongeszobe_Javitott.zip fájlt." data-en="Choose your previously prepared Sailor_Ikoncsomag_Bongeszobe_Javitott.zip file.">Válaszd ki a korábban előkészített Sailor_Ikoncsomag_Bongeszobe_Javitott.zip fájlt.</span></p>
+<p><span class="number">2</span><span data-hu="A képek csak ebben a böngészőben tárolódnak. A kalkulátor magától megkeresi a felszereléshez illő ikonokat." data-en="Images stay in this browser only. The calculator automatically matches compatible equipment icons.">A képek csak ebben a böngészőben tárolódnak. A kalkulátor magától megkeresi a felszereléshez illő ikonokat.</span></p>
+<p><span class="number">3</span><span data-hu="A kalkulátornál ellenőrizd: 90 CAP, 9DG, megfelelő CH/EU ruhatípus és férfi/nő karakter." data-en="In the calculator, check 90 CAP, 9DG, matching CH/EU outfit family and character gender.">A kalkulátornál ellenőrizd: 90 CAP, 9DG, megfelelő CH/EU ruhatípus és férfi/nő karakter.</span></p>
+</div>
+<div class="action-row">
+<label class="file-pick" for="iconPack"><span data-hu="🛡 Saját ikoncsomag kiválasztása" data-en="🛡 Choose my local icon pack">🛡 Saját ikoncsomag kiválasztása</span><input id="iconPack" type="file" accept=".zip,application/zip" aria-label="Sailor browser-local icon ZIP"></label>
+<a class="back" href="index.html" data-hu="← Vissza a kalkulátorhoz" data-en="← Back to calculator">← Vissza a kalkulátorhoz</a>
+</div>
+<p id="message" role="status" aria-live="polite" data-level="pending" data-hu="Helyi ikoncsomag állapotának ellenőrzése…" data-en="Checking local icon pack status…">Helyi ikoncsomag állapotának ellenőrzése…</p>
+</div>
+<div class="card">
+<h2 data-hu="Ha továbbra is helyettesítő ikon látható" data-en="If a fallback icon is still displayed">Ha továbbra is helyettesítő ikon látható</h2>
+<p data-hu="A CAP és Degree nem azonos: 90 CAP általában 9DG ikonokat használ. Válassz CH/EU ruhatípust; ismeretlen ruhatípus esetén az oldal szándékosan nem találgat. A 12–15DG ruhaképek hiányát ez a betöltés sem pótolja." data-en="CAP and Degree are different: 90 CAP generally uses 9DG icons. Select a CH/EU outfit family; an unknown family is deliberately not guessed. This import cannot supply missing 12–15DG outfit sprites.">A CAP és Degree nem azonos: 90 CAP általában 9DG ikonokat használ. Válassz CH/EU ruhatípust; ismeretlen ruhatípus esetén az oldal szándékosan nem találgat. A 12–15DG ruhaképek hiányát ez a betöltés sem pótolja.</p>
+<p class="small" data-hu="A JSON-mentés a SET-eket és a beállításokat viszi át, de a privát képfájlokat nem. Más böngészőn vagy új webcímen ezt az egyszeri lépést ismételni kell. Semmi nem módosít mások SET-jein vagy a játékon." data-en="JSON backups transfer sets and settings, but not private image bytes. Repeat this one-time step in another browser or at a new website address. Nothing changes other players' sets or the game.">A JSON-mentés a SET-eket és a beállításokat viszi át, de a privát képfájlokat nem. Más böngészőn vagy új webcímen ezt az egyszeri lépést ismételni kell. Semmi nem módosít mások SET-jein vagy a játékon.</p>
+</div>
+<footer class="small" data-hu="A program nem küld ikont szerverre, nem csatlakozik a játékhoz és nem terjeszti a játék eredeti képeit. A helyi csomag ellenőrizetlen forrásjelölteket tartalmaz." data-en="No images are uploaded to a server, no game client connection is made, and original game sprites are not redistributed by this site. The local pack contains unverified candidate mappings.">A program nem küld ikont szerverre, nem csatlakozik a játékhoz és nem terjeszti a játék eredeti képeit. A helyi csomag ellenőrizetlen forrásjelölteket tartalmaz.</footer>
+</main>
+<script src="assets/icons/local-pack.js"></script>
+<script>
+'use strict';
+const SELECT=document.getElementById('language');
+let language='hu',messageKey='checking',messageCount=0;
+const messages={
+ checking:['Helyi ikoncsomag állapotának ellenőrzése…','Checking local icon pack status…'],
+ empty:['Itt még nincs helyi ikoncsomag. Válaszd ki egyszer a Sailor ZIP-et.','No local icon pack for this website yet. Choose the Sailor ZIP once.'],
+ ready:['Helyi ikonok készen: {n} jelölt. Visszatérhetsz a kalkulátorhoz.','Local icons ready: {n} candidates. Return to the calculator.'],
+ temporary:['{n} ikonjelölt betöltve, de a tartós mentés nem sikerült. A következő látogatáskor újból szükség lehet a ZIP-re.','{n} candidates loaded, but local persistence failed. You may need the ZIP again next visit.'],
+ working:['Ikonok helyi ellenőrzése és mentése…','Validating and saving local icons…'],
+ failed:['A fájlt nem sikerült beolvasni. Válaszd a böngészőhöz előkészített Sailor ikon ZIP-et.','Could not load that file. Choose the prepared Sailor browser icon ZIP.']
+};
+try{language=localStorage.getItem('wheel-calculator-language-v1')==='en'?'en':'hu';}catch(_){}
+function message(key,count=0,level='pending'){
+ messageKey=key;messageCount=count;
+ const out=document.getElementById('message');
+ out.dataset.level=level;
+ out.textContent=messages[key][language==='en'?1:0].replace('{n}',String(count));
+}
+function setLanguage(next){
+ language=next==='en'?'en':'hu';SELECT.value=language;
+ document.documentElement.lang=language;
+ document.querySelectorAll('[data-hu][data-en]').forEach(el=>{
+  el.textContent=el.getAttribute(language==='en'?'data-en':'data-hu');
+ });
+ document.title=language==='en'?'Silkroad Wheel Calculator – Restore local icons':'Silkroad Wheel Calculator – Helyi ikonok visszaállítása';
+ try{localStorage.setItem('wheel-calculator-language-v1',language);}catch(_){}
+ message(messageKey,messageCount,document.getElementById('message').dataset.level);
+}
+SELECT.onchange=()=>setLanguage(SELECT.value);
+setLanguage(language);
+const chooser=document.getElementById('iconPack');
+chooser.onchange=async()=>{
+ const file=chooser.files&&chooser.files[0];if(!file)return;
+ chooser.disabled=true;
+ message('working');
+ try{
+  const result=await window.WHEEL_LOCAL_PACK.importFile(file);
+  message(result.persisted?'ready':'temporary',result.count,result.persisted?'ok':'pending');
+ }catch(_){message('failed',0,'error');}
+ finally{chooser.disabled=false;chooser.value='';}
+};
+window.WHEEL_LOCAL_PACK.restore().then(found=>{
+ const result=window.WHEEL_LOCAL_PACK.summary();
+ message(found&&result.ready?'ready':'empty',result.count,found?'ok':'pending');
+}).catch(()=>message('empty'));
+</script>
+</body>
+</html>
