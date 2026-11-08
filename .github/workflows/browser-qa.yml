@@ -1,4 +1,4 @@
-name: Browser QA (Chromium)
+name: Browser QA (Chromium, Firefox, WebKit)
 on:
   push:
     branches: [main, "feat/**"]
