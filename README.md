@@ -53,14 +53,17 @@ A Silkroad Online szerverekhez használható felszerelés- és Wheel-sor-kalkul�
 - Eredmények, SET Manager, JSON biztonsági mentés
 - Visszajelző oldal: `/visszajelzes.html` (kimásolható üzenet; nem küld automatikusan semmit)
 
-## Közzététel Renderen
+## Közzététel Renderen – csak a publikus játékosfelület
 
-1. Hozz létre egy **külön GitHub repository-t** (pl. `sailor-wheel-calculator-beta`), a `README.md`, `index.html` és `visszajelzes.html` fájlokkal.
-2. Render: **New → Static Site**, csatlakoztasd a GitHub repository-t.
-3. Branch: `main`; Build Command: `echo Static beta: no build required`; Publish Directory: `.`
-4. Állítsd be a public `onrender.com` linket a Discord tesztelőknek.
+**Figyelem:** a repository gyökerének (`.`) publikálása már NEM megfelelő: a fejlesztői/admin előnézetet és belső fájlokat is láthatóvá teheti. Az alábbi beállítás egy publikus, de nem jogosultságkezelt játékosoldalt hoz létre.
 
-A `render.yaml` opcionális Render Blueprint-konfiguráció, a jelenlegi tároló nem tartalmaz ilyen fájlt. Manuális Static Site létrehozásakor a fenti beállításokat használd.
+1. Render → a meglévő Static Site beállításai, vagy új, külön publikus Static Site a `main` ágról.
+2. **Build Command:** `node tools/build-public.cjs`.
+3. **Publish Directory:** `dist-public` (NEM `.`).
+4. Ellenőrizd, hogy a `/` és `/publikus.html` működik, de a `/bemutato.html`, `/data/`, `/tests/`, `/tools/` nem szolgál ki fejlesztői/admin tartalmat.
+5. A valódi admin hozzáférést csak külön, hitelesített tárhely/proxy biztosíthatja; rejtett link vagy JavaScript-jelszó nem védelem.
+
+A csomag kizárólag öt engedélyezett statikus fájlt tartalmaz; nincs benne eredeti Sailor grafika vagy privát ZIP. A meglévő Render szolgáltatás átállítása **üzemeltetői művelet**, és a hibás GitHub→Render automatikus telepítés külön megoldandó. Részletek: [biztonságos publikus telepítés](docs/DEPLOY_PUBLIC_ONLY.md) · [feladat #29](https://github.com/hegybalazs-bot/sailor-wheel-calculator-beta/issues/29) · [autodeploy #4](https://github.com/hegybalazs-bot/sailor-wheel-calculator-beta/issues/4).
 
 ## Adatok és felelősség
 
