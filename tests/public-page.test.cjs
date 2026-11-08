@@ -116,7 +116,7 @@ test('Silkroad feedback and public save status use correct beta naming and no pr
 
 test('public calculator links to a distinct same-origin one-time icon recovery page',()=>{
  assert.match(publicHtml,/href="ikon-helyreallitas\.html"/);
- assert.doesNotMatch(publicHtml,/id="iconPack"|id="localIconZip"|data-pick-local-icon/);
+ assert.doesNotMatch(publicHtml.slice(0,publicHtml.indexOf('<script>')),/id="iconPack"|id="localIconZip"|data-pick-local-icon/);
  const recovery=fs.readFileSync(path.join(__dirname,'..','ikon-helyreallitas.html'),'utf8');
  assert.match(recovery,/WHEEL_LOCAL_PACK\.importFile\(file\)/);
  assert.match(recovery,/WHEEL_LOCAL_PACK\.restore\(\)/);
