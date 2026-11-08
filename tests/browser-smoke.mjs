@@ -6,25 +6,37 @@ import {createServer} from 'node:http';
 import {readFile,mkdir} from 'node:fs/promises';
 import {join,resolve,extname} from 'node:path';
 import {createHash} from 'node:crypto';
+import {createRequire} from 'node:module';
 import assert from 'node:assert/strict';
 
 const root=resolve('.'),shots=join(root,'artifacts','browser');
+const require=createRequire(import.meta.url);
+const {build}=require('../tools/build-public.cjs');
+build(); // Test the real five-file release bundle, not repository-root publishing.
+const publicRoot=join(root,'dist-public');
 await mkdir(shots,{recursive:true});
 const mime={'.html':'text/html;charset=utf-8','.js':'application/javascript;charset=utf-8','.json':'application/json;charset=utf-8','.css':'text/css;charset=utf-8'};
-const server=createServer(async(req,res)=>{
- let p;
- try{
-  const url=new URL(req.url||'/', 'http://127.0.0.1'),decoded=decodeURIComponent(url.pathname);
-  p=resolve(root,'.'+(decoded==='/'?'/publikus.html':decoded));
-  if(!(p===root||p.startsWith(root+'/')))throw Error('forbidden');
-  const body=await readFile(p);
-  res.writeHead(200,{'Content-Type':mime[extname(p)]||'application/octet-stream',
-   'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});
-  res.end(body);
- }catch(_){res.writeHead(404);res.end('Not found');}
-});
-await new Promise((ok,fail)=>{server.once('error',fail);server.listen(0,'127.0.0.1',ok);});
-const origin='http://127.0.0.1:'+server.address().port;
+function serveStatic(directory){
+ return createServer(async(req,res)=>{
+  try{
+   const url=new URL(req.url||'/', 'http://127.0.0.1');
+   const decoded=decodeURIComponent(url.pathname),target=decoded==='/'?'/index.html':decoded;
+   const file=resolve(directory,'.'+target);
+   if(!file.startsWith(directory+'/'))throw Error('forbidden');
+   const bytes=await readFile(file);
+   res.writeHead(200,{'Content-Type':mime[extname(file)]||'application/octet-stream',
+    'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});
+   res.end(bytes);
+  }catch(_){res.writeHead(404);res.end('Not found');}
+ });
+}
+async function listen(server){
+ await new Promise((ok,fail)=>{server.once('error',fail);server.listen(0,'127.0.0.1',ok);});
+ return 'http://127.0.0.1:'+server.address().port;
+}
+const server=serveStatic(publicRoot);
+const developerServer=serveStatic(root);
+const origin=await listen(server),developerOrigin=await listen(developerServer);
 let browser,failures=0;
 const results=[];
 async function check(title,fn){
@@ -73,6 +85,103 @@ function syntheticPack(){
 
 try{
  browser=await chromium.launch({headless:true,args:['--no-sandbox']});
+ await check('public release bundle serves player root and excludes developer files over HTTP',async()=>{
+  const {context,page,errors}=await newPage({width:1200,height:780});
+  try{
+   await page.goto(origin+'/',{waitUntil:'load'});
+   await page.waitForSelector('#root [data-workspace-go="items"]',{timeout:12000});
+   assert.match(await page.title(),/Silkroad Wheel Calculator/);
+   assert.equal(await page.locator('#localIconZip').count(),0);
+   const paths=['/bemutato.html','/README.md','/data/release-evidence.json',
+    '/tests/browser-smoke.mjs','/tools/build-public.cjs','/.github/workflows/wheel-tests.yml',
+    '/assets/icons/original.ddj','/nonexistent.html'];
+   for(const path of paths){
+    const response=await context.request.get(origin+path);
+    assert.equal(response.status(),404,path+' should not be included in the public bundle');
+   }
+   for(const publicPath of ['/','/index.html','/publikus.html','/visszajelzes.html',
+    '/assets/icons/local-pack.js','/assets/icons/manifest.js']){
+    const response=await context.request.get(origin+publicPath);
+    assert.equal(response.status(),200,publicPath+' must remain available');
+   }
+   assert.deepEqual(errors,[]);
+  }finally{await context.close();}
+ });
+ await check('keyboard disclosures and landscape viewport allow access to all settings',async()=>{
+  const {context,page,errors}=await newPage({width:844,height:390});
+  try{
+   await page.goto(origin+'/');
+   const setSummary=page.locator('.setbar > .compact-manage summary');
+   await setSummary.focus();
+   await page.keyboard.press('Enter');
+   assert.equal(await page.locator('#newSetBtn').isVisible(),true);
+   await page.locator('#capSel').focus();
+   assert.equal(await page.evaluate(()=>document.activeElement?.id),'capSel');
+   await page.selectOption('#capSel','125');
+   await page.locator('#degreeInput').focus();
+   assert.equal(await page.evaluate(()=>document.activeElement?.id),'degreeInput');
+   await page.locator('[data-workspace-go="items"]').click();
+   await page.screenshot({path:join(shots,'public-landscape-844.png'),fullPage:true});
+   const dims=await page.evaluate(()=>({window:innerWidth,page:document.documentElement.scrollWidth}));
+   assert(dims.page-dims.window<=6,'no landscape page overflow '+JSON.stringify(dims));
+   assert.deepEqual(errors,[]);
+  }finally{await context.close();}
+ });
+ await check('two server profiles, separately named CAP sets and custom rules restore from JSON',async()=>{
+  const source=await newPage({width:1200,height:800}),destination=await newPage({width:1200,height:800});
+  try{
+   await source.page.goto(origin+'/');
+   await source.page.locator('.setbar > .compact-manage summary').click();
+   source.page.once('dialog',dialog=>dialog.accept('Original 90 SET'));
+   await source.page.locator('#newSetBtn').click();
+   await source.page.waitForFunction(()=>[...document.querySelectorAll('#setPicker option')].some(o=>o.textContent.includes('Original 90 SET')));
+   const oldSetId=await source.page.locator('#setPicker').inputValue();
+   await source.page.locator('.serverbar > .compact-manage summary').click();
+   source.page.once('dialog',dialog=>dialog.accept('Legends Realm'));
+   await source.page.locator('#newServerBtn').click();
+   await source.page.waitForFunction(()=>[...document.querySelectorAll('#serverPicker option')].some(o=>o.textContent.includes('Legends Realm')));
+   await source.page.selectOption('#capSel','120');
+   source.page.once('dialog',dialog=>dialog.accept('Legends 120 SET'));
+   await source.page.locator('#newSetBtn').click();
+   await source.page.locator('[data-tab="rules"]').click();
+   await source.page.locator('[data-config="maxAR"]').fill('53');
+   await source.page.locator('[data-config="maxAR"]').press('Tab');
+   const [download]=await Promise.all([
+    source.page.waitForEvent('download',{timeout:12000}),
+    source.page.locator('#exportBtn').click()
+   ]);
+   const buffer=await readFile(await download.path());
+   const backup=JSON.parse(buffer.toString('utf8'));
+   assert.equal(backup.serverProfiles.entries.length,2);
+   const sail=backup.serverProfiles.entries.find(e=>e.name==='Sailor Online');
+   const realm=backup.serverProfiles.entries.find(e=>e.name==='Legends Realm');
+   assert.ok(sail&&realm);
+   assert(sail.data.setBank[90].entries.some(e=>e.id===oldSetId&&e.name==='Original 90 SET'));
+   assert.equal(realm.data.cap,120);
+   assert.equal(realm.data.cfg[120].maxAR,53);
+   assert(realm.data.setBank[120].entries.some(e=>e.name==='Legends 120 SET'));
+   await destination.page.goto(origin+'/');
+   destination.page.on('dialog',dialog=>dialog.accept());
+   await destination.page.locator('#importFile').setInputFiles({
+    name:'multiserver.json',mimeType:'application/json',buffer
+   });
+   await destination.page.waitForFunction(()=>[...document.querySelectorAll('#serverPicker option')].length===2,{timeout:12000});
+   assert.equal(await destination.page.locator('#capSel').inputValue(),'120');
+   const savedNames=await destination.page.locator('#serverPicker option').allTextContents();
+   assert(savedNames.includes('Sailor Online')&&savedNames.includes('Legends Realm'));
+   const originalId=await destination.page.locator('#serverPicker option',{hasText:'Sailor Online'}).getAttribute('value');
+   await destination.page.selectOption('#serverPicker',originalId);
+   assert.equal(await destination.page.locator('#capSel').inputValue(),'90');
+   assert((await destination.page.locator('#setPicker option').allTextContents()).includes('Original 90 SET'));
+   const realmId=await destination.page.locator('#serverPicker option',{hasText:'Legends Realm'}).getAttribute('value');
+   await destination.page.selectOption('#serverPicker',realmId);
+   assert.equal(await destination.page.locator('#capSel').inputValue(),'120');
+   await destination.page.locator('[data-tab="rules"]').click();
+   assert.equal(await destination.page.locator('[data-config="maxAR"]').inputValue(),'53');
+   assert.deepEqual(source.errors,[]);
+   assert.deepEqual(destination.errors,[]);
+  }finally{await source.context.close();await destination.context.close();}
+ });
  await check('public desktop loads and has no admin image inputs',async()=>{
   const {context,page,errors}=await newPage({width:1440,height:900});
   try{
@@ -245,7 +354,7 @@ try{
  await check('developer preview imports private art and remembers it after reload',async()=>{
   const {context,page,errors}=await newPage({width:1440,height:900});
   try{
-   await page.goto(origin+'/index.html');
+   await page.goto(developerOrigin+'/index.html');
    await page.waitForSelector('#root');
    await page.locator('#localIconZip').setInputFiles({name:'test-local-icons.zip',mimeType:'application/zip',buffer:syntheticPack()});
    await page.waitForFunction(()=>document.querySelector('#root')?.textContent?.includes('1 jelölt'),{timeout:16000});
@@ -256,6 +365,6 @@ try{
    await page.screenshot({path:join(shots,'private-zip-auto-icons.png'),fullPage:true});
   }finally{await context.close();}
  });
-}finally{if(browser)await browser.close();await new Promise(ok=>server.close(ok));}
+}finally{if(browser)await browser.close();await Promise.all([new Promise(ok=>server.close(ok)),new Promise(ok=>developerServer.close(ok))]);}
 process.stdout.write(results.join('\n')+'\n');
 if(failures){process.stderr.write(failures+' browser QA scenario(s) FAILED\n');process.exitCode=1;}
