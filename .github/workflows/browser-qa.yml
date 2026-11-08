@@ -1,4 +1,4 @@
-name: Browser QA (Chromium)
+name: Browser QA (Chromium, Firefox, WebKit)
 on:
   push:
     branches: [main, "feat/**"]
@@ -14,10 +14,12 @@ jobs:
           node-version: '22'
       - name: Install pinned browser automation
         run: npm install --no-save --no-package-lock playwright@1.56.1
-      - name: Install Chromium runtime
-        run: npx playwright install --with-deps chromium
-      - name: Run desktop and mobile viewport browser tests
+      - name: Install Chromium, Firefox and WebKit runtimes
+        run: npx playwright install --with-deps chromium firefox webkit
+      - name: Run Chromium desktop and mobile viewport tests
         run: node tests/browser-smoke.mjs
+      - name: Run Firefox and WebKit public smoke tests
+        run: node tests/browser-compat.mjs
       - name: Upload screenshots for human visual review
         if: always()
         uses: actions/upload-artifact@v4
