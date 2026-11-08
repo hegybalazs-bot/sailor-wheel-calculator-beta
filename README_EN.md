@@ -112,3 +112,16 @@ Inside **SET & items**, the sticky top workspace switcher offers **⚔ Items / W
 
 **Security boundary:** These are separate static pages, not login-gated roles. The developer preview URL remains accessible to anyone who knows it; restricting real admin tools requires authenticated hosting or an independent private deployment.
 
+
+
+## Emerald v5 — beta QA and safe public delivery
+
+**Public player page:** https://sailor-wheel-calculator-beta.onrender.com/publikus.html
+
+The repo now runs a separate [real Chromium browser QA workflow](.github/workflows/browser-qa.yml) covering desktop, mobile viewport, CAP persistence, public JSON backup recovery, Wheel pages, local icon ZIP import and IndexedDB reload. Screenshots are attached to GitHub Actions runs. Physical Android/iOS testing is still required.
+
+`node tools/build-public.cjs` creates an allowlisted `dist-public` static release bundle without developer preview, private artwork or source files. **The existing Render service still publishes the repository root** until the authorized owner applies the instructions in [Public-only deployment](docs/DEPLOY_PUBLIC_ONLY.md). Authentication for a real private admin workspace is a separate task.
+
+`node tools/release-gate.cjs` lists unresolved evidence; `--stable` rejects premature production/stable labels. Administrator-confirmed Blue types, actual rates and game artwork licenses cannot be substituted by guesses or CI success.
+
+References: [Sailor admin verification form](docs/ADMIN_VERIFICATION_REQUEST_EN.md), [Beta release notes](docs/BETA_RELEASE_NOTES_EN.md), [Evidence register](data/release-evidence.json), [Release roadmap](docs/ROADMAP_V5.md).
