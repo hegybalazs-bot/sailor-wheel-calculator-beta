@@ -191,6 +191,57 @@ try{
    assert.deepEqual(errors,[]);
   }finally{await context.close();}
  });
+
+ await check('manual Blue max is preserved across CAP-default change, reload and JSON import',async()=>{
+  const source=await newPage({width:1200,height:850}),target=await newPage({width:1200,height:850});
+  const readState=page=>page.evaluate(()=>JSON.parse(localStorage.getItem('sailor-wheel-calculator-v4')));
+  try{
+   await source.page.goto(origin+'/publikus.html');
+   await source.page.locator('[data-workspace-go="items"]').click();
+   await source.page.locator('[data-item="head"]').first().click();
+   await source.page.locator('[data-item-field="count"]').fill('1');
+   await source.page.locator('[data-item-field="count"]').press('Tab');
+   await source.page.locator('[data-row-type="0"]').selectOption('HP');
+   await source.page.locator('[data-row-value="0"]').fill('300');
+   await source.page.locator('[data-row-value="0"]').press('Tab');
+   const modelInput=source.page.locator('[data-row-model-max="0"]');
+   assert.equal(await modelInput.inputValue(),'','inherited max is displayed only as a placeholder');
+   await modelInput.fill('600');
+   await modelInput.press('Tab');
+   assert.equal((await readState(source.page)).sets[90].head.rows[0].modelMax,600);
+   await source.page.locator('[data-tab="rules"]').click();
+   const capMax=source.page.locator('[data-config="maxHP"]');
+   await capMax.fill('900');
+   await capMax.press('Tab');
+   await source.page.reload();
+   const old=await readState(source.page);
+   assert.equal(old.cfg[90].maxHP,900);
+   assert.equal(old.sets[90].head.rows[0].modelMax,600);
+   await source.page.locator('[data-tab="set"]').click();
+   await source.page.locator('[data-workspace-go="items"]').click();
+   await source.page.locator('[data-item="head"]').first().click();
+   assert.equal(await source.page.locator('[data-row-model-max="0"]').inputValue(),'600');
+   assert.match(await source.page.locator('[data-row-model-max="0"]').getAttribute('class'),/is-manual/);
+   const [download]=await Promise.all([
+    source.page.waitForEvent('download',{timeout:12000}),
+    source.page.locator('#exportBtn').click()
+   ]);
+   const buffer=await readFile(await download.path());
+   await target.page.goto(origin+'/publikus.html');
+   target.page.on('dialog',dialog=>dialog.accept());
+   await target.page.locator('#importFile').setInputFiles({
+    name:'silkroad-manual-max.json',mimeType:'application/json',buffer
+   });
+   await target.page.waitForFunction(()=>{
+    const data=JSON.parse(localStorage.getItem('sailor-wheel-calculator-v4')||'{}');
+    return data?.cfg?.[90]?.maxHP===900&&data?.sets?.[90]?.head?.rows?.[0]?.modelMax===600;
+   },null,{timeout:12000});
+   const imported=await readState(target.page);
+   assert.equal(imported.sets[90].head.rows[0].value,300);
+   assert.deepEqual(source.errors,[]);
+   assert.deepEqual(target.errors,[]);
+  }finally{await source.context.close();await target.context.close();}
+ });
  await check('developer preview imports private art and remembers it after reload',async()=>{
   const {context,page,errors}=await newPage({width:1440,height:900});
   try{
