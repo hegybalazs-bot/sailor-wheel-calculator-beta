@@ -560,6 +560,7 @@ a:hover{color:#ffe5ac}
  .controls{overflow:visible;flex-wrap:wrap}
 }
 
+.wheel-sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 </style>
 </head>
 <body><div class="shell">
@@ -582,7 +583,7 @@ a:hover{color:#ffe5ac}
 <label>Degree (szerkeszthető)<input type="number" min="1" max="20" id="degreeInput"></label><label>Fegyver típusa <select id="weaponSel"></select></label><label>Ruhatípus / Armour family<select id="apparelStyleSel" aria-label="Ruhatípus / Armour family"></select></label><label>Karakter / Icon gender<select id="iconGenderSel" aria-label="Character icon gender"><option value="man">Férfi / Male</option><option value="woman">Nő / Female</option></select></label><label>CAP kézi beírása (1–200)<input type="number" min="1" max="200" step="1" id="capQuick" inputmode="numeric" aria-label="CAP kézi beírása"></label>
 <button type="button" id="capApply" title="Beírt CAP kiválasztása">✓ CAP beállítása</button><label>Alap cél (%)<input type="number" id="goalSel" min="1" max="100" step="0.1" title="Új itemek alapcélja; meglévő itemhez állíts be saját célt"></label><button id="applyGoalAll" title="Az alapcélt csak az aktuális CAP összes itemjére alkalmazza">Alapcél minden itemre</button><div class="grow"></div><div class="info" id="saveStatus">Automatikus helyi mentés bekapcsolva</div></div><div class="weapon-strip" id="weaponTip"></div>
 <div class="tabs"><button data-tab="set" class="active">⚔ Szett & itemek</button><button data-tab="chance">🎲 Következő Wheel / Pen esélye</button><button data-tab="rules">⚙ CAP & grade szabályok</button><button data-tab="help">ⓘ Súgó / források</button></div>
-<main class="page" id="root"></main><div class="foot">Wheel Calculator · Szerverprofilok · Offline alkalmazás, internetkapcsolat nélkül is működik · A valós szerveresélyek ellenőrzött adatok nélkül nem ismertek.</div></div>
+<main class="page" id="root"></main><div id="wheelAnnouncer" role="status" aria-live="polite" aria-atomic="true" class="wheel-sr-only"></div><div class="foot">Wheel Calculator · Szerverprofilok · Offline alkalmazás, internetkapcsolat nélkül is működik · A valós szerveresélyek ellenőrzött adatok nélkül nem ismertek.</div></div>
 <script src="assets/icons/manifest.js"></script>
 <script src="assets/icons/local-pack.js"></script>
 <script>
@@ -2500,7 +2501,7 @@ function setView(){
  if(!WORKSPACE_PANELS.includes(WORKSPACE_ACTIVE))WORKSPACE_ACTIVE='items';
  return sharedSetPreviewPanel()+`<nav class="workspace-nav" role="tablist" aria-label="${en?'Calculator workspace':'Kalkulátor munkafelület'}">
  ${sections.map(p=>`<button type="button" role="tab" class="${WORKSPACE_ACTIVE===p.id?'selected':''}"
- data-workspace-go="${p.id}" aria-selected="${WORKSPACE_ACTIVE===p.id}"
+ data-workspace-go="${p.id}" aria-selected="${WORKSPACE_ACTIVE===p.id}" tabindex="${WORKSPACE_ACTIVE===p.id?'0':'-1'}"
  aria-controls="workspace-${p.id}" id="workspace-tab-${p.id}">${p.icon} ${esc(p.label)}</button>`).join('')}</nav>`+
  sections.map(p=>`<section id="workspace-${p.id}" role="tabpanel" aria-labelledby="workspace-tab-${p.id}"
  class="workspace-pane ${p.id==='items'?'workspace-main':''}" data-workspace-pane="${p.id}"
@@ -2516,6 +2517,7 @@ function chooseWorkspace(panel,scroll=false){
  document.querySelectorAll('[data-workspace-go]').forEach(el=>{
   const selected=el.dataset.workspaceGo===panel;
   el.setAttribute('aria-selected',String(selected));
+  el.setAttribute('tabindex',selected?'0':'-1');
   el.classList.toggle('selected',selected);
  });
  if(scroll)document.querySelector('.workspace-nav')?.scrollIntoView?.({behavior:'smooth',block:'start'});
@@ -3000,18 +3002,55 @@ function helpViewEnglish(){return `<section class="panel"><h2>ⓘ Guide / known 
  <h3>Sources and feedback</h3><p><a href="https://pvpboard.com/en/silkroad/sailor-online" target="_blank" rel="noopener">Sailor Online – PVPBoard overview</a><br><a href="https://www.rev-gg.com/wheel-system" target="_blank" rel="noopener">Wheel system illustration (another SRO server)</a><br><a href="visszajelzes.html">Report a bug or submit a confirmed stat with screenshots</a></p>
  </div></div></section>`;}
 function helpView(){if(UI_LANG==='en')return helpViewEnglish();return `<section class="panel"><h2>ⓘ Útmutató / ismert korlátok</h2><div class="layout2"><div class="feature"><h3>Hogyan használd?</h3><p><b>1.</b> Válaszd ki a CAP-ot, degree-t és fegyvertípust.<br><b>2.</b> Bal oldalon válassz itemet (Shoulder, Hands, Foot, Head, Chest, Legs, 4 ékszer, fegyver, Shield).<br><b>3.</b> Add meg az item <b>valódi grade-jét</b> és hogy hány Wheel-sort sikerült pörgetni.<br><b>4.</b> Használd a „Wheel-sorösszetétel” mezőket: például 5 STR + 2 INT + 1 Parry = 8 sor. Alkalmazás után minden egyes sor értékét külön add meg. A teljes Wheel-minőség a pontozott sorok (STR/INT/Parry/Attack/Block/Critical/HP/MP) maximális értékükhöz viszonyított százalékának átlaga; a Durability/Egyéb nem pontozott. STR és INT esetén minden szerverben +1…+11 választható; a maximum fix +11. Az ennél nagyobb korábbi mentett sorérték figyelmeztetéssel megmarad, de nem számít bele az összegzésbe.<br><b>5.</b> A kiválasztott itemnél a saját HP/MP/Parry értékeket kézzel add meg; a program a CAP-hoz beállított maximumhoz viszonyítja (130 CAP-től HP 2300, Parry 60). A 125 CAP külön választható. A SoS és egyéb grade-sorlimitek szabadon módosíthatók.<br><b>6.</b> Add meg minden itemhez az egyedi %-os célodat. A teljes item sorának színe az aktuális haladás alapján vált: zöld (cél), sárga (10 százalékponton belül), fehér (távol), piros (20% alatt). A STR és INT minőségét és részarányát külön látod.<br><b>7.</b> A „pörgetés mentése” gombbal historikus sorozatokat is követhetsz.</p><h3>Több SET kezelése</h3><p>A felső <b>Mentett SET-ek</b> részen készíthetsz új szettet, másolhatsz egy meglévőt, átnevezheted vagy törölheted. Minden CAP-hoz saját külön SET-lista tartozik. Az egyes SET-ekhez az itemek, a választott fegyver és annak összes változata, a Shield és az előzmények is hozzá vannak mentve. A CAP-on belüli SET-váltás nem írja felül a másik szettet.</p><h3>Adatmentés</h3><p>A program helyben ment, de másik gépen/böngészőben nem szinkronizál. Az <b>Export JSON</b> biztonsági másolat, amit az Import gombbal visszatölthetsz. A ZIP-ben nincs külső függőség.</p></div><div class="feature"><h3>Fontos szabályok</h3><p><b>STR/INT minőség:</b> A STR/INT sorok megadott értéke osztva az ideiglenes +11-es modellezési felső értékkel; külön STR% és INT%, plusz közös súlyozott minőség. A STR/INT részarány külön mérőszám: STR vagy INT osztva (STR+INT) összponttal. Minden itemhez külön, 1–100%-os saját célt állíthatsz be. A teljes Wheel-minőség az összes megadott, számszerűen pontozható sor átlaga; a hiányzó érték nulla pontot ad, és nem lesz végleges értékelés. Ettől külön látható a célzott STR/INT sorokhoz viszonyított haladás. Az STR/INT sormaximum minden szerverprofilban fix +11; nem írható felül a Wheel-táblázatban sem.</p><p><b>Fegyver:</b> 14 választható CH/EU fegyvertípus; mindegyikhez külön Wheel-sorok és előzmények minden CAP-ban. 90 CAP-on alapkövetelmény a 2 maximális (+40-es) Attack Rate sor, összesen legalább +80 Attack Rate, egy megfelelő Blocking Rate sor, +12 STR/INT. Spear és 2H Sword esetén Critical alapból kötelező, de ezt fegyverenként ki- és bekapcsolhatod. Pajzs csak az arra alkalmas fegyvereknél számít.</p><p><b>Esélyek:</b> a modell nem ismeri a Sailor szerver dobási eloszlását. Csak akkor becsül, ha te saját feltételezett eloszlást adsz meg; az értékeket alapból egyenletesnek tekinti. A soronkénti kézi modellhatárok az itemminőség számítását érintik; a jövőbeli dobás szimulációja továbbra is CAP-alapmaximumokkal dolgozik. A 90 CAP Attack Rate mező 5/10/20/30/40 értékeket javasol, de ezek teljességét még ellenőrizni kell; más beírt értéket sem tilt le.</p><p><b>Szerveradat:</b> a 14DG Magic 9 / Rare 10 / Legend 11 maximumot Sailorhoz kötődő leírás tartalmazza; a SoS / SoM / Sun fokozatok 90–110 CAP-os limitjét ebből nem lehet biztosan következtetni. A képernyőn átírható.</p><p><b>Források:</b><br><a style="color:#8de8c9" href="https://pvpboard.com/en/silkroad/sailor-online" target="_blank" rel="noopener">Sailor Online – PVPBoard bemutató</a><br><a style="color:#8de8c9" href="https://www.rev-gg.com/wheel-system" target="_blank" rel="noopener">Wheel működés – másik SRO szerver, szemléltetés</a></p></div></div></section>`;}
+// Preserve keyboard focus when only the editor is replaced; never change its saved values.
+function rememberWheelFocus(){
+ const root=$('#root'),active=document.activeElement;
+ if(!root||!active||typeof root.contains!=='function'||!root.contains(active))return null;
+ const keys=['data-blue-type','data-row-type','data-row-model-max','data-item-field','data-config','data-item','data-workspace-go'];
+ for(const key of keys){
+  const value=active.getAttribute?.(key);
+  if(value&&/^[a-zA-Z0-9_-]{1,80}$/.test(value))return [key,value];
+ }
+ if(active.id&&/^[a-zA-Z0-9_-]{1,80}$/.test(active.id))return ['id',active.id];
+ return null;
+}
 function paint(){
+ const focus=rememberWheelFocus();
+ const keepBlueOpen=$('#blue-catalog')?.open===true;
  topControls();
  const rendered=S.tab==='chance'?chanceView():S.tab==='rules'?rulesView():S.tab==='help'?helpView():setView();
  $('#root').innerHTML=translateMarkup(rendered);
+ const blue=$('#blue-catalog');if(blue&&keepBlueOpen)blue.open=true;
  localizeShell();
  const lang=$('#langSel');if(lang){lang.value=UI_LANG;lang.onchange=e=>setUiLanguage(e.target.value);}
  bindRendered();
+ if(focus){
+  const [key,value]=focus,root=$('#root');
+  const target=root?.querySelector?.('['+key+'="'+value+'"]');
+  if(target&&!target.disabled&&typeof target.focus==='function'&&
+   (typeof target.getClientRects!=='function'||target.getClientRects().length))
+   target.focus({preventScroll:true});
+ }
 }
-function toast(txt){txt=translateText(txt);let old=$('.toast');if(old)old.remove();let x=document.createElement('div');x.className='toast';x.textContent=txt;document.body.append(x);clearTimeout(toastTimer);toastTimer=setTimeout(()=>x.remove(),2700);}
+function toast(txt){txt=translateText(txt);const announcer=$('#wheelAnnouncer');if(announcer)announcer.textContent=txt;let old=$('.toast');if(old)old.remove();let x=document.createElement('div');x.className='toast';x.textContent=txt;document.body.append(x);clearTimeout(toastTimer);toastTimer=setTimeout(()=>x.remove(),2700);}
 function adjustState(){let id=S.active,ob=itm(id),lim=itemLimit(ob);if(ob.count>lim){ob.count=lim;ob.rows=ob.rows.slice(0,lim);toast('Figyelem: a grade maximumára csökkent a sorok száma!');}if(ob.count<0)ob.count=0;while(ob.rows.length<ob.count)ob.rows.push({type:'',value:''});}
 function bindRendered(){
- document.querySelectorAll('[data-workspace-go]').forEach(el=>el.onclick=()=>chooseWorkspace(el.dataset.workspaceGo,true));
+ document.querySelectorAll('[data-workspace-go]').forEach(el=>{
+  el.onclick=()=>chooseWorkspace(el.dataset.workspaceGo,true);
+  el.onkeydown=event=>{
+   const index=WORKSPACE_PANELS.indexOf(el.dataset.workspaceGo);
+   if(index<0)return;
+   let next=index;
+   if(event.key==='ArrowRight')next=(index+1)%WORKSPACE_PANELS.length;
+   else if(event.key==='ArrowLeft')next=(index+WORKSPACE_PANELS.length-1)%WORKSPACE_PANELS.length;
+   else if(event.key==='Home')next=0;
+   else if(event.key==='End')next=WORKSPACE_PANELS.length-1;
+   else return;
+   event.preventDefault();
+   chooseWorkspace(WORKSPACE_PANELS[next],false);
+   document.querySelector('[data-workspace-go="'+WORKSPACE_PANELS[next]+'"]')?.focus();
+  };
+ });
  document.querySelectorAll('[data-editor-fold]').forEach(el=>el.ontoggle=()=>{
   const key=el.dataset.editorFold;
   if(Object.prototype.hasOwnProperty.call(EDITOR_FOLDS,key))EDITOR_FOLDS[key]=el.open;
