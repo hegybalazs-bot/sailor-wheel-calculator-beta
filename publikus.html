@@ -570,6 +570,7 @@ a:hover{color:#ffe5ac}
  <label>Aktív szerver<select id="serverPicker" aria-label="Aktív Silkroad szerverprofil"></select></label>
  <details class="compact-manage"><summary>⚙ Szerver beállításai</summary><div class="compact-manage-content"><button id="newServerBtn" type="button">＋ Új szerverprofil</button>
  <button id="renameServerBtn" type="button">✎ Szerver átnevezése</button>
+ <button class="danger" id="deleteServerBtn" type="button">⌫ Szerver törlése</button>
  <small>Minden szerver saját CAP-beállításokat, SET-eket, Blue-katalógust és statokat tárol.</small></div></details>
  </section>
  <section class="setbar" aria-label="Szettkezelés">
@@ -895,6 +896,8 @@ const UI_LANG_KEY='wheel-calculator-language-v1';
 let UI_LANG='hu';
 try{UI_LANG=localStorage.getItem(UI_LANG_KEY)==='en'?'en':'hu';}catch(_){}
 const EN_UI_PHRASES=[
+ ["⌫ Szerver törlése","⌫ Delete server"],
+
  ["🛡 Ikonok visszaállítása","🛡 Restore icons"],
  ["Privát, böngészőben tárolt 9DG ikoncsomag újraaktiválása","Restore your private browser-local 9DG icon pack"],
  ["⚠ BÉTA · szerveradatok nem hitelesítettek","⚠ BETA · server data unverified"],
@@ -1192,6 +1195,7 @@ function currentServerName(){return activeServerProfile()?.name||'Sailor Online'
 function refreshServerPicker(){
  const picker=$('#serverPicker');if(!picker)return;
  picker.innerHTML=P.entries.map(e=>`<option value="${esc(e.id)}" ${e.id===P.activeId?'selected':''}>${esc(e.name)}</option>`).join('');
+ const remove=$('#deleteServerBtn');if(remove)remove.disabled=P.entries.length<=1;
 }
 function serverStateSnapshot(){
  syncActiveSet();snapshotDegreeModel(currentCfg());
@@ -1254,6 +1258,53 @@ function renameServerProfile(name){
  const label=String(name??'').trim().slice(0,60);
  if(!label)return false;
  activeServerProfile().name=label;save();paint();return true;
+}
+// Destructive server deletion is guarded by a whole-profile JSON backup and a
+// valid remaining profile. Never delete the last server or silently discard sets.
+function deleteServerProfile(){
+ const removed=activeServerProfile();
+ if(!removed||P.entries.length<=1){toast(UI_LANG==='en'?'The last server profile cannot be deleted.':'Az utolsó szerverprofil nem törölhető.');return false;}
+ const target=P.entries.find(e=>e.id!==removed.id&&validServerState(e.data));
+ if(!target){alertUI(UI_LANG==='en'?'No valid remaining server profile was found.':'Nincs érvényes megmaradó szerverprofil.');return false;}
+ const question=UI_LANG==='en'?
+  'Delete the server "'+removed.name+'" and all its CAP sets? A JSON backup of ALL servers will be downloaded before deletion. Check your downloads. This cannot be undone without a backup. Continue?':
+  'Törlöd a(z) "'+removed.name+'" szervert és az összes CAP-jához tartozó SET-et? Törlés előtt az ÖSSZES szerverről JSON-mentés letöltését indítjuk. Ellenőrizd a letöltést! Mentés nélkül a törlés nem visszavonható. Folytatod?';
+ if(!confirmUI(question))return false;
+ // This can throw on serialization/download initiation; in that case do not mutate.
+ try{
+  downloadBlob('Wheel_Calculator_Server_Torles_Elotti_Mentes_'+new Date().toISOString().slice(0,10)+'.json',
+   JSON.stringify(exportAllProfiles(),null,2));
+ }catch(err){alertUI((UI_LANG==='en'?'Backup could not start; deletion canceled: ':'Nem indult el a mentés, a törlés megszakítva: ')+err.message);return false;}
+ const oldS=copyJSON(S),oldP=copyJSON(P),oldCaps=CAPS.slice();
+ let oldStored=null,oldProfilesStored=null;
+ try{
+  oldStored=localStorage.getItem(STORAGE);oldProfilesStored=localStorage.getItem(SERVERS_STORAGE);
+  restoreServerState(target.data);
+  P.entries=P.entries.filter(e=>e.id!==removed.id);
+  P.activeId=target.id;
+  activeServerProfile().data=null;
+  lastSim=null;
+  save();
+  // A failed quota write must not silently leave a half-updated two-key store.
+  if(localStorage.getItem(STORAGE)!==JSON.stringify(S)||
+    localStorage.getItem(SERVERS_STORAGE)!==JSON.stringify(P))
+   throw Error('A böngésző mentése nem sikerült.');
+  paint();
+  toast(UI_LANG==='en'?'Server removed. Verify your pre-deletion JSON backup.':
+   'Szerver törölve. Ellenőrizd a törlés előtti JSON-mentést!');
+  return true;
+ }catch(err){
+  S=oldS;P=oldP;CAPS.splice(0,CAPS.length,...oldCaps);
+  try{
+   if(oldStored===null)localStorage.removeItem(STORAGE);
+   else localStorage.setItem(STORAGE,oldStored);
+   if(oldProfilesStored===null)localStorage.removeItem(SERVERS_STORAGE);
+   else localStorage.setItem(SERVERS_STORAGE,oldProfilesStored);
+  }catch(_){}
+  paint();
+  alertUI((UI_LANG==='en'?'Server was NOT deleted: ':'A szerver NEM lett törölve: ')+err.message);
+  return false;
+ }
 }
 function exportAllProfiles(){
  const snapshot=serverStateSnapshot();
@@ -3178,6 +3229,7 @@ $('#printBtn').onclick=()=>window.print();
 $('#serverPicker').onchange=e=>{if(!switchServerProfile(e.target.value)){toast('A szerverprofil betöltése nem sikerült.');paint();}};
 $('#newServerBtn').onclick=()=>{const name=promptUI('Új szerver neve (külön mentésekkel):','Új Silkroad szerver');if(name===null)return;if(!addServerProfile(name))toast('Adj meg érvényes nevet (maximum 30 szerver).');};
 $('#renameServerBtn').onclick=()=>{const name=promptUI('Szerver új neve:',currentServerName());if(name===null)return;if(!renameServerProfile(name))toast('A szerver neve nem lehet üres.');};
+$('#deleteServerBtn').onclick=deleteServerProfile;
 $('#setPicker').onchange=e=>selectSet(e.target.value);
 $('#newSetBtn').onclick=()=>createSet(false);
 $('#copySetBtn').onclick=()=>createSet(true);
