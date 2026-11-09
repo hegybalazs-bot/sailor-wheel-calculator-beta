@@ -207,3 +207,19 @@ test('SET deletion safeguards the final SET and leaves other CAPs and server pro
   assert.match(html,/remove\.disabled=bank\.entries\.length<=1/);
  }
 });
+
+test('workspace tabs expose roving keyboard navigation, Blue focus recovery and persistent live announcements',()=>{
+ for(const html of [base,publicHtml]){
+  assert.match(html,/data-workspace-go="\$\{p\.id\}" aria-selected="\$\{WORKSPACE_ACTIVE===p\.id\}" tabindex="\$\{WORKSPACE_ACTIVE===p\.id\?'0':'-1'\}"/);
+  assert.match(html,/event\.key==='ArrowRight'/);
+  assert.match(html,/event\.key==='ArrowLeft'/);
+  assert.match(html,/event\.key==='Home'/);
+  assert.match(html,/event\.key==='End'/);
+  assert.match(html,/setAttribute\('tabindex',selected\?'0':'-1'\)/);
+  assert.match(html,/function rememberWheelFocus\(\)/);
+  assert.match(html,/const keepBlueOpen=\$\('#blue-catalog'\)\?\.open===true/);
+  assert.match(html,/id="wheelAnnouncer" role="status" aria-live="polite" aria-atomic="true"/);
+  assert.match(html,/const announcer=\$\('#wheelAnnouncer'\)/);
+  assert.match(html,/target\.focus\(\{preventScroll:true\}\)/);
+ }
+});
