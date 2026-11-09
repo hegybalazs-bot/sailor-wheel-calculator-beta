@@ -236,6 +236,66 @@ try{
   }finally{await source.context.close();await destination.context.close();}
  });
 
+
+ await check('delete server is reversible with whole-profile JSON backup and cannot remove last server',async()=>{
+  const own=await newPage({width:1180,height:850});
+  const recovery=await newPage({width:1180,height:850});
+  const {page,context,errors}=own;
+  try{
+   await page.goto(origin+'/');
+   await page.locator('.serverbar > .compact-manage summary').click();
+   assert.equal(await page.locator('#deleteServerBtn').isDisabled(),true);
+   page.once('dialog',dialog=>dialog.accept('Rumlord Temporary'));
+   await page.locator('#newServerBtn').click();
+   await page.waitForFunction(()=>document.querySelectorAll('#serverPicker option').length===2);
+   assert.equal(await page.locator('#deleteServerBtn').isEnabled(),true);
+   await page.selectOption('#capSel','120');
+   await page.locator('#goalSel').fill('68');
+   await page.locator('#goalSel').press('Tab');
+   await page.locator('.setbar > .compact-manage summary').click();
+   page.once('dialog',dialog=>dialog.accept('Temporary 120 SET'));
+   await page.locator('#newSetBtn').click();
+   assert((await page.locator('#setPicker option').allTextContents()).includes('Temporary 120 SET'));
+   page.once('dialog',dialog=>dialog.dismiss());
+   await page.locator('#deleteServerBtn').click();
+   assert.equal(await page.locator('#serverPicker option').count(),2,'canceled deletion preserves profiles');
+   assert.equal(await page.locator('#capSel').inputValue(),'120');
+   let question='';
+   page.once('dialog',dialog=>{question=dialog.message();dialog.accept();});
+   const [download]=await Promise.all([
+    page.waitForEvent('download',{timeout:16000}),
+    page.locator('#deleteServerBtn').click()
+   ]);
+   assert.match(question,/Rumlord Temporary/);
+   assert.match(question,/ÖSSZES szerverről JSON-mentés/);
+   assert.match(download.suggestedFilename(),/Server_Torles_Elotti_Mentes/);
+   const bytes=await readFile(await download.path());
+   const backup=JSON.parse(bytes.toString('utf8'));
+   assert.equal(backup.serverProfiles.entries.length,2,'whole-store backup covers both servers');
+   const temp=backup.serverProfiles.entries.find(e=>e.name==='Rumlord Temporary');
+   assert(temp,'deleted profile must be recoverable from backup');
+   assert.equal(temp.data.cap,120);
+   assert.equal(temp.data.goal,68);
+   assert(temp.data.setBank[120].entries.some(e=>e.name==='Temporary 120 SET'));
+   await page.waitForFunction(()=>document.querySelectorAll('#serverPicker option').length===1,null,{timeout:12000});
+   assert.equal(await page.locator('#serverPicker option').innerText(),'Sailor Online');
+   assert.equal(await page.locator('#capSel').inputValue(),'90');
+   assert.equal(await page.locator('#deleteServerBtn').isDisabled(),true);
+   await page.reload();
+   assert.equal(await page.locator('#serverPicker option').count(),1);
+   assert.equal(await page.locator('#capSel').inputValue(),'90');
+   await recovery.page.goto(origin+'/');
+   recovery.page.on('dialog',dialog=>dialog.accept());
+   await recovery.page.locator('#importFile').setInputFiles({
+    name:'restore-deleted-server.json',mimeType:'application/json',buffer:bytes
+   });
+   await recovery.page.waitForFunction(()=>document.querySelectorAll('#serverPicker option').length===2,null,{timeout:12000});
+   assert.equal(await recovery.page.locator('#capSel').inputValue(),'120');
+   assert((await recovery.page.locator('#setPicker option').allTextContents()).includes('Temporary 120 SET'));
+   assert.deepEqual(errors,[]);
+   assert.deepEqual(recovery.errors,[]);
+  }finally{await context.close();await recovery.context.close();}
+ });
  await check('JSON import previews profile, saves previous state, restores new data and rejects unsafe files',async()=>{
   const original=await newPage({width:1200,height:850});
   const replacement=await newPage({width:1200,height:850});
