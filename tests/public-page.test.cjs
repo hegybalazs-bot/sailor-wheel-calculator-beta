@@ -13,6 +13,7 @@ function boot(html){
  const el=(selector)=>elements[selector]??={
   innerHTML:'',value:'',textContent:'',
   classList:{add(){},remove(){},toggle(){}},
+  remove(){},
   click(){this.onclick?.();}
  };
  const document={
@@ -32,6 +33,7 @@ function boot(html){
 ;globalThis.audit={
  state:()=>S,html:()=>document.querySelector('#root').innerHTML,
  inspectImportBackup,backupImportConfirmation,exportAllProfiles,
+ addServerProfile,deleteServerProfile,serverProfiles:()=>P,
  paint,setLanguage:setUiLanguage,selectedTab:()=>S.tab,
  items:()=>itemList(),renderEditor:()=>editPanel()
 };`,sandbox,{timeout:7000});
@@ -92,7 +94,7 @@ test('compact Silkroad shell keeps all existing controls accessible in expandabl
   assert.match(page,/<details class="compact-manage"><summary>⚙ Szerver beállításai<\/summary>/);
   assert.match(page,/<details class="compact-manage set-manage"><summary>⚙ SET kezelése<\/summary>/);
   assert.match(page,/<div class="controls" role="group" aria-label="Gyors karakterbeállítások, vízszintesen görgethető">/);
-  for(const id of ['serverPicker','newServerBtn','renameServerBtn','setPicker','newSetBtn','copySetBtn','renameSetBtn','deleteSetBtn','capSel','degreeInput','weaponSel','apparelStyleSel','iconGenderSel','capQuick','capApply','goalSel','applyGoalAll','exportBtn','importBtn'])
+  for(const id of ['serverPicker','newServerBtn','renameServerBtn','deleteServerBtn','setPicker','newSetBtn','copySetBtn','renameSetBtn','deleteSetBtn','capSel','degreeInput','weaponSel','apparelStyleSel','iconGenderSel','capQuick','capApply','goalSel','applyGoalAll','exportBtn','importBtn'])
    assert.match(page,new RegExp('id="'+id+'"'),id);
   const band=page.slice(page.indexOf('<div class="controls"'),page.indexOf('<div class="weapon-strip"'));
   assert(band.indexOf('id="capSel"')<band.indexOf('id="degreeInput"'));
@@ -160,5 +162,28 @@ test('safe import invokes pre-import JSON download before data replacement in bo
   assert.match(html,/inspectImportBackup\(data\)/);
   assert.match(html,/Régi weboldal adatai áthozása/);
   assert.match(html,/sailor-wheel-calculator-beta\.onrender\.com\/publikus\.html/);
+ }
+});
+
+test('server deletion guards final profile and preserves the other server/CAP/SET state',()=>{
+ for(const html of [base,publicHtml]){
+  const {audit}=boot(html);
+  const originalId=audit.serverProfiles().activeId;
+  assert.equal(audit.deleteServerProfile(),false,'the final server cannot be deleted');
+  assert.equal(audit.serverProfiles().entries.length,1);
+  assert.equal(audit.addServerProfile('Pirate Test Server'),true);
+  assert.equal(audit.serverProfiles().entries.length,2);
+  const removedId=audit.serverProfiles().activeId;
+  assert.notEqual(removedId,originalId);
+  const before=audit.exportAllProfiles();
+  assert.equal(before.serverProfiles.entries.length,2);
+  assert.equal(before.serverProfiles.entries.find(e=>e.id===removedId).name,'Pirate Test Server');
+  assert.equal(audit.deleteServerProfile(),true,'delete active temporary server');
+  assert.equal(audit.serverProfiles().entries.length,1);
+  assert.equal(audit.serverProfiles().activeId,originalId,'select original surviving profile');
+  assert.equal(audit.state().cap,90);
+  assert.equal(audit.deleteServerProfile(),false,'cannot delete last profile after switching');
+  assert.match(html, /Wheel_Calculator_Server_Torles_Elotti_Mentes_/);
+  assert.match(html,/id="deleteServerBtn"/);
  }
 });
