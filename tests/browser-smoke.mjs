@@ -183,6 +183,9 @@ try{
    assert.equal(await page.locator('[data-workspace-pane="items"]').isVisible(),true);
    await page.locator('.workspace-item-button[data-item="hands"]').click();
    assert.equal(await page.evaluate(()=>document.activeElement?.getAttribute('data-item')),'hands');
+   // Blue catalog lives in the closed-by-default advanced editor disclosure.
+   await page.locator('[data-editor-fold="tools"] > summary').click();
+   await page.waitForFunction(()=>document.querySelector('[data-editor-fold="tools"]')?.open===true);
    const catalog=page.locator('#blue-catalog');
    await catalog.locator('summary').click();
    assert.equal(await catalog.evaluate(el=>el.open),true);
