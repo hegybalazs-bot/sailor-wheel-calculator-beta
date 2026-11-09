@@ -237,6 +237,52 @@ try{
  });
 
 
+
+ await check('SET deletion preserves final SET, provides full backup and restores deleted set in clean browser',async()=>{
+  const source=await newPage({width:1140,height:840}),fresh=await newPage({width:1140,height:840});
+  try{
+   const {page,errors}=source;
+   await page.goto(origin+'/');
+   await page.locator('.setbar > .compact-manage summary').click();
+   assert.equal(await page.locator('#deleteSetBtn').isDisabled(),true);
+   page.once('dialog',dialog=>dialog.accept('Disposable 90 CAP'));
+   await page.locator('#newSetBtn').click();
+   await page.waitForFunction(()=>document.querySelectorAll('#setPicker option').length===2);
+   assert.equal(await page.locator('#deleteSetBtn').isEnabled(),true);
+   await page.locator('#goalSel').fill('64');
+   await page.locator('#goalSel').press('Tab');
+   page.once('dialog',dialog=>dialog.dismiss());
+   await page.locator('#deleteSetBtn').click();
+   assert.equal(await page.locator('#setPicker option').count(),2);
+   let question='';
+   page.once('dialog',dialog=>{question=dialog.message();dialog.accept();});
+   const [download]=await Promise.all([
+    page.waitForEvent('download',{timeout:16000}),
+    page.locator('#deleteSetBtn').click()
+   ]);
+   assert.match(question,/Disposable 90 CAP/);
+   assert.match(question,/ÖSSZES szerver és CAP/);
+   assert.match(download.suggestedFilename(),/Set_Torles_Elotti_Mentes/);
+   const bytes=await readFile(await download.path()),backup=JSON.parse(bytes.toString('utf8'));
+   assert.equal(backup.serverProfiles.entries.length,1);
+   assert.equal(backup.setBank[90].entries.length,2);
+   assert(backup.setBank[90].entries.some(e=>e.name==='Disposable 90 CAP'));
+   assert.equal(backup.goal,64);
+   await page.waitForFunction(()=>document.querySelectorAll('#setPicker option').length===1);
+   assert.equal(await page.locator('#deleteSetBtn').isDisabled(),true);
+   await page.reload();
+   assert.equal(await page.locator('#setPicker option').count(),1);
+   await fresh.page.goto(origin+'/');
+   fresh.page.on('dialog',dialog=>dialog.accept());
+   await fresh.page.locator('#importFile').setInputFiles({
+    name:'restore-deleted-set.json',mimeType:'application/json',buffer:bytes
+   });
+   await fresh.page.waitForFunction(()=>document.querySelectorAll('#setPicker option').length===2,null,{timeout:12000});
+   assert((await fresh.page.locator('#setPicker option').allTextContents()).includes('Disposable 90 CAP'));
+   assert.deepEqual(errors,[]);
+   assert.deepEqual(fresh.errors,[]);
+  }finally{await source.context.close();await fresh.context.close();}
+ });
  await check('delete server is reversible with whole-profile JSON backup and cannot remove last server',async()=>{
   const own=await newPage({width:1180,height:850});
   const recovery=await newPage({width:1180,height:850});
