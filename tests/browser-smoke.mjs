@@ -91,6 +91,11 @@ try{
    await page.goto(origin+'/',{waitUntil:'load'});
    await page.waitForSelector('#root [data-workspace-go="items"]',{timeout:12000});
    assert.match(await page.title(),/Silkroad Wheel Calculator/);
+   const revision=await page.locator('#buildVersion').getAttribute('data-build-commit');
+   assert.match(revision,/^(?:[a-f0-9]{40}|unavailable)$/);
+   assert.match(await page.locator('#buildVersion').innerText(),/^Build:/);
+   assert.equal(await page.locator('#buildVersion').getAttribute('data-build-commit'),revision);
+
    assert.equal(await page.locator('#localIconZip').count(),0);
    const paths=['/bemutato.html','/README.md','/data/release-evidence.json',
     '/tests/browser-smoke.mjs','/tools/build-public.cjs','/.github/workflows/wheel-tests.yml',
