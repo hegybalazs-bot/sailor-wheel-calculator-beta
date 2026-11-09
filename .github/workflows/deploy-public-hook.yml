@@ -1,0 +1,63 @@
+name: Deploy public Wheel after verified CI
+on:
+  workflow_run:
+    workflows: ["Browser QA (Chromium, Firefox, WebKit)"]
+    types: [completed]
+    branches: [main]
+permissions:
+  actions: read
+  contents: read
+jobs:
+  render-public:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    concurrency:
+      group: render-public-${{ github.event.workflow_run.head_sha }}
+      cancel-in-progress: false
+    steps:
+      - name: Verify Node CI passed on the exact main SHA
+        id: gate
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner=context.repo.owner,repo=context.repo.repo;
+            const sha=context.payload.workflow_run.head_sha;
+            // Never deploy an older commit after main advanced.
+            const latest=await github.rest.repos.getBranch({owner,repo,branch:'main'});
+            if(latest.data.commit.sha!==sha){
+              core.info('Main advanced since browser CI; skipping stale deployment.');
+              core.setOutput('safe','no');return;
+            }
+            let testRun;
+            for(let attempt=0;attempt<40;attempt++){
+              const {data}=await github.rest.actions.listWorkflowRuns({
+                owner,repo,workflow_id:'wheel-tests.yml',head_sha:sha,branch:'main',per_page:15
+              });
+              testRun=data.workflow_runs.find(x=>x.head_sha===sha&&x.event==='push');
+              if(testRun&&testRun.status==='completed')break;
+              await new Promise(resolve=>setTimeout(resolve,12000));
+            }
+            if(!testRun||testRun.status!=='completed'){core.setFailed('Missing completed Node regression CI for main SHA');return;}
+            if(testRun.conclusion!=='success'){core.setFailed('Node regression CI not green for main SHA');return;}
+            const again=await github.rest.repos.getBranch({owner,repo,branch:"main"});
+            if(again.data.commit.sha!==sha){core.info('Main advanced during CI checks; skipping.');core.setOutput('safe','no');return;}
+            core.setOutput('safe','yes');
+            core.info('Browser + Node CI success for same latest main SHA; deploy may proceed.');
+      - name: Request Render public deploy (only if hook secret is configured)
+        if: steps.gate.outputs.safe == 'yes'
+        shell: bash
+        env:
+          RENDER_PUBLIC_DEPLOY_HOOK_URL: ${{ secrets.RENDER_PUBLIC_DEPLOY_HOOK_URL }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${RENDER_PUBLIC_DEPLOY_HOOK_URL}" ]]; then
+            echo "Render deploy hook secret not configured; no deployment requested."
+            exit 0
+          fi
+          case "${RENDER_PUBLIC_DEPLOY_HOOK_URL}" in
+            https://api.render.com/deploy/*) ;;
+            *) echo "::error::Invalid deploy hook host; only api.render.com is allowed."; exit 1 ;;
+          esac
+          curl --fail --silent --show-error --max-time 40 --request POST "$RENDER_PUBLIC_DEPLOY_HOOK_URL" > /dev/null
+          echo "Render deploy requested after both CI suites passed. Confirm LIVE commit in Render."
