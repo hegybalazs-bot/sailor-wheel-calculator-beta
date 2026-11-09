@@ -1,55 +1,43 @@
-# Wheel Calculator — verified v5.0 release checklist
+# Wheel Calculator — manual-first release plan
 
-## Premium SET dashboard foundations (2026-11-06)
+**Policy accepted 2026-11-09:** This is a manually configured Silkroad Wheel calculator, *not* an official Sailor Online rules database. There is **no administrator sign-off requirement** for allowed Blue types, 100% maxima, Normal/SoS/SoM/Sun line limits, Fortune/Fate/Pen rules, or hypothetical probability input. All supported server-specific values must remain editable locally by the user. Existing initial values are merely editable presets; do not silently apply them as verified facts.
 
-- [x] Responsive 12-slot armor/jewelry/weapon/shield loadout using the existing safe icon registry.
-- [x] Per-item quality progress bars vs. custom targets; missing or invalid entries do not contribute to quality.
-- [x] Prioritized improvement list based on valid manually entered values and known row maxima.
-- [x] Bilingual copy and print styling; static fallback behavior.
-- [ ] Obtain and approve authentic Silkroad sprites for the full CH/EU Degree/grade coverage.
-- [ ] Run actual desktop/mobile portrait/landscape browser checks and accessible screen reader smoke tests.
-- [ ] Validate estimates against representative in-game screenshots, without connecting to game clients.
+## Completed in GitHub main
 
+- [x] Separate local server profiles with independent CAPs/Degree models, SETs, weapons, Blues and Wheel models
+- [x] CAP selector 90 / 100 / 110 / 120 / 125 / 130 / 140 and additional custom 1–200 CAP support
+- [x] Blue-type allowlist editable per item + CAP/Degree, status-resistance Blue maxima editable and per-row 100% reference overrides
+- [x] Normal/SoS/SoM/Sun and item-specific per-grade line limits editable (no admin requirement)
+- [x] User-requested universal limits: STR/INT +11, Durability 200%; 130+ HP 2300, Parry 60, 140 uses 130 reference until user edits
+- [x] Wheel Fate/Fortune/Pen planning and explicitly conditional estimators: **no default claim about actual game roll odds**
+- [x] HU/EN, compact responsive interface, multi-server SET manager and full local JSON backup/import
+- [x] On overwrite/delete: save current profile-bank JSON before changes; guard last server and last SET
+- [x] 9/10/11DG candidate icons locally recoverable at a separate same-origin route, without publishing game artwork (icons deferred)
+- [x] Public-only 6-file Render build allowlist excludes source, developer preview, private extracted PNG/DDJ and review ZIP
+- [x] Automated Node, Chromium, Firefox and WebKit smoke tests, including backup recovery and 390px UI viewports
+- [x] Release policy changed to **manual configuration** with no official-data gate
 
-Updated for the v5 Admin Preview (2026-11-06).
+## Actual pending requirements
 
-## Must pass before declaring v5.0
+- [ ] Verify latest GitHub main commit deployed on the dedicated public Render static site; **do not** claim new code live before checking exact Render deploy SHA. Manually deploy until GitHub webhook autoDeploy is fixed.
+- [ ] Real Android Chrome and physical iPhone Safari portrait/landscape; record device/version and screenshots
+- [ ] Physical keyboard and screen-reader testing using populated Wheel rows, error messages, SET selectors and editable Blue controls
+- [ ] Export/restore full real personal multi-server, multi-CAP JSON on a clean physical browser; verify actual saved values and legacy backup migration
+- [ ] Repair GitHub→Render commit auto-deployment and verify a genuine new main commit triggers automatic deploy (issue #4)
+- [ ] If a **privileged** administration service is desired, host it separately with genuine server-side login; no static JavaScript password, hidden admin URL or public root-preview constitutes protected admin
+- [ ] Human QA/release notes and optional version tag after checks; until then keep **beta**
 
-- [ ] **Authentic equipment icons:** obtain correctly matched CH/EU item sprites for all available degrees with appropriate reuse permission, including head, shoulder, chest, hands, legs, foot, weapon, shield and jewelry. Current imagery remains stylized when no verified source is present.
-- [ ] **Gameplay-proven Blue catalogs:** verify each item slot's possible Blue types for Sailor and other user-selected servers; distinguish the number of possible types from the maximum lines visible on one item. Document server and date of evidence.
-- [ ] **Real roll probabilities:** obtain measured/server-documented distribution for Wheel of Fortune line types and value ranges, Feather Pen line selection and value outcomes. Until verified, show conditional assumptions only; never invent odds.
-- [ ] **Full CAP/degree references:** validate at least 90, 100, 110, 120, 125, 130 and 140 CAP with in-game screenshots. Preserve +11 STR/INT, Durability 200, HP 2300 / Parry 60 at 130+, and current 130=140 Wheel baseline. Check other server-specific Rate, Critical, status resistances and grade line limits.
-- [ ] **Physical desktop and mobile E2E:** test Chrome/Chromium and Android/iOS portrait + landscape, Hungarian/English switching, all four tabs, custom icons, settings, set comparison, and imported backup flows. Record screenshots, observed bugs, and device/browser versions.
-- [ ] **Backup recovery:** export multiple server profiles and item history, import in a new browser, verify every CAP/SET value, including old Sailor-only files, malformed backup rejection, and storage quota warnings.
-- [ ] **Render auto-deploy:** verify that a new GitHub main commit triggers its own deploy without a manual deploy call; compare exact commit SHAs, then close GitHub issue #4 only after independent proof.
-- [ ] **Accessibility and English text QA:** keyboard navigation, icon+label semantics, input errors, dialogs, English feedback form, untranslatable user-entered names, and complete language coverage of populated (not only empty) items.
-- [ ] **Documentation and release:** update English/Hungarian changelog, pin a release commit/tag, archive tested JSON backups and publish beta caveats.
+## Explicitly not required / deferred
 
-## Admin-preview foundations added (not final release sign-off)\n\n- [x] Three-stage Wheel overview and per-CAP/per-server manual budget planner.\n- [x] Fictional demo SET generator (90/100/130 CAP), independent of original SETs.\n- [x] Read-only share links for the current equipment snapshot, without other private history.\n- [x] Player-entered per-CAP/Degree evidence register (not admin certification).\n- [x] Bilingual standalone admin showcase page.\n- [x] Prior verified icon groundwork and local-only safe image manifest preparer.\n- [ ] Real in-game validation of Fate stage rules, actual prices and external stat limits.\n- [ ] Live-browser and device QA for all new admin-preview features.\n\n## Current completed foundations
+- **No Sailor administrator verification** of any Blue/type/max/line/probability value. Players supply their own, and conditional models should be labeled assumptions.
+- **No official drop probabilities** needed. If unknown, probability remains unknown or an explicitly user-supplied mathematical model.
+- **Original game icons deferred**. Placeholder SVGs are acceptable; reuse or distribution rights are relevant *only* if authentic original art is eventually publicly shipped.
+- No game-client, server, bot, memory, packet, credential or account integration; this is a browser-local calculator.
 
-- [x] Offline HU/EN interface and English feedback/help (v4.10.0).
-- [x] Independently named server profiles with safe CAPS and guarded imports.
-- [x] Blue catalog per equipment slot and expandable full-set Blue breakdown.
-- [x] CAP select and manual entry with preserved separate set histories.
-- [x] Fixed, user-supplied STR/INT +11 and Durability 200%; 130+ HP 2300, Parry 60; current 140 uses 130 Wheel reference.
-- [x] Separate conditional Feather Pen, full Wheel simulation and their limitations.
-- [x] JSON backup export including all server profiles, older Sailor-only import support.
+## Verification
 
-**Do not mark user-facing production readiness PASS solely from Node regression tests.** Real browser and game-data verification remain necessary.
-
-
-## 2026-11-08 — Implemented beta hardening and independently blocked sign-off
-
-- [x] **Chromium E2E on CI:** `.github/workflows/browser-qa.yml` runs 6 real browser scenarios (desktop player UI; CAP data persistence; 390px mobile viewport + HU/EN and overflow; JSON backup roundtrip in a clean browser; Wheel planning/rules pages; developer import of a synthetically generated private ZIP and IndexedDB reload). Screenshot artifacts are uploaded. **Does not certify Android or iOS hardware.**
-- [x] **Public-only build:** `node tools/build-public.cjs` emits exactly 5 allowlisted static site files in `dist-public`; no original game artwork, source data, admin preview or developer tooling is bundled. CI has a strict list/contents regression test and uploads the public release artifact.
-- [x] **Verification register:** `data/release-evidence.json` distinguishes candidate/player-submitted data from genuine administrative approval, 7 CAP scope statuses, unknown odds, logo/artwork licenses, actual QA and Render deployment.
-- [x] **Strict release-gate validator:** `node tools/release-gate.cjs` reports unverified items; `node tools/release-gate.cjs --stable` blocks mislabeling the beta stable while any material proof is missing. Verified claims require named, dated, linked evidence. Unit tests cover invalid and falsified statuses.
-- [x] **Admin review and release documentation:** `docs/ADMIN_VERIFICATION_REQUEST_EN.md`, `docs/DEPLOY_PUBLIC_ONLY.md`, `docs/BETA_RELEASE_NOTES_HU.md` and `docs/BETA_RELEASE_NOTES_EN.md`.
-- [x] **Actionable backlog:** #28 admin-proven 90 CAP/9DG data; #29 private admin access & public-only Render deployment; #30 physical devices, screen readers and backup recovery. Existing #21 icon rights and #4 Render webhook stay open.
-- [ ] **Admin confirmation:** no direct Sailor 90 CAP/9DG Blue/max/actual odds report yet. Public community articles are references only.
-- [ ] **Original art permission:** candidate icons remain user-local; do not publish or counterfeit images for missing 12–15DG clothes.
-- [ ] **Physical user-device and assistive-technology QA:** not replaced by 390px Chromium.
-- [ ] **Existing Render service:** until publishDir moves from `.` to `dist-public`, the index-based developer preview remains publicly accessible. Authentication requires separate protected hosting; a secret link is not protection.
-- [ ] **Render auto-deploy:** issue #4 persists; independent git-push-triggered deployment must be proven without a manual API call.
-
-**Release rule:** `Emerald v5 BETA` until *all* external gates are evidenced. Do not assert official Sailor probability data merely from unit tests or screenshots.
+- `node --test tests/*.test.cjs`
+- `node tools/release-gate.cjs` — manual policy plus real QA blockers
+- `node tools/release-gate.cjs --stable` — blocks unless physical/independent QA proof is on record, **not** unless a Sailor admin sends data
+- `node tools/build-public.cjs` — only intended public files
+- CI browser workflow checks Chromium + Firefox + WebKit; not equivalent to physical device QA
