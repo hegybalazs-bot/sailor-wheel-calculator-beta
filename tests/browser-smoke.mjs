@@ -160,6 +160,52 @@ try{
    assert.deepEqual(errors,[]);
   }finally{await context.close();}
  });
+
+ await check('accessible workspace tabs, focused Blue editing, and live save messages',async()=>{
+  const {context,page,errors}=await newPage({width:1080,height:840});
+  try{
+   await page.goto(origin+'/');
+   await page.waitForSelector('#root [data-workspace-go="items"]');
+   const tabs=page.locator('.workspace-nav [role="tab"]');
+   assert.equal(await tabs.count(),5);
+   assert.equal(await tabs.nth(0).getAttribute('tabindex'),'0');
+   assert.equal(await tabs.nth(1).getAttribute('tabindex'),'-1');
+   await tabs.nth(0).focus();
+   await page.keyboard.press('ArrowRight');
+   assert.equal(await page.evaluate(()=>document.activeElement?.getAttribute('data-workspace-go')),'balance');
+   assert.equal(await tabs.nth(1).getAttribute('aria-selected'),'true');
+   assert.equal(await tabs.nth(0).getAttribute('tabindex'),'-1');
+   await page.keyboard.press('End');
+   assert.equal(await page.evaluate(()=>document.activeElement?.getAttribute('data-workspace-go')),'extras');
+   assert.equal(await tabs.nth(4).getAttribute('tabindex'),'0');
+   await page.keyboard.press('Home');
+   assert.equal(await page.evaluate(()=>document.activeElement?.getAttribute('data-workspace-go')),'items');
+   assert.equal(await page.locator('[data-workspace-pane="items"]').isVisible(),true);
+   await page.locator('.workspace-item-button[data-item="hands"]').click();
+   assert.equal(await page.evaluate(()=>document.activeElement?.getAttribute('data-item')),'hands');
+   const catalog=page.locator('#blue-catalog');
+   await catalog.locator('summary').click();
+   assert.equal(await catalog.evaluate(el=>el.open),true);
+   const str=page.locator('#blue-catalog [data-blue-type="STR"]');
+   const original=await str.isChecked();
+   await str.click();
+   assert.equal(await page.locator('#blue-catalog').evaluate(el=>el.open),true,
+    'checkbox changes must not collapse manually expanded Blue catalog');
+   assert.equal(await page.evaluate(()=>document.activeElement?.getAttribute('data-blue-type')),'STR',
+    'focus must remain on the same Blue checkbox after a redraw');
+   assert.equal(await page.locator('#blue-catalog [data-blue-type="STR"]').isChecked(),!original);
+   assert.equal(await page.locator('#wheelAnnouncer').getAttribute('role'),'status');
+   const [download]=await Promise.all([
+    page.waitForEvent('download',{timeout:16000}),
+    page.locator('#exportBtn').click()
+   ]);
+   assert.match(download.suggestedFilename(),/Wheel_Calculator_Backup/);
+   assert.match(await page.locator('#wheelAnnouncer').innerText(),/JSON-export|JSON export/);
+   await page.reload();
+   assert.equal(await page.locator('.workspace-item-button[data-item="hands"]').count(),1);
+   assert.deepEqual(errors,[]);
+  }finally{await context.close();}
+ });
  await check('keyboard disclosures and landscape viewport allow access to all settings',async()=>{
   const {context,page,errors}=await newPage({width:844,height:390});
   try{
