@@ -34,6 +34,7 @@ function boot(html){
  state:()=>S,html:()=>document.querySelector('#root').innerHTML,
  inspectImportBackup,backupImportConfirmation,exportAllProfiles,
  addServerProfile,deleteServerProfile,serverProfiles:()=>P,
+ deleteSet,
  paint,setLanguage:setUiLanguage,selectedTab:()=>S.tab,
  items:()=>itemList(),renderEditor:()=>editPanel()
 };`,sandbox,{timeout:7000});
@@ -185,5 +186,24 @@ test('server deletion guards final profile and preserves the other server/CAP/SE
   assert.equal(audit.deleteServerProfile(),false,'cannot delete last profile after switching');
   assert.match(html, /Wheel_Calculator_Server_Torles_Elotti_Mentes_/);
   assert.match(html,/id="deleteServerBtn"/);
+ }
+});
+
+test('SET deletion safeguards the final SET and leaves other CAPs and server profiles intact',()=>{
+ for(const html of [base,publicHtml]){
+  const {audit}=boot(html),state=audit.state();
+  assert.equal(audit.deleteSet(),false);
+  const bank=state.setBank[90],cap100Before=JSON.stringify(state.setBank[100]);
+  const duplicate=structuredClone(bank.entries[0]);
+  duplicate.id='disposable-90';duplicate.name='Disposable 90 SET';
+  bank.entries.push(duplicate);bank.activeId=duplicate.id;
+  assert.equal(audit.deleteSet(),true);
+  assert.equal(bank.entries.length,1);
+  assert.equal(bank.activeId,bank.entries[0].id);
+  assert.equal(JSON.stringify(state.setBank[100]),cap100Before);
+  assert.equal(audit.deleteSet(),false);
+  assert.match(html,/Wheel_Calculator_Set_Torles_Elotti_Mentes_/);
+  assert.match(html,/id="deleteSetBtn"/);
+  assert.match(html,/remove\.disabled=bank\.entries\.length<=1/);
  }
 });
