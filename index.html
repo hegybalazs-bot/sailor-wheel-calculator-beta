@@ -1419,13 +1419,58 @@ function createSet(duplicate=false){
 function renameSet(){let entry=activeEntry();let name=makeSetName(entry.name,'SET új neve:');if(!name||name===entry.name)return;
  entry.name=name;save();paint();toast('SET átnevezve: '+name);
 }
-function deleteSet(){let bank=activeBank();if(bank.entries.length<=1){toast('Az utolsó SET nem törölhető.');return;}
- let entry=activeEntry();if(!confirmUI(`Tényleg törlöd a(z) "${entry.name}" SET-et a ${S.cap} CAP-ban? A benne tárolt itemek és fegyverek is elvesznek.`))return;
- bank.entries=bank.entries.filter(e=>e.id!==entry.id);bank.activeId=bank.entries[0].id;applySetEntry(S.cap,bank.entries[0]);S.active='shoulder';lastSim=null;save();paint();toast('SET törölve.');
+// Back up ALL server profiles before deleting a SET in a single CAP.
+function deleteSet(){
+ const bank=activeBank();
+ if(bank.entries.length<=1){
+  toast(UI_LANG==='en'?'The final SET cannot be deleted.':'Az utolsó SET nem törölhető.');
+  return false;
+ }
+ const entry=activeEntry();
+ const question=UI_LANG==='en'?
+  'Delete "'+entry.name+'" from '+S.cap+' CAP? All item and Wheel lines in this SET will be removed. A JSON backup of EVERY server and CAP will be downloaded first. Check Downloads. Continue?':
+  'Törlöd a(z) "'+entry.name+'" SET-et a '+S.cap+' CAP-ban? Az itemek és Wheel-sorok elvesznek. Előbb az ÖSSZES szerver és CAP JSON-mentésének letöltését indítjuk. Ellenőrizd a letöltést! Folytatod?';
+ if(!confirmUI(question))return false;
+ try{
+  downloadBlob('Wheel_Calculator_Set_Torles_Elotti_Mentes_'+new Date().toISOString().slice(0,10)+'.json',
+   JSON.stringify(exportAllProfiles(),null,2));
+ }catch(err){
+  alertUI((UI_LANG==='en'?'Backup could not start; SET deletion canceled: ':'Nem indult el a mentés, a SET törlése megszakítva: ')+err.message);
+  return false;
+ }
+ const oldS=copyJSON(S),oldP=copyJSON(P),oldCaps=CAPS.slice();
+ let oldStored=null,oldProfilesStored=null;
+ try{
+  oldStored=localStorage.getItem(STORAGE);oldProfilesStored=localStorage.getItem(SERVERS_STORAGE);
+  bank.entries=bank.entries.filter(e=>e.id!==entry.id);
+  bank.activeId=bank.entries[0].id;
+  applySetEntry(S.cap,bank.entries[0]);
+  S.active='shoulder';lastSim=null;
+  save();
+  if(localStorage.getItem(STORAGE)!==JSON.stringify(S)||
+   localStorage.getItem(SERVERS_STORAGE)!==JSON.stringify(P))
+   throw Error('A böngésző mentése nem sikerült.');
+  paint();
+  toast(UI_LANG==='en'?'SET deleted. Verify your pre-deletion JSON backup.':
+   'SET törölve. Ellenőrizd a törlés előtti JSON-mentést!');
+  return true;
+ }catch(err){
+  S=oldS;P=oldP;CAPS.splice(0,CAPS.length,...oldCaps);
+  try{
+   if(oldStored===null)localStorage.removeItem(STORAGE);
+   else localStorage.setItem(STORAGE,oldStored);
+   if(oldProfilesStored===null)localStorage.removeItem(SERVERS_STORAGE);
+   else localStorage.setItem(SERVERS_STORAGE,oldProfilesStored);
+  }catch(_){}
+  paint();
+  alertUI((UI_LANG==='en'?'SET was NOT deleted: ':'A SET NEM lett törölve: ')+err.message);
+  return false;
+ }
 }
 function refreshSetPicker(){let bank=activeBank();let picker=$('#setPicker');if(!picker)return;
  picker.innerHTML=bank.entries.map(e=>`<option value="${esc(e.id)}" ${e.id===bank.activeId?'selected':''}>${esc(e.name)}</option>`).join('');
  $('#setCount').textContent=`${S.cap} CAP · ${bank.entries.length} mentett SET`;
+ const remove=$('#deleteSetBtn');if(remove)remove.disabled=bank.entries.length<=1;
 }
 
 let lastSim=null;let toastTimer;
