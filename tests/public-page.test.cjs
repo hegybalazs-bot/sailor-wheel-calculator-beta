@@ -13,6 +13,7 @@ function boot(html){
  const el=(selector)=>elements[selector]??={
   innerHTML:'',value:'',textContent:'',
   classList:{add(){},remove(){},toggle(){}},
+  remove(){},
   click(){this.onclick?.();}
  };
  const document={
