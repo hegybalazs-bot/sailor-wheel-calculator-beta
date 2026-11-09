@@ -896,6 +896,15 @@ const UI_LANG_KEY='wheel-calculator-language-v1';
 let UI_LANG='hu';
 try{UI_LANG=localStorage.getItem(UI_LANG_KEY)==='en'?'en':'hu';}catch(_){}
 const EN_UI_PHRASES=[
+ ["Az alaplista csak szerkeszthető kiinduló sablon.","The default list is just an editable starting template."],
+ ["Te döntöd el, mely Blue-típusok léteznek az adott szerveren.","You decide which Blue types exist on this server."],
+ ["CAP-onként és Degree-nként állítható; a korábban beírt sorokat nem töröljük.","Editable per CAP and Degree; previously entered Wheel lines are never deleted."],
+ ["Alap sablon – a saját szerveredhez szabadon módosítható.","Default template – customize freely for your own server."],
+ ["A lista kiinduló sablon, minden szerveren kézzel szerkeszthető.","This is a starting template; edit it manually for each server."],
+ ["Az ikonokra kattintva az adott item szerkesztőjében változtathatod meg.","Click an item icon to edit its permitted Blue types."],
+ ["Az alábbi maximumokat a saját szerverprofilodhoz kézzel szerkesztheted; az alapértékek csak sablonok, nem szükséges hozzájuk adminjóváhagyás.","You can edit these maxima for your own server profile; initial numbers are just templates and do not require administrator approval."],
+ ["a játékos által szerkeszthető sablonértékek, nem hivatalos szerverkonfiguráció.","player-editable template numbers, not official server configuration."],
+ ["Minden szerverhez, CAP-hoz és Degree-hez te állíthatod be a Blue-típusokat és a maximumértékeket, valamint az itemek sorlimitjeit. A kezdeti adatok csak módosítható sablonok. Nincs szükség Sailor-admin általi jóváhagyásra; a program nem ígér hivatalos dobási esélyt. A beállításaid és SET-jeid helyben maradnak a böngésződben – rendszeresen exportálj JSON-mentést. A játékhoz és játékszerverhez nem kapcsolódik.","For every server, CAP and Degree, you can configure the Blue types, reference maxima and item line limits. Initial numbers are editable templates, not official server data. No Sailor administrator approval is needed and no real drop rates are claimed. Your settings and SETs remain in your browser, so regularly export JSON backups. This tool does not connect to the game or game server."],
  ["⚠ BÉTA · kézi szerverbeállítások","⚠ BETA · manual server settings"],
 
  ["⌫ Szerver törlése","⌫ Delete server"],
