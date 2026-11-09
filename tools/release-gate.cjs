@@ -1,90 +1,114 @@
 'use strict';
-/* Strict proof-of-work release gate. Run:
- *   node tools/release-gate.cjs          # factual beta summary; success if data schema valid
- *   node tools/release-gate.cjs --stable # fails unless independently evidenced
+/* Manual-only Wheel Calculator release checks. Official Sailor server approval
+ * is deliberately NOT a publication requirement. The client stores only each
+ * player's manually entered CAP/Degree/Blue data and conditional assumptions.
+ *
+ * node tools/release-gate.cjs          # factual current beta report
+ * node tools/release-gate.cjs --stable # gates on independent device/access QA
  */
 const fs=require('node:fs');
 const path=require('node:path');
 const evidencePath=path.resolve(__dirname,'../data/release-evidence.json');
-const allowed=new Set(['pending','verified']);
+const caps=[90,100,110,120,125,130,140];
+const modes={
+ mode:'manual_per_server_cap_degree',
+ blueTypes:'player_selected_per_item',
+ blueMaxima:'player_entered_per_cap_degree_or_row',
+ lineLimits:'player_editable_per_grade_and_item',
+ odds:'hypothetical_only_when_entered'
+};
+const qaRequired=['physicalAndroid','physicalIOS','screenReader','backupRoundtripPhysicalBrowsers'];
 const sourceStatuses=new Set(['pending','verified','reference_only']);
-const capList=[90,100,110,120,125,130,140];
-function fail(msg){throw Error('Release evidence error: '+msg);}
+function fail(message){throw Error('Release evidence error: '+message);}
 function verifiableUrl(url){return typeof url==='string'&&/^https:\/\/[^\s<>"']{5,512}$/i.test(url);}
-function hasReviewer(item){return typeof item.verifiedBy==='string'&&item.verifiedBy.trim().length>1&&
- /^20\d{2}-\d{2}-\d{2}$/.test(item.reviewedAt||'');}
+function hasReviewer(x){return typeof x.verifiedBy==='string'&&x.verifiedBy.trim().length>1&&
+ /^20\d{2}-\d{2}-\d{2}$/.test(x.reviewedAt||'');}
 function checkEvidence(e){
- if(!e||e.schemaVersion!==1||e.stage!=='beta'&&e.stage!=='stable')fail('invalid version/stage');
- if(e.server!=='Sailor Online'||!Array.isArray(e.capScopes)||e.capScopes.length!==7)fail('missing server CAP scopes');
- const caps=e.capScopes.map(x=>x.cap);
- if(JSON.stringify(caps)!==JSON.stringify(capList))fail('missing/reordered CAP profiles');
- let unresolved=0;const reasons=[];
+ if(!e||e.schemaVersion!==1||!['beta','stable'].includes(e.stage))fail('invalid version/stage');
+ if(e.productMode!=='manual_configuration')fail('manual-only product mode required');
+ if(!e.configurationPolicy||Object.entries(modes).some(([k,v])=>e.configurationPolicy[k]!==v)||
+  e.configurationPolicy.externalServerSync!==false||
+  e.configurationPolicy.officialApprovalRequired!==false)fail('must use user-configured rules without server sync or official approval');
+ if(e.server!=='Sailor Online'||!Array.isArray(e.capScopes)||e.capScopes.length!==caps.length||
+  JSON.stringify(e.capScopes.map(x=>x.cap))!==JSON.stringify(caps))fail('missing/reordered editable CAP profiles');
+ const advisory=[],blockers=[];
+ // Legacy source statuses only matter IF someone explicitly claims official verification.
  for(const item of e.capScopes){
-  for(const prop of ['blueCatalog','lineLimits','statMaximums']){
-   if(!allowed.has(item[prop]))fail(item.cap+' '+prop+' invalid status');
-   if(item[prop]==='verified'&&(!hasReviewer(item)||!verifiableUrl(item.sources?.[prop])))
-    fail(item.cap+' CAP '+prop+' requires reviewer, date and per-topic HTTPS source');
-   if(item[prop]!=='verified'){unresolved++;reasons.push(item.cap+' CAP '+prop);}
+  for(const field of ['blueCatalog','lineLimits','statMaximums']){
+   if(!['editable','verified'].includes(item[field]))fail(item.cap+' CAP '+field+' must be editable or independently verified');
+   if(item[field]==='verified'&&(!hasReviewer(item)||!verifiableUrl(item.sources?.[field])))
+    fail(item.cap+' CAP '+field+' cannot be declared officially verified without provenance');
   }
-  if(!['unknown','verified'].includes(item.officialOdds))fail('invalid odds status');
+  if(!['unknown','verified'].includes(item.officialOdds))fail('invalid official odds status');
   if(item.officialOdds==='verified'&&(!hasReviewer(item)||!verifiableUrl(item.sources?.officialOdds)||
    typeof item.oddsMethodology!=='string'||item.oddsMethodology.length<15))
-   fail(item.cap+' CAP official odds require source, reviewer and methodology');
-  if(item.officialOdds!=='verified'){unresolved++;reasons.push(item.cap+' CAP official probability');}
-  if(item.degree!==null&&(!Number.isInteger(item.degree)||item.degree<1||item.degree>20))fail('invalid degree');
+   fail(item.cap+' CAP claimed official odds require source, reviewer and methodology');
+  if(item.degree!==null&&(!Number.isInteger(item.degree)||item.degree<1||item.degree>20))
+   fail('invalid degree');
+  // No approval needed; editing parameters yourself is the design, not missing QA.
  }
+ advisory.push('Server/CAP/Degree Blue types, values, grade row limits and odds are user-editable; not a Sailor official claim');
  if(!Array.isArray(e.gameMechanics)||e.gameMechanics.length!==3)fail('3 Wheel stages required');
  for(const m of e.gameMechanics){
-  if(!sourceStatuses.has(m.status))fail('invalid Wheel evidence status');
+  if(!sourceStatuses.has(m.status))fail('invalid Wheel source status');
   if(m.status==='verified'&&(!verifiableUrl(m.officialEvidenceUrl)||
    typeof m.reviewedBy!=='string'||m.reviewedBy.length<2||
-   !/^20\d{2}-\d{2}-\d{2}$/.test(m.reviewedAt||'')))fail(m.name+' requires official source and dated reviewer');
-  if(m.status!=='verified'){unresolved++;reasons.push(m.name+' mechanics');}
+   !/^20\d{2}-\d{2}-\d{2}$/.test(m.reviewedAt||'')))
+   fail(m.name+' official source assertion requires dated reviewer');
  }
- const x=e.equipmentVerification;
- if(!x||!allowed.has(x.status)||!Array.isArray(x.approvedItemEvidence))fail('invalid item evidence');
- if(x.status==='verified'){
-  if(!x.approvedItemEvidence.length||x.approvedItemEvidence.some(row=>!row?.url||!row?.approvedBy||!row?.reviewedAt))
-   fail('item verification requires screenshot/source and reviewer details');
- }else{unresolved++;reasons.push('equipment slot and Blue image evidence');}
+ if(!e.equipmentVerification||!['not_required','pending','verified'].includes(e.equipmentVerification.status)||
+  !Array.isArray(e.equipmentVerification.approvedItemEvidence))fail('invalid item evidence');
+ if(e.equipmentVerification.status==='verified'&&
+  (!e.equipmentVerification.approvedItemEvidence.length||
+   e.equipmentVerification.approvedItemEvidence.some(x=>!x?.url||!x.approvedBy||!x.reviewedAt)))
+  fail('item verification claim requires proof');
  const icons=e.icons||{};
  if(!['permission_pending','permission_granted'].includes(icons.publicRedistribution))fail('invalid icon permission');
- if(icons.publicRedistribution==='permission_granted'&&(!verifiableUrl(icons.reuseLicenseUrl)||
-  !icons.rightsHolder||String(icons.rightsHolder).length<3))
-  fail('public original icons require documented rights holder and reuse license');
- if(icons.publicRedistribution!=='permission_granted'){unresolved++;reasons.push('rights to distribute game artwork');}
+ if(icons.publicRedistribution==='permission_granted'&&
+  (!verifiableUrl(icons.reuseLicenseUrl)||!icons.rightsHolder||String(icons.rightsHolder).length<3))
+  fail('cannot claim rights for game graphics without evidence');
+ if(icons.allowedPublicAssets!=='Only original program-created SVG fallback art')
+  fail('public manual release may include only original UI SVG art');
+ // No original game graphics are shipped, so unresolved permission for optional
+ // private ZIPs is not a public release blocker.
+ if(icons.publicRedistribution==='permission_pending')advisory.push('Private original game sprites are not redistributed');
  const admin=e.adminApproval||{};
- if(!allowed.has(admin.status))fail('invalid admin approval status');
- if(admin.status==='verified'&&(!admin.reviewer||!admin.reviewDate||!/^https:\/\//.test(admin.evidenceUrl||'')))
-  fail('admin approvals require reviewer, date and HTTPS source');
- if(admin.status!=='verified'){unresolved++;reasons.push('named admin approval');}
- for(const mode of ['physicalAndroid','physicalIOS','screenReader','backupRoundtripPhysicalBrowsers']){
-  const v=e.qa?.[mode];
-  if(!['passed','not_run','failed'].includes(v))fail('invalid QA state '+mode);
-  if(v==='passed'){
-   const proof=e.qaEvidence?.[mode];
+ if(!['pending','not_required','verified'].includes(admin.status))fail('invalid admin approval state');
+ if(admin.status==='verified'&&(!admin.reviewer||!admin.reviewDate||!verifiableUrl(admin.evidenceUrl)))
+  fail('explicit admin approval claim requires a reviewer and source');
+ if(admin.status!=='not_required')fail('manual calculator must not depend on admin sign-off');
+ for(const name of qaRequired){
+  const status=e.qa?.[name];
+  if(!['passed','not_run','failed'].includes(status))fail('invalid QA state '+name);
+  if(status==='passed'){
+   const proof=e.qaEvidence?.[name];
    if(!proof||!verifiableUrl(proof.proofUrl)||typeof proof.reviewedBy!=='string'||
     proof.reviewedBy.length<2||!/^20\d{2}-\d{2}-\d{2}$/.test(proof.reviewedAt||''))
-    fail(mode+' requires a reviewer, test date and proof URL');
-  }else{unresolved++;reasons.push(mode);}
+    fail(name+' requires a reviewer, test date and evidence URL');
+  }else blockers.push(name+(status==='failed'?' FAILED':' NOT RUN'));
  }
- for(const prop of ['renderAutoDeployWebhook','adminAccess']){
-  const accepted=prop==='adminAccess'?['authenticated','not_authenticated']:['verified','unverified'];
-  if(!accepted.includes(e.delivery?.[prop]))fail('invalid delivery status '+prop);
-  if(e.delivery[prop]===(prop==='adminAccess'?'authenticated':'verified')){
-   const proofUrl=prop==='adminAccess'?e.delivery.adminAuthProofUrl:e.delivery.renderWebhookProofUrl;
-   if(!verifiableUrl(proofUrl))fail(prop+' requires a public/auditable HTTPS proof URL (no secrets)');
-  }else{unresolved++;reasons.push(prop);}
- }
- if(e.stage==='stable'&&unresolved)fail('cannot label stable while '+unresolved+' gates unresolved');
- return {stage:e.stage,unresolved,reasons};
+ const d=e.delivery||{};
+ if(d.publicPlayerOnly!==true)fail('public bundle isolation must remain mandatory');
+ if(!verifiableUrl(d.publicPlayerUrl))fail('missing public player URL');
+ if(!['verified','unverified'].includes(d.renderAutoDeployWebhook))fail('invalid auto-deploy status');
+ if(d.renderAutoDeployWebhook==='verified'&&!verifiableUrl(d.renderWebhookProofUrl))
+  fail('claimed auto-deploy verification requires evidence');
+ if(!['authenticated','not_authenticated'].includes(d.adminAccess))fail('invalid admin access status');
+ if(d.adminAccess==='authenticated'&&!verifiableUrl(d.adminAuthProofUrl))
+  fail('claimed admin authentication requires evidence');
+ if(d.renderAutoDeployWebhook!=='verified')advisory.push('Render git-push auto-deploy not proven; manual deployment is an operating task');
+ if(d.adminAccess!=='authenticated')advisory.push('Separate authenticated developer workspace remains optional / not deployed');
+ if(e.stage==='stable'&&blockers.length)fail('cannot label stable while '+blockers.length+' independent QA gates unresolved');
+ return {stage:e.stage,unresolved:blockers.length,reasons:blockers,advisory,manual:true};
 }
 function main(argv=process.argv.slice(2)){
  const e=JSON.parse(fs.readFileSync(evidencePath,'utf8')),report=checkEvidence(e);
- console.log('Wheel Calculator release gate: '+report.stage.toUpperCase());
- console.log('Unresolved evidence/QA gates: '+report.unresolved);
- for(const r of report.reasons)console.log('PENDING '+r);
- if(argv.includes('--stable')&&report.unresolved)fail('stable release BLOCKED; '+report.unresolved+' gates unresolved');
+ console.log('Wheel Calculator: '+report.stage.toUpperCase()+' / MANUAL PER-SERVER MODE');
+ console.log('Independent QA blockers: '+report.unresolved);
+ for(const r of report.reasons)console.log('BLOCKED '+r);
+ for(const r of report.advisory)console.log('INFO '+r);
+ if(argv.includes('--stable')&&report.unresolved)
+  fail('stable release BLOCKED; '+report.unresolved+' independent QA gates unresolved');
  return report;
 }
 if(require.main===module){

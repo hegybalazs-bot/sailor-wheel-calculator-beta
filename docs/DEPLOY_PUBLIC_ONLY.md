@@ -1,41 +1,34 @@
-# Public-site deployment and admin access boundary
+# Public deployment and developer-workspace boundary
 
-## Current risk
+## Current services (last confirmed 2026-11-09)
 
-Render's existing static service (`sailor-wheel-calculator-beta`) publishes repository root `.`. This exposes the index-based **developer preview** and public assets together. A different URL, an unlinked page, a secret client-side password or a JavaScript role check are **NOT an admin permission system**. No protected admin API or server-side account management exists in this static application. Player edits are browser-local and do not grant powers over other users.
+**Dedicated public static site:** https://silkroad-wheel-calculator-public.onrender.com
 
-## Prepared fix
+Render service `srv-dbocditg1s2s73ept23g`, branch `main`, configured build `node tools/build-public.cjs` and publish `dist-public`. Its last confirmed **LIVE commit** was `0b3ec2d0a7c8b85c180d6493dd3ec153cf5da61b` (PR #42) when this document was updated. The precise live commit can change: always query Render deployments before saying a new PR is live.
 
-Run `node tools/build-public.cjs`. The deterministic `dist-public/` folder contains **only**:
-- `index.html`: the public `publikus.html` copy, so the root opens a player-safe page;
-- `publikus.html`: the unchanged public player interface;
-- `visszajelzes.html`: public feedback form;
-- `assets/icons/manifest.js` and `assets/icons/local-pack.js`: local-only icon rendering support.
+**Older original static site:** https://sailor-wheel-calculator-beta.onrender.com
 
-It intentionally omits `bemutato.html`, developer `index.html`, sources, documentation, tool/test files, original PNG/DDJ game images and user ZIP packs. An allowlist test fails if unexpected files are present.
+Its configured publish directory was repository root `.`. This exposes the developer **preview** and internal source files, and must not be considered an authenticated admin portal. It has no privileged shared database, but publishing the full repo is unnecessary and misleading. The user's browser localStorage is origin-scoped, so old and new site profiles do not automatically transfer.
 
-### Existing Render service migration (needs authorized dashboard action)
+## Public-only build (working and tested)
 
-1. In the Render dashboard for `sailor-wheel-calculator-beta`, configure **Build Command**: `node tools/build-public.cjs`.
-2. Configure **Publish Directory**: `dist-public` (instead of the current `.`).
-3. Deploy the exact main commit; confirm `/` and `/publikus.html` show the public interface.
-4. Confirm requests to `/bemutato.html`, `/docs/...`, `/tests/...`, `/data/...` and `/tools/...` return 404 (or a static fallback with **no** developer/admin controls).
-5. Verify the user's original browser-local SETs and JSON backups still work; upgrading `/` to public uses the same storage keys.
-6. Keep admin development in a **private source/deployment** with identity-aware access (e.g. enterprise SSO/reverse-proxy authorization), rather than serving it from the public static origin.
+Run `node tools/build-public.cjs`. Its exact six-file allowlist:
+- `index.html`: public player interface
+- `publikus.html`: same player interface
+- `visszajelzes.html`: offline feedback-copy helper
+- `ikon-helyreallitas.html`: one-time private, browser-local sprite ZIP recovery (no upload)
+- `assets/icons/manifest.js` and `assets/icons/local-pack.js`: safe client-local code
 
-The current Render connection can inspect deploys and trigger manual deployments but does **not** expose a service-settings update action. Until the authorized migration above occurs, publishing `dist-public` is **prepared, not active**.
+It excludes developer `index.html`, `bemutato.html`, `README.md`, `docs/`, `tests/`, `tools/`, `data/`, admin code and copyrighted original game sprites. Exact allowlist, real HTTP 404 and browser integration are checked in CI.
 
-## Hard limitations
+## Next operations
 
-This is UI isolation and safer publication, not authentication. Users may inspect public JavaScript and edit their own local calculator values; they still cannot change a shared database because none exists. GitHub source access is separately governed by repository visibility. Never treat "admin preview" as confidential or implement client-side secrets.
+1. On the **new** Render service dashboard, use **Manual Deploy → Deploy latest commit** if main changes are not automatically built.
+2. Verify exact new `main` SHA equals Render latest LIVE SHA, and that `/index.html`, `/ikon-helyreallitas.html` work and `/bemutato.html`, `/data/`, `/tests/` do not publicly serve content.
+3. Correct Render/GitHub auto-deployment webhook integration. `autoDeploy=yes` alone does not prove successful automatic triggering; issue #4 remains open.
+4. Restrict/retire the **old** root-publishing site in the dashboard, or change its build and publish path to the same public-only output if keeping it. **Do not** assume changing GitHub source edits the service settings.
+5. If privileged server-side admin is actually desired, provision a separate identity-protected backend with secrets stored only on the server. There is presently no privileged admin capability to secure; a hidden link or JavaScript password is never real authentication.
 
-## Render webhook bug
+## Release policy
 
-The service advertises `autoDeploy=yes` / `autoDeployTrigger=commit`, but issue #4 documents missing automatic deployment events after new main commits. Do not close it merely because a manual deploy succeeds. Verify a future code push produces a Render deploy with trigger `git_push`/matching provenance (platform vocabulary may differ) without manual API call, and matches exact main commit SHA.
-
-## Release check
-
-`node tools/release-gate.cjs`: summarize unresolved evidence and QA.
-`node tools/release-gate.cjs --stable`: intentionally BLOCKS release until all required proof is recorded.
-`node --test tests/*.test.cjs`: deterministic unit/backup/public-build checks.
-`node tests/browser-smoke.mjs`: Chromium real-browser smoke test (requires installed Playwright).
+Server Blue types, maxima, Normal/SoS/SoM/Sun line limits and modeled probabilities are **manually configured**, not awaiting Sailor administrator approval. The release gate blocks only independent QA evidence requirements (real physical browsers/accessibility/backup roundtrip), not missing official game data or deferred original art. The application remains a beta until independent checks are performed.

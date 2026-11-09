@@ -1,3 +1,11 @@
+# Wheel Calculator — publikus, kézzel beállítható béta
+
+**VÉGLEGES MŰKÖDÉSI ELV (2026-11-09):** A szerverenként/CAP-onként/Degree-nként használható Blue-típusokat, az item- és grade-sorlimiteket, a 100%-os maximumértékeket és a választott szimulációs esélyeket **mindig a játékos adja meg kézzel**. Ehhez **nem kell Sailor Online-adminjóváhagyás** vagy hivatalos adatbázis. A kezdeti értékek szerkeszthető példák, nem szerver által igazolt számok. A program nem kapcsolódik a játékhoz, a feltételes százalékok nem valódi dropesélyek.
+
+**Publikus weboldal:** https://silkroad-wheel-calculator-public.onrender.com/ — egy GitHub-változás csak akkor éles, ha a Render is azonos commitot jelez. [Kézi konfigurálás](docs/MANUAL_CONFIGURATION.md) · [Aktuális feladatlista](docs/ROADMAP_V5.md) · [Biztonságos webes publikálás](docs/DEPLOY_PUBLIC_ONLY.md). Az ikonfejlesztés halasztva. Az alábbi régebbi **adminelőnézeti és igazolási feladatok történeti megjegyzések, nem mai követelmények**.
+
+---
+
 # Wheel Calculator – Emerald v5 ADMIN PREVIEW (BÉTA)
 
 ## Sailor ikonok: privát, Degree-szerinti ZIP-betöltés
@@ -63,7 +71,7 @@ A Silkroad Online szerverekhez használható felszerelés- és Wheel-sor-kalkul�
 4. Ellenőrizd, hogy a `/` és `/publikus.html` működik, de a `/bemutato.html`, `/data/`, `/tests/`, `/tools/` nem szolgál ki fejlesztői/admin tartalmat.
 5. A valódi admin hozzáférést csak külön, hitelesített tárhely/proxy biztosíthatja; rejtett link vagy JavaScript-jelszó nem védelem.
 
-A csomag kizárólag öt engedélyezett statikus fájlt tartalmaz; nincs benne eredeti Sailor grafika vagy privát ZIP. A meglévő Render szolgáltatás átállítása **üzemeltetői művelet**, és a hibás GitHub→Render automatikus telepítés külön megoldandó. Részletek: [biztonságos publikus telepítés](docs/DEPLOY_PUBLIC_ONLY.md) · [feladat #29](https://github.com/hegybalazs-bot/sailor-wheel-calculator-beta/issues/29) · [autodeploy #4](https://github.com/hegybalazs-bot/sailor-wheel-calculator-beta/issues/4).
+A csomag kizárólag hat engedélyezett statikus fájlt tartalmaz; nincs benne eredeti Sailor grafika vagy privát ZIP. A meglévő Render szolgáltatás átállítása **üzemeltetői művelet**, és a hibás GitHub→Render automatikus telepítés külön megoldandó. Részletek: [biztonságos publikus telepítés](docs/DEPLOY_PUBLIC_ONLY.md) · [feladat #29](https://github.com/hegybalazs-bot/sailor-wheel-calculator-beta/issues/29) · [autodeploy #4](https://github.com/hegybalazs-bot/sailor-wheel-calculator-beta/issues/4).
 
 ## Adatok és felelősség
 
