@@ -1,3 +1,11 @@
+# Wheel Calculator — public manual configuration beta
+
+**CURRENT POLICY (2026-11-09):** Blue types, item and per-grade line limits, 100%-reference maxima and optional probability models are **always entered/adjusted manually per server/CAP/Degree**. No official Sailor Online administrator approval or reference tables are required. Initial values are editable examples, not proven server facts. This is an offline, browser-local app; simulations are conditional estimates, not real-game drop-rate claims.
+
+**Live public player site:** https://silkroad-wheel-calculator-public.onrender.com/ — new code is only live when Render reports a matching main commit. [Manual configuration guide](docs/MANUAL_CONFIGURATION.md) · [Current release roadmap](docs/ROADMAP_V5.md) · [Public deployment boundary](docs/DEPLOY_PUBLIC_ONLY.md). Original client images are optional and deferred. The older developer preview, former administrator review materials and older release checklist sections below are **historical background, not current requirements**.
+
+---
+
 # Wheel Calculator — Emerald v5 Admin Preview (Beta)
 
 ## Sailor icons: private ZIP import with degree-specific selection
@@ -23,7 +31,7 @@ The **Next Wheel / Pen** tab now includes a manual Fate → Fortune → Pen plan
 
 **Offline Hungarian / English Silkroad Wheel calculator** for Sailor Online and other customizable Silkroad servers.
 
-[Open the app](https://sailor-wheel-calculator-beta.onrender.com/) · [Report a bug or share a verified stat](https://sailor-wheel-calculator-beta.onrender.com/visszajelzes.html)
+[Open the app](https://silkroad-wheel-calculator-public.onrender.com/) · [Send feedback](https://silkroad-wheel-calculator-public.onrender.com/visszajelzes.html)
 
 ## Emerald v5 Admin Preview — showcase and planning features (2026-11-06)
 
