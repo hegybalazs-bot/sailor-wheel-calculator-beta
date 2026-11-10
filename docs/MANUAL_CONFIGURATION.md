@@ -2,6 +2,16 @@
 
 **2026-11-09 decision:** No official Sailor Online Blue reference dataset or admin verification is required. This tool is useful for Sailor and other Silkroad servers because **players configure the rules themselves**. An old iSRO list is merely an optional editable starting point, never authoritative.
 
+## Share only CAP/Degree rules (no personal SET data)
+
+In **⚙ Saját CAP-beállítások / CAP Settings**, find **Kézi CAP / Degree szabályok átadása**. Use **Szabályok exportálása** to save a small JSON template covering the active CAP/Degree stat maxima, Normal/SoS/SoM/Sun grade line limits, configured weapon requirements, the allowed Blue types of all 12 equipment slots, specialty Blue maxima and player-entered conditional probability assumptions.
+
+This rules-only template deliberately **does not contain** any saved personal SETs, actual item rolls, Wheel history, character balances, icons, account credentials or even the local server profile name. To import, first select the **same CAP and Degree** under the intended destination server, and choose **Szabályok betöltése**. The app validates the entire template; unknown Blue types, duplicate entries, invalid values and mismatched CAP/Degree are rejected.
+
+Before applying a matching file, the browser initiates a **complete** regular JSON rollback backup of every saved server/SET. Confirm that download is present. The import replaces **only** the selected CAP/Degree's shared rules and conditional assumptions; existing individual SETs and their item-specific Wheel line limits remain untouched. The original separate whole-profile **Mentés JSON-ba / Betöltés** flow remains available for moving personal items.
+
+**No staff sign-off is required.** Templates are user-made assumptions; a transferred percent is not an official game roll rate.
+
 ## How a player configures a server
 
 1. Pick or create a **server profile** under **⚙ Szerver beállításai**. Profiles are kept separately in the browser and included in one JSON export.
