@@ -1387,6 +1387,11 @@ function importAllProfiles(data){
  const raw=data.serverProfiles;
  const active=copyJSON(data);delete active.serverProfiles;
  const oldS=copyJSON(S),oldP=copyJSON(P),oldCaps=CAPS.slice();
+ // Snapshot BOTH localStorage keys before mutating anything. A failed storage
+ // write (quota/private mode) must never be reported as a successful import.
+ const oldStorage={
+  state:localStorage.getItem(STORAGE),profiles:localStorage.getItem(SERVERS_STORAGE)
+ };
  try{
   if(raw!=null){
    if(!Array.isArray(raw.entries)||!raw.entries.length||raw.entries.length>30)
@@ -1408,9 +1413,25 @@ function importAllProfiles(data){
    // Importing older Sailor-only files changes only the current server profile.
    restoreServerState(active);
   }
-  lastSim=null;save();paint();return true;
+  lastSim=null;
+  if(!save()||localStorage.getItem(STORAGE)!==JSON.stringify(S)||
+    localStorage.getItem(SERVERS_STORAGE)!==JSON.stringify(P))
+   throw Error('A böngésző nem tudta teljesen eltárolni az importált SET-eket.');
+  paint();
+  return true;
  }catch(err){
   S=oldS;P=oldP;CAPS.splice(0,CAPS.length,...oldCaps);
+  let rollbackOk=true;
+  try{
+   if(oldStorage.state===null)localStorage.removeItem(STORAGE);
+   else localStorage.setItem(STORAGE,oldStorage.state);
+   if(oldStorage.profiles===null)localStorage.removeItem(SERVERS_STORAGE);
+   else localStorage.setItem(SERVERS_STORAGE,oldStorage.profiles);
+   rollbackOk=localStorage.getItem(STORAGE)===oldStorage.state&&
+    localStorage.getItem(SERVERS_STORAGE)===oldStorage.profiles;
+  }catch(_){rollbackOk=false;}
+  lastSim=null;paint();
+  if(!rollbackOk)throw Error('A mentés megszakadt, a helyi tárhely visszaállítása sem sikerült. A korábban letöltött JSON-biztonsági mentésből állítsd vissza az adataidat!');
   throw err;
  }
 }
@@ -1487,7 +1508,7 @@ function refreshSetPicker(){let bank=activeBank();let picker=$('#setPicker');if(
 }
 
 let lastSim=null;let toastTimer;
-function save(){try{applyFixedStatLimits();syncActiveSet();snapshotDegreeModel(currentCfg());S.schemaVersion=SCHEMA_VERSION;localStorage.setItem(STORAGE,JSON.stringify(S));if(typeof P!=='undefined'&&P?.entries)localStorage.setItem(SERVERS_STORAGE,JSON.stringify(P));$('#saveStatus').textContent=UI_LANG==='en'?'✓ Emerald v5 preview set saved':'✓ Emerald v5 előzetes SET mentve';}catch(_){$('#saveStatus').textContent=translateText('⚠ A böngésző nem engedi a tárolást – exportálj JSON-t!');}}
+function save(){try{applyFixedStatLimits();syncActiveSet();snapshotDegreeModel(currentCfg());S.schemaVersion=SCHEMA_VERSION;localStorage.setItem(STORAGE,JSON.stringify(S));if(typeof P!=='undefined'&&P?.entries)localStorage.setItem(SERVERS_STORAGE,JSON.stringify(P));$('#saveStatus').textContent=UI_LANG==='en'?'✓ Emerald v5 preview set saved':'✓ Emerald v5 előzetes SET mentve';return true;}catch(_){$('#saveStatus').textContent=translateText('⚠ A böngésző nem engedi a tárolást – exportálj JSON-t!');return false;}}
 function currentCfg(){return S.cfg[S.cap];}function items(){return S.sets[S.cap];}
 function weaponId(cap=S.cap){return normalizeWeapon(S.weaponByCap?.[cap]||S.weapon);}
 function critRequired(id=weaponId(),cap=S.cap){return S.critOverrides?.[cap]?.[id]===undefined?WEAPONS[id].crit:Boolean(S.critOverrides[cap][id]);}
