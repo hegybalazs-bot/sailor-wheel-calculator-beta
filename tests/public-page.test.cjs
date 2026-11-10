@@ -33,6 +33,7 @@ function boot(html){
 ;globalThis.audit={
  state:()=>S,html:()=>document.querySelector('#root').innerHTML,
  inspectImportBackup,backupImportConfirmation,exportAllProfiles,importAllProfiles,
+ exportManualRuleTemplate,inspectManualRuleTemplate,applyManualRuleTemplate,
  addServerProfile,deleteServerProfile,serverProfiles:()=>P,
  deleteSet,
  paint,setLanguage:setUiLanguage,selectedTab:()=>S.tab,
@@ -257,4 +258,70 @@ test('failed first-key localStorage write also leaves all server data untouched'
  assert.throws(()=>audit.importAllProfiles(incoming),/nem tudta teljesen eltárolni/i);
  assert.equal(JSON.stringify(audit.state()),before);
  assert.equal(JSON.stringify(store),keys);
+});
+
+test('CAP/Degree rule-only JSON export excludes personal SETs, rolls, item history and server names',()=>{
+ for(const html of [base,publicHtml]){
+  const {audit}=boot(html),data=audit.exportManualRuleTemplate();
+  assert.equal(data.kind,'wheel-manual-cap-degree-rules-v1');
+  assert.equal(data.cap,90);
+  assert.equal(data.degree,9);
+  assert.equal(data.maxima.maxSTR,11);
+  assert.equal(data.gradeMax.SoS,9);
+  assert.equal(data.blueTypes.shoulder.length>0,true);
+  assert.equal(data.chances.shoulder&&typeof data.chances.shoulder==='object',true);
+  const json=JSON.stringify(data);
+  for(const privateField of ['serverProfiles','setBank','sets','weaponInventory','history',
+    'apparelStyle','serverName','localIconSelections','balanceBases']){
+   assert.equal(Object.prototype.hasOwnProperty.call(data,privateField),false,privateField);
+  }
+  assert.doesNotMatch(json,/"serverProfiles"|"weaponInventory"|"setBank"|"history"|"items"/);
+  const scan=audit.inspectManualRuleTemplate(JSON.parse(json));
+  assert.equal(scan.cap,90);assert.equal(scan.degree,9);
+  assert(scan.types>0);
+ }
+});
+test('manual rule-only import updates Blue limits but preserves the current SET and all other CAPs',()=>{
+ const {audit,store}=boot(publicHtml),state=audit.state();
+ const beforeSet=JSON.stringify(state.sets[90].shoulder);
+ const cap100=JSON.stringify(state.cfg[100]);
+ const beforeProfiles=JSON.parse(store['wheel-calculator-server-profiles-v1']);
+ const data=JSON.parse(JSON.stringify(audit.exportManualRuleTemplate()));
+ data.maxima.maxAR=58;
+ data.gradeMax.SoS=12;
+ data.blueTypes.shoulder=['STR','INT'];
+ data.chances.shoulder={STR:'55',INT:'45'};
+ data.blueMaxima.STUN=87;
+ const result=audit.applyManualRuleTemplate(data);
+ assert.equal(result.cap,90);
+ assert.equal(audit.state().cfg[90].maxAR,58);
+ assert.equal(audit.state().cfg[90].gradeMax.SoS,12);
+ assert.deepEqual(Array.from(audit.state().blueCatalogOverrides['90_9'].shoulder),['STR','INT']);
+ assert.equal(audit.state().blueTypeMaxima['90_9'].STUN,87);
+ assert.equal(JSON.stringify(audit.state().sets[90].shoulder),beforeSet);
+ assert.equal(JSON.stringify(audit.state().cfg[100]),cap100);
+ assert.equal(JSON.parse(store['wheel-calculator-server-profiles-v1']).activeId,beforeProfiles.activeId);
+ assert.equal(audit.state().cap,90);
+});
+test('manual rule-only import validates scope/Blue catalog/maxima and never edits state on rejection',()=>{
+ const {audit}=boot(publicHtml);
+ const data=JSON.parse(JSON.stringify(audit.exportManualRuleTemplate()));
+ const baseline=JSON.stringify(audit.state());
+ for(const mutator of [
+  x=>{x.cap=110;},
+  x=>{x.degree=12;},
+  x=>{x.kind='full-backup';},
+  x=>{x.maxima.maxSTR=1000;},
+  x=>{x.gradeMax.Sun=99;},
+  x=>{x.blueTypes.shoulder=['STR','STR'];},
+  x=>{x.blueTypes.shoulder=['NOT_BLUE'];},
+  x=>{x.chances.shoulder={STR:101};},
+  x=>{x.blueMaxima.STUN=-1;},
+  x=>{x.blueMaxima.UNKNOWN=50;}
+ ]){
+  const malformed=JSON.parse(JSON.stringify(data));
+  mutator(malformed);
+  assert.throws(()=>audit.inspectManualRuleTemplate(malformed));
+  assert.equal(JSON.stringify(audit.state()),baseline);
+ }
 });

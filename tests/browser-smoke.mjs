@@ -396,6 +396,53 @@ try{
    assert.deepEqual(recovery.errors,[]);
   }finally{await context.close();await recovery.context.close();}
  });
+
+ await check('export/import manual CAP/Degree rules without sharing or overwriting personal SETs',async()=>{
+  const from=await newPage({width:1160,height:850}),to=await newPage({width:1160,height:850});
+  try{
+   await from.page.goto(origin+'/');
+   await from.page.locator('[data-tab="rules"]').click();
+   const max=from.page.locator('[data-config="maxAR"]').first();
+   assert.equal(await max.count(),1);
+   await max.fill('58');
+   await max.press('Tab');
+   const [file]=await Promise.all([
+    from.page.waitForEvent('download',{timeout:16000}),
+    from.page.locator('#exportRulesBtn').click()
+   ]);
+   assert.match(file.suggestedFilename(),/Manual_Rules_90CAP_9DG/);
+   const bytes=await readFile(await file.path()),preset=JSON.parse(bytes.toString('utf8'));
+   assert.equal(preset.kind,'wheel-manual-cap-degree-rules-v1');
+   assert.equal(Number(preset.maxima.maxAR),58);
+   assert.equal(preset.cap,90);assert.equal(preset.degree,9);
+   for(const field of ['sets','serverProfiles','setBank','history','weaponInventory']){
+    assert.equal(Object.hasOwn(preset,field),false,'private '+field+' must not transfer');
+   }
+   await to.page.goto(origin+'/');
+   await to.page.locator('#goalSel').fill('73');
+   await to.page.locator('#goalSel').press('Tab');
+   await to.page.locator('[data-tab="rules"]').click();
+   let confirmation='';
+   to.page.on('dialog',dialog=>{confirmation=dialog.message();dialog.accept();});
+   const [preImportBackup]=await Promise.all([
+    to.page.waitForEvent('download',{timeout:16000}),
+    to.page.locator('#rulesImportFile').setInputFiles({
+     name:'90cap-manual-rules.json',mimeType:'application/json',buffer:bytes
+    })
+   ]);
+   assert.match(preImportBackup.suggestedFilename(),/Rules_Import_Elotti_Mentes/);
+   assert.match(confirmation,/90 CAP \/ 9DG/);
+   const full=JSON.parse((await readFile(await preImportBackup.path())).toString('utf8'));
+   assert.equal(full.goal,73,'full automatic rollback includes personal SET defaults');
+   assert.equal(await to.page.evaluate(()=>Number(S.cfg[90].maxAR)),58);
+   assert.equal(await to.page.locator('#goalSel').inputValue(),'73','personal goal preserved');
+   await to.page.reload();
+   assert.equal(await to.page.evaluate(()=>Number(S.cfg[90].maxAR)),58);
+   assert.equal(await to.page.locator('#goalSel').inputValue(),'73');
+   assert.deepEqual(from.errors,[]);
+   assert.deepEqual(to.errors,[]);
+  }finally{await from.context.close();await to.context.close();}
+ });
  await check('JSON import previews profile, saves previous state, restores new data and rejects unsafe files',async()=>{
   const original=await newPage({width:1200,height:850});
   const replacement=await newPage({width:1200,height:850});
