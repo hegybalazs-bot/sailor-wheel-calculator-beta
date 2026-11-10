@@ -33,6 +33,7 @@ function boot(html){
 ;globalThis.audit={
  state:()=>S,html:()=>document.querySelector('#root').innerHTML,
  inspectImportBackup,backupImportConfirmation,exportAllProfiles,importAllProfiles,
+ save,staleWheelPair,staleState:()=>STORAGE_STALE,
  exportManualRuleTemplate,inspectManualRuleTemplate,applyManualRuleTemplate,
  addServerProfile,deleteServerProfile,serverProfiles:()=>P,
  deleteSet,
@@ -324,4 +325,37 @@ test('manual rule-only import validates scope/Blue catalog/maxima and never edit
   assert.throws(()=>audit.inspectManualRuleTemplate(malformed));
   assert.equal(JSON.stringify(audit.state()),baseline);
  }
+});
+
+test('cross-tab state conflict refuses to overwrite a newer saved SET and allows an emergency JSON export',()=>{
+ for(const html of [base,publicHtml]){
+  const {audit,store,document}=boot(html);
+  const stateKey='sailor-wheel-calculator-v4';
+  const profileKey='wheel-calculator-server-profiles-v1';
+  assert(store[stateKey]&&store[profileKey]);
+  const fromOtherTab=JSON.parse(store[stateKey]);
+  fromOtherTab.goal=88;
+  store[stateKey]=JSON.stringify(fromOtherTab);
+  const latest=store[stateKey],profiles=store[profileKey];
+  audit.state().goal=62;
+  assert.equal(audit.save(),false,'stale tab must not write');
+  assert.equal(store[stateKey],latest,'other tab saved state must stay intact');
+  assert.equal(store[profileKey],profiles,'other tab profiles must stay intact');
+  assert.equal(audit.staleState(),true);
+  assert.match(document.querySelector('#saveStatus').textContent,/Másik böngészőlapon|Another tab/);
+  assert.equal(audit.exportAllProfiles().goal,62,'the unsaved edits remain downloadable as JSON');
+  assert.equal(audit.save(),false,'retries cannot silently take over saved data');
+ }
+});
+test('second browser tab can change only server profile metadata and still be protected',()=>{
+ const {audit,store}=boot(publicHtml);
+ const key='wheel-calculator-server-profiles-v1';
+ const profile=JSON.parse(store[key]);
+ profile.entries[0].name='Updated in tab A';
+ store[key]=JSON.stringify(profile);
+ const old=store[key];
+ audit.state().goal=44;
+ assert.equal(audit.save(),false);
+ assert.equal(store[key],old);
+ assert.equal(audit.staleState(),true);
 });
