@@ -9,7 +9,7 @@ const base=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
 const publicHtml=fs.readFileSync(path.join(__dirname,'..','publikus.html'),'utf8');
 const inline=x=>x.match(/<script>([\s\S]*?)<\/script>/i)?.[1];
 function boot(html){
- const elements={},store={};
+ const elements={},store={},writeFailures={};
  const el=(selector)=>elements[selector]??={
   innerHTML:'',value:'',textContent:'',
   classList:{add(){},remove(){},toggle(){}},
@@ -23,7 +23,7 @@ function boot(html){
   body:{append(){}}
  };
  const sandbox={
-  document,localStorage:{getItem:key=>store[key]??null,setItem:(key,v)=>{store[key]=String(v);}},
+  document,localStorage:{getItem:key=>store[key]??null,setItem:(key,v)=>{if(writeFailures[key]>0){writeFailures[key]--;throw Error('QuotaExceededError')}store[key]=String(v);},removeItem:key=>{delete store[key];}},
   window:{print(){}},prompt:()=>null,confirm:()=>true,alert:()=>{},
   setTimeout:()=>0,clearTimeout:()=>{},
   Blob:class Blob{},URL:{createObjectURL:()=> 'blob:public-test',revokeObjectURL(){}}
@@ -32,13 +32,13 @@ function boot(html){
  vm.runInContext(inline(html)+`
 ;globalThis.audit={
  state:()=>S,html:()=>document.querySelector('#root').innerHTML,
- inspectImportBackup,backupImportConfirmation,exportAllProfiles,
+ inspectImportBackup,backupImportConfirmation,exportAllProfiles,importAllProfiles,
  addServerProfile,deleteServerProfile,serverProfiles:()=>P,
  deleteSet,
  paint,setLanguage:setUiLanguage,selectedTab:()=>S.tab,
  items:()=>itemList(),renderEditor:()=>editPanel()
 };`,sandbox,{timeout:7000});
- return {audit:sandbox.audit,store,document};
+ return {audit:sandbox.audit,store,document,failNextWrite:key=>{writeFailures[key]=(writeFailures[key]||0)+1;}};
 }
 
 test('public calculator is its own indexable URL, not an admin preview',()=>{
@@ -222,4 +222,39 @@ test('workspace tabs expose roving keyboard navigation, Blue focus recovery and 
   assert.match(html,/const announcer=\$\('#wheelAnnouncer'\)/);
   assert.match(html,/target\.focus\(\{preventScroll:true\}\)/);
  }
+});
+
+test('failed second-key localStorage write rolls back import instead of silently claiming success',()=>{
+ for(const html of [base,publicHtml]){
+  const {audit,store,failNextWrite}=boot(html);
+  const incoming=JSON.parse(JSON.stringify(audit.exportAllProfiles()));
+  // The incoming SET is meaningfully different and has a valid active profile.
+  incoming.cap=130;
+  incoming.serverProfiles.entries.find(e=>e.id===incoming.serverProfiles.activeId).data.cap=130;
+  const original=JSON.stringify(audit.state());
+  const savedState=store['sailor-wheel-calculator-v4'];
+  const savedProfiles=store['wheel-calculator-server-profiles-v1'];
+  assert(savedState&&savedProfiles);
+  // The first key will already have changed when the second write throws.
+  failNextWrite('wheel-calculator-server-profiles-v1');
+  assert.throws(()=>audit.importAllProfiles(incoming),/nem tudta teljesen eltárolni/i);
+  assert.equal(JSON.stringify(audit.state()),original,'in-memory current SET and CAP rolled back');
+  assert.equal(store['sailor-wheel-calculator-v4'],savedState,'first partially written key rolled back');
+  assert.equal(store['wheel-calculator-server-profiles-v1'],savedProfiles,'second key preserved');
+  assert.equal(audit.state().cap,90);
+  assert.equal(audit.importAllProfiles(incoming),true,'next import succeeds when storage recovers');
+  assert.equal(audit.state().cap,130);
+ }
+});
+test('failed first-key localStorage write also leaves all server data untouched',()=>{
+ const {audit,store,failNextWrite}=boot(publicHtml);
+ const incoming=JSON.parse(JSON.stringify(audit.exportAllProfiles()));
+ incoming.cap=120;
+ incoming.serverProfiles.entries.find(e=>e.id===incoming.serverProfiles.activeId).data.cap=120;
+ const before=JSON.stringify(audit.state());
+ const keys=JSON.stringify(store);
+ failNextWrite('sailor-wheel-calculator-v4');
+ assert.throws(()=>audit.importAllProfiles(incoming),/nem tudta teljesen eltárolni/i);
+ assert.equal(JSON.stringify(audit.state()),before);
+ assert.equal(JSON.stringify(store),keys);
 });
