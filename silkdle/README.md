@@ -1,27 +1,67 @@
-# Silkdle — web MVP
+# Silkdle — Chinese + European Silkroad fan quiz
 
-Standalone mobile-friendly Silkroad Online fan quiz, Chinese and European.
+Silkdle is an unofficial fan-made, mobile-friendly Silkroad Online quiz. It lives in its own \`silkdle/\` directory; the Wheel Calculator homepage is not modified.
 
-## First playable version
-- Six playable modes: Mob Guess, Unique Hunter, Equipment, Mastery, Map Explorer, SRO Knowledge.
-- Daily challenge in Europe/Budapest time and unlimited practice.
-- Chinese / European / Mixed filters, HU / EN UI.
-- 6-guess modes with progressive clues and 5-question classic quiz.
-- Per-device results saved in localStorage; copyable score.
-- Responsive layout; no dependencies, no trackers, no external images.
+## Play modes
 
-## Limitations
-- Beta/demo content, not the full curated and validated 132-question bank.
-- Daily challenges and answer keys currently run client-side and are not cheat-proof.
-- No authentication, server-side admin, global leaderboard or official images yet.
-- This is an unofficial Silkroad Online fan project.
+- **Classic**: Mob Guess, Unique Hunter, Equipment, Mastery, Map Explorer, SRO Knowledge (daily + practice, HU/EN, CH/EU/Mixed).
+- **Image Hunt (community)**: Free, accountless image recognition. A 5×5 cover initially reveals only one tile; wrong guesses or the Reveal button open more pieces. No timer; no leaderboard points.
+- **Speed Hunt (ranked beta)**: one shared puzzle every Budapest-local day; 60 seconds, at most three wrong guesses, one attempt per account/day. Server determines start time, correctness, elapsed time, and score. Faster correct answers receive more points. Each wrong guess subtracts 100 points.
+- **Leaderboard**: today's highest ranked score and all-time cumulative points, stored in PostgreSQL.
+- **Accounts**: username, email, password, login/logout, server-side sessions and account deletion.
 
-## Deployment
-A single static file: `silkdle/index.html`. Published as `/silkdle/` from the existing static host that exposes repository root. Code is intentionally isolated from the Wheel Calculator root app.
+Scoring: on correct answer before deadline, \`max(100, 1000 - floor(elapsed_ms / 1000) * 12 - 100 * wrong_guesses)\`. On timeout or reaching three wrong guesses, 0 points. A user can play community mode without registering; only ranked mode writes shared leaderboard scores.
 
-## Next steps
-1. Independent repository and dedicated domain/site.
-2. Licensed image assets.
-3. Server-side question bank, secret answers, persistence, daily puzzle API.
-4. Content editor and moderation workflows.
-5. Import and review the existing 132-question seed, translate to EN.
+## Demo pictures and future content
+
+Four **original vector illustrations** are provided solely as gameplay placeholders. They do not claim to be Silkroad screenshots and do not reproduce copyrighted client artwork. Replace them with authorized, vetted, answer-tagged actual SRO screenshots later. Do not silently copy game files into this public repository.
+
+## Local run
+
+Requires Node.js >= 20, optional PostgreSQL for ranked features.
+
+\`\`\`bash
+cd silkdle
+npm install
+npm start
+\`\`\`
+
+Open \`http://localhost:3000\`. With no \`DATABASE_URL\`, casual modes work; signup, login and worldwide rankings return HTTP 503 (no fake leaderboard).
+
+For PostgreSQL, set \`DATABASE_URL\` securely in your terminal or deployment dashboard. On startup, the server creates the three \`silkdle_*\` tables and indexes.
+
+## Deployment (Render)
+
+A standalone Render **web service** runs this branch with:
+- Build command: \`npm install --prefix silkdle --no-audit --no-fund\`
+- Start command: \`node silkdle/server.cjs\`
+- Region: Frankfurt; runtime: Node; HTTPS URL provided by Render.
+
+To connect the pre-provisioned Render database **privately**, open the database's Render Dashboard, copy its **Internal Database URL**, then open this web service's **Environment** settings and set \`DATABASE_URL\`. **Never paste passwords or database URLs into chat, code, commits, GitHub issues or public logs.** Both resources must be in the same Render region.
+
+Do not invite public account registration until database connectivity, email verification, password recovery, abuse prevention, privacy policy and consent handling have been reviewed. Render Free PostgreSQL expires after 30 days and has no backups; upgrade to a persistent database before using real long-term accounts.
+
+## Tests
+
+\`\`\`bash
+npm install --prefix silkdle --no-audit --no-fund
+node --test silkdle/test/server.test.cjs
+\`\`\`
+
+With \`TEST_DATABASE_URL\` set to a disposable local test database, the test suite covers registration, case-insensitive username conflicts, login, rank scoring, leaderboard, logout and account deletion. GitHub CI provisions a temporary PostgreSQL container for integration testing.
+
+## Security model
+
+- Passwords are salted and hashed via scrypt; no plaintext password storage.
+- Sessions use hashed random tokens in PostgreSQL, with HttpOnly SameSite=Strict cookies.
+- SQL uses parameterized queries and a unique constraint for per-user per-day attempts.
+- Server decides game time, matching, score and leaderboard entries.
+- Rate limiting is basic and per process; distributed production rate limiting, email verification and bot detection must be added before a public launch.
+- No claims are made that client-side image puzzles are entirely cheat-proof.
+
+## Scope of next development
+
+1. Connect database and run E2E deployment checks.
+2. Add verified image assets, better image sequence pools and image moderation.
+3. Email verification, password reset and privacy/data-retention controls.
+4. Content administration, per-mode rankings and more daily questions.
