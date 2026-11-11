@@ -898,6 +898,7 @@ const UI_LANG_KEY='wheel-calculator-language-v1';
 let UI_LANG='hu';
 try{UI_LANG=localStorage.getItem(UI_LANG_KEY)==='en'?'en':'hu';}catch(_){}
 const EN_UI_PHRASES=[
+ ["Összes szerver és SET törlése","Delete all servers and SETs"],
  ["A maximumokat kézzel állíthatod be a szerveredhez; a sablonértékekhez nem kell adminjóváhagyás. A Freezing ékszernél alapból 20% = 100%. A Normal / SoS / SoM / Sun CAP-alap sorlimiten túl az adott itemhez saját limit is adható.","You can set the maxima manually for your server; the template values do not require administrator approval. For jewelry, Freezing is initially 20% = 100%. In addition to the Normal / SoS / SoM / Sun CAP-based line limit, you can set an item-specific limit."],
  ["Az alaplista csak szerkeszthető kiinduló sablon.","The default list is just an editable starting template."],
  ["Te döntöd el, mely Blue-típusok léteznek az adott szerveren.","You decide which Blue types exist on this server."],
@@ -1326,6 +1327,90 @@ function exportAllProfiles(){
   id:e.id,name:e.name,data:e.id===P.activeId?snapshot:copyJSON(e.data)
  }))}};
 }
+// Destructive resets always back up the ENTIRE multi-server profile bank.
+// A CAP rules reset does not touch actual item Wheel rows or SET history.
+function protectedWheelReset({question,filePrefix,change,done}){
+ if(STORAGE_STALE||staleWheelPair(storedWheelPair())){
+  markWheelStale();
+  alertUI(UI_LANG==='en'?'Another tab changed saved SETs. Export JSON and reload before resetting.':
+   'Másik lapon újabb mentés van. Exportálj JSON-t, majd frissítsd ezt a lapot a törlés előtt.');
+  return false;
+ }
+ if(!confirmUI(question))return false;
+ try{
+  downloadBlob(filePrefix+'_'+new Date().toISOString().slice(0,10)+'.json',
+   JSON.stringify(exportAllProfiles(),null,2));
+ }catch(err){
+  alertUI((UI_LANG==='en'?'Backup failed; reset canceled: ':'Nem indult el a biztonsági mentés, a visszaállítás megszakítva: ')+err.message);
+  return false;
+ }
+ const oldS=copyJSON(S),oldP=copyJSON(P),oldCaps=CAPS.slice(),
+  prior=storedWheelPair(),previousObserved=STORAGE_OBSERVED;
+ try{
+  change();
+  lastSim=null;
+  if(!save()||localStorage.getItem(STORAGE)!==JSON.stringify(S)||
+   localStorage.getItem(SERVERS_STORAGE)!==JSON.stringify(P))
+   throw Error('Nem sikerült menteni a visszaállítást.');
+  paint();toast(done);
+  return true;
+ }catch(err){
+  S=oldS;P=oldP;CAPS.splice(0,CAPS.length,...oldCaps);
+  let rollback=true;
+  try{
+   if(prior.state===null)localStorage.removeItem(STORAGE);
+   else localStorage.setItem(STORAGE,prior.state);
+   if(prior.profiles===null)localStorage.removeItem(SERVERS_STORAGE);
+   else localStorage.setItem(SERVERS_STORAGE,prior.profiles);
+   rollback=localStorage.getItem(STORAGE)===prior.state&&
+    localStorage.getItem(SERVERS_STORAGE)===prior.profiles;
+   if(rollback)STORAGE_OBSERVED=previousObserved;
+  }catch(_){rollback=false;}
+  paint();
+  alertUI(rollback?
+   (UI_LANG==='en'?'Reset failed; your saved data was restored: ':
+    'Visszaállítás sikertelen; a mentett adatok megmaradtak: ')+err.message:
+   (UI_LANG==='en'?'Reset and rollback failed. Recover from the downloaded JSON!':
+    'A visszaállítás és a helyi mentés helyreállítása sem sikerült. Használd a letöltött JSON-t!'));
+  return false;
+ }
+}
+function resetCurrentCapRules(){
+ const cap=S.cap;
+ return protectedWheelReset({
+  question:UI_LANG==='en'?
+   'Restore all manual rules for '+cap+' CAP to the editable defaults? Blue type pools, custom maxima and assumed chances for every Degree under this CAP will be reset. Your SET items and Wheel history remain. A full JSON backup downloads first. Continue?':
+   'Visszaállítod a(z) '+cap+' CAP összes kézi szabályát? Minden Degree Blue-listája, maximuma és feltételezett esélye az alapértékre kerül. Az itemek, SET-ek és előzmények megmaradnak. Előbb teljes JSON-mentés indul. Folytatod?',
+  filePrefix:'Wheel_Cap_Szabalyok_Elotti_Mentes',
+  change:()=>{
+   S.cfg[cap]=freshConfig(cap);
+   const prefix=cap+'_';
+   for(const name of ['blueCatalogOverrides','blueTypeMaxima','blueChanceProfiles']){
+    const map=S[name];if(!map||typeof map!=='object')continue;
+    for(const key of Object.keys(map))if(key.startsWith(prefix))delete map[key];
+   }
+  },
+  done:UI_LANG==='en'?'CAP rules restored; saved SETs untouched.':
+   'CAP-szabályok alaphelyzetben; a SET-ek megmaradtak.'
+ });
+}
+function resetAllSavedProfiles(){
+ return protectedWheelReset({
+  question:UI_LANG==='en'?
+   'DELETE all saved server profiles, CAP rules, SET items and Wheel history in this browser? A full JSON backup downloads first. Local private icon packages may remain in separate browser image storage. Continue?':
+   'Törlöd ennek a böngészőnek az ÖSSZES szerverprofilját, CAP-szabályát, SET-jét és Wheel-előzményét? Előbb teljes JSON-mentés indul. A külön tárolt privát ikoncsomag megmaradhat. Folytatod?',
+  filePrefix:'Wheel_Osszes_Adat_Torles_Elotti_Mentes',
+  change:()=>{
+   CAPS.splice(0,CAPS.length,...BUILTIN_CAPS);
+   S=initial();normalizeGoals();applyStrIntChoiceRange();applyBonusReferenceV42();
+   applyRateRulesV43();initializeDegreeModels();applyFixedStatLimits();normalizeSetBank();
+   P={activeId:'srv_sailor',entries:[{id:'srv_sailor',name:'Sailor Online',data:null}]};
+  },
+  done:UI_LANG==='en'?'Server profiles and SETs cleared; verify backup.':
+   'Szerverprofilok és SET-ek törölve; ellenőrizd a JSON-mentést!'
+ });
+}
+
 function importAllProfiles(data){
  if(!validServerState(data))throw Error('Nem érvényes Wheel Calculator mentés.');
  const raw=data.serverProfiles;
@@ -3135,7 +3220,7 @@ function manualRuleTemplatePanel(){
   '</button><input type="file" class="hide" id="rulesImportFile" accept=".json,application/json"></div></section>';
 }
 
-function rulesView(){let c=currentCfg();return manualRuleTemplatePanel()+`<section class="panel"><h2>⚙ ${S.cap} CAP · ${c.degree}DG — szerverparaméterek</h2><div class="notice"><b>EMERALD v5 PREVIEW:</b> A maximumokat kézzel állíthatod be a szerveredhez; a sablonértékekhez nem kell adminjóváhagyás. A Freezing ékszernél alapból 20% = 100%. A Normal / SoS / SoM / Sun CAP-alap sorlimiten túl az adott itemhez saját limit is adható.</div><div class="notice"><b>100%-os HP/MP kiindulási értékek (130+ HP fix):</b> 90 CAP = 600; 100 = 860; 110 = 1300; 120 = 1300; 125 = 2100; 130+ CAP = 2300 HP (fix). A 140 CAP MP-referenciája jelenleg a 130 CAP-éval egyezik (+2300), amíg nincs szerverfrissítés. <b>Parry Rate:</b> 90 CAP = 40, 100+ CAP = 60 (az elválasztás egyelőre feltételezés). <b>Attack Rate:</b> CAP/DG szerint szerkeszthető (alapból 40 vagy 60); <b>Critical:</b> +1/+2/+3, ahol +3 = 100%; <b>Blocking Rate:</b> 100 = 100%. <b>Durability:</b> menthető, de nem része a minősítésnek. Az STR/INT +11, Durability 200%, 130+ HP 2300 és Parry 60 fix; a többi referencia szerkeszthető. A külön itemenkénti saját HP/MP/Parry/Freezing értékeket a Szett &amp; itemek fülön add meg.</div><div class="warnbox">90 CAP / 9DG esetén is a rögzített STR/INT maximum +11, a 40/60 között állítható Attack Rate, +3 Critical és a ruházat HP/MP/Parry/Durability maximumai a begyűjtött adatokon alapulnak. A 5/10/20/30/40 Attack Rate értéklépcsők egyelőre ellenőrzendő tippek. Az itt látható STR/INT minőség matematikai arány, nem feltétlenül a régi SRO kliensben megjelenő Blue-%. A 9/10/11 soros SoS/SoM/Sun értékek a felhasználó által kért <b>kezdő feltételezések</b>, a játékos által szerkeszthető sablonértékek, nem hivatalos szerverkonfiguráció. Az STR/INT minden szerverprofilban fix +11; 130 CAP-től HP 2300 és Parry 60 a felső határ; ez a felhasználó által megerősített közös statkorlát. A 140 CAP Wheel statreferenciái egyelőre a 130 CAP értékeit követik; a Balance továbbra is karakterlevelből számolódik. A rate maximumok továbbra is szerkeszthető sablonértékek. A 130 CAP 14DG Magic/Rare/Legend 9/10/11 rendszeréről létezik nyilvános leírás, de nem igazolja a SoS/SoM/Sun mappinget minden CAP-ra.</div><div class="layout2"><div><h3>Egyetlen sor megengedett értékei</h3><div class="formrow two">${[['maxSTR','STR/sor – fix +11'],['maxINT','INT/sor – fix +11'],['maxAR','Maximum Attack Rate/sor'],['maxBR','Maximum Blocking Rate/sor'],['maxCRIT','Maximum Critical/sor (1–3)'],['maxHP','Maximum HP Increase/sor'],['maxMP','Maximum MP Increase/sor'],['maxDUR','Maximum Durability – 200%'],['maxPARRY','Maximum Parry Rate/sor'],['maxFREEZE','Maximum Freezing (%) – ékszer']].map(([k,n])=>{if(k==='maxDUR')return `<label>Durability – fix 200% (nem pontozott)<input value="200%" disabled></label>`;return `<label>${n}<input type="number" min="1" max="${k==='maxSTR'||k==='maxINT'?11:k==='maxCRIT'?3:99999}" ${['maxSTR','maxINT'].includes(k)||(S.cap>=130&&['maxHP','maxPARRY'].includes(k))?'readonly title="Rögzített maximum"':''} data-config="${k}" value="${esc(c[k]??'')}"></label>`;}).join('')}</div><div class="notice"><b>STR/INT (minden CAP és szerver):</b> fix +1…+11, nincs 11 fölötti érték. A Durability legfeljebb 200% és nem része a Wheel-minőségnek. A +11 STR/INT korlát minden szerverprofilra érvényes. <b>90 CAP / 9DG egyéb feltételezett értékek:</b> Attack Rate maximum 40/sor (átváltható 60-ra), Critical 1–3/sor. Attack Rate lépcsőtippek: 5, 10, 20, 30, 40 (még nem véglegesítve). A Blue-roll erőssége és a dobási esély külön fogalom.</div><h3 style="margin-top:20px">Itemfokozatok – sorlimitek</h3><p class="info">A SoS, SoM, Sun és Normal alap sorlimiteket te állítod; az adott itemnek külön is adhatsz sorlimitet. A CAP/DG profil és a soronkénti modellmaximum is szerkeszthető a Szett & itemek fülön. Az elméleti STR/INT plafon = sorlimit × az aktuálisan megadott STR vagy INT sormaximum.</p><div class="formrow two">${['Normal','SoS','SoM','Sun'].map(k=>`<label>${k} maximális sor<input type="number" min="1" max="30" data-grade-max="${k}" value="${esc(c.gradeMax[k])}"></label>`).join('')}</div></div><div><h3>Főfegyver & Shield követelmények</h3><div class="formrow two">${[['weaponMinAttackLines','Minimum Attack Rate sor'],['weaponMinPerfectAttackLines','Minimum tökéletes Attack Rate sor'],['weaponMinAttackTotal','Minimum összes Attack Rate'],['weaponMinBlockLines','Minimum tökéletes Blocking Rate sor fegyveren'],['weaponMinBlockValue','Minimum Blocking Rate sorérték (információs)'],['weaponMinStats','Minimum STR+INT fegyveren'],['critMin','Minimum Critical sor Spear / 2H'],['critIdeal','Ideális Critical sor Spear / 2H'],['shieldMinBlockLines','Minimum 100%-os Blocking Rate sor Shielden']].map(([k,n])=>`<label>${n}<input type="number" min="0" max="999" data-config="${k}" value="${esc(c[k]??'')}"></label>`).join('')}</div><div class="notice">Minden CAP külön itemadatokat és minden CAP/DG pár külön statmaximumprofilt tart. Például a 90 CAP-os Shoulder eredménye nem írja felül a 100 CAP-os Shoulder eredményét.</div></div></div><div class="actions"><button class="danger" id="resetCap">Ennek a CAP-nak a szabályait alaphelyzetbe</button><button class="alt" id="resetAll">MINDEN adat törlése</button></div></section>`;}
+function rulesView(){let c=currentCfg();return manualRuleTemplatePanel()+`<section class="panel"><h2>⚙ ${S.cap} CAP · ${c.degree}DG — szerverparaméterek</h2><div class="notice"><b>EMERALD v5 PREVIEW:</b> A maximumokat kézzel állíthatod be a szerveredhez; a sablonértékekhez nem kell adminjóváhagyás. A Freezing ékszernél alapból 20% = 100%. A Normal / SoS / SoM / Sun CAP-alap sorlimiten túl az adott itemhez saját limit is adható.</div><div class="notice"><b>100%-os HP/MP kiindulási értékek (130+ HP fix):</b> 90 CAP = 600; 100 = 860; 110 = 1300; 120 = 1300; 125 = 2100; 130+ CAP = 2300 HP (fix). A 140 CAP MP-referenciája jelenleg a 130 CAP-éval egyezik (+2300), amíg nincs szerverfrissítés. <b>Parry Rate:</b> 90 CAP = 40, 100+ CAP = 60 (az elválasztás egyelőre feltételezés). <b>Attack Rate:</b> CAP/DG szerint szerkeszthető (alapból 40 vagy 60); <b>Critical:</b> +1/+2/+3, ahol +3 = 100%; <b>Blocking Rate:</b> 100 = 100%. <b>Durability:</b> menthető, de nem része a minősítésnek. Az STR/INT +11, Durability 200%, 130+ HP 2300 és Parry 60 fix; a többi referencia szerkeszthető. A külön itemenkénti saját HP/MP/Parry/Freezing értékeket a Szett &amp; itemek fülön add meg.</div><div class="warnbox">90 CAP / 9DG esetén is a rögzített STR/INT maximum +11, a 40/60 között állítható Attack Rate, +3 Critical és a ruházat HP/MP/Parry/Durability maximumai a begyűjtött adatokon alapulnak. A 5/10/20/30/40 Attack Rate értéklépcsők egyelőre ellenőrzendő tippek. Az itt látható STR/INT minőség matematikai arány, nem feltétlenül a régi SRO kliensben megjelenő Blue-%. A 9/10/11 soros SoS/SoM/Sun értékek a felhasználó által kért <b>kezdő feltételezések</b>, a játékos által szerkeszthető sablonértékek, nem hivatalos szerverkonfiguráció. Az STR/INT minden szerverprofilban fix +11; 130 CAP-től HP 2300 és Parry 60 a felső határ; ez a felhasználó által megerősített közös statkorlát. A 140 CAP Wheel statreferenciái egyelőre a 130 CAP értékeit követik; a Balance továbbra is karakterlevelből számolódik. A rate maximumok továbbra is szerkeszthető sablonértékek. A 130 CAP 14DG Magic/Rare/Legend 9/10/11 rendszeréről létezik nyilvános leírás, de nem igazolja a SoS/SoM/Sun mappinget minden CAP-ra.</div><div class="layout2"><div><h3>Egyetlen sor megengedett értékei</h3><div class="formrow two">${[['maxSTR','STR/sor – fix +11'],['maxINT','INT/sor – fix +11'],['maxAR','Maximum Attack Rate/sor'],['maxBR','Maximum Blocking Rate/sor'],['maxCRIT','Maximum Critical/sor (1–3)'],['maxHP','Maximum HP Increase/sor'],['maxMP','Maximum MP Increase/sor'],['maxDUR','Maximum Durability – 200%'],['maxPARRY','Maximum Parry Rate/sor'],['maxFREEZE','Maximum Freezing (%) – ékszer']].map(([k,n])=>{if(k==='maxDUR')return `<label>Durability – fix 200% (nem pontozott)<input value="200%" disabled></label>`;return `<label>${n}<input type="number" min="1" max="${k==='maxSTR'||k==='maxINT'?11:k==='maxCRIT'?3:99999}" ${['maxSTR','maxINT'].includes(k)||(S.cap>=130&&['maxHP','maxPARRY'].includes(k))?'readonly title="Rögzített maximum"':''} data-config="${k}" value="${esc(c[k]??'')}"></label>`;}).join('')}</div><div class="notice"><b>STR/INT (minden CAP és szerver):</b> fix +1…+11, nincs 11 fölötti érték. A Durability legfeljebb 200% és nem része a Wheel-minőségnek. A +11 STR/INT korlát minden szerverprofilra érvényes. <b>90 CAP / 9DG egyéb feltételezett értékek:</b> Attack Rate maximum 40/sor (átváltható 60-ra), Critical 1–3/sor. Attack Rate lépcsőtippek: 5, 10, 20, 30, 40 (még nem véglegesítve). A Blue-roll erőssége és a dobási esély külön fogalom.</div><h3 style="margin-top:20px">Itemfokozatok – sorlimitek</h3><p class="info">A SoS, SoM, Sun és Normal alap sorlimiteket te állítod; az adott itemnek külön is adhatsz sorlimitet. A CAP/DG profil és a soronkénti modellmaximum is szerkeszthető a Szett & itemek fülön. Az elméleti STR/INT plafon = sorlimit × az aktuálisan megadott STR vagy INT sormaximum.</p><div class="formrow two">${['Normal','SoS','SoM','Sun'].map(k=>`<label>${k} maximális sor<input type="number" min="1" max="30" data-grade-max="${k}" value="${esc(c.gradeMax[k])}"></label>`).join('')}</div></div><div><h3>Főfegyver & Shield követelmények</h3><div class="formrow two">${[['weaponMinAttackLines','Minimum Attack Rate sor'],['weaponMinPerfectAttackLines','Minimum tökéletes Attack Rate sor'],['weaponMinAttackTotal','Minimum összes Attack Rate'],['weaponMinBlockLines','Minimum tökéletes Blocking Rate sor fegyveren'],['weaponMinBlockValue','Minimum Blocking Rate sorérték (információs)'],['weaponMinStats','Minimum STR+INT fegyveren'],['critMin','Minimum Critical sor Spear / 2H'],['critIdeal','Ideális Critical sor Spear / 2H'],['shieldMinBlockLines','Minimum 100%-os Blocking Rate sor Shielden']].map(([k,n])=>`<label>${n}<input type="number" min="0" max="999" data-config="${k}" value="${esc(c[k]??'')}"></label>`).join('')}</div><div class="notice">Minden CAP külön itemadatokat és minden CAP/DG pár külön statmaximumprofilt tart. Például a 90 CAP-os Shoulder eredménye nem írja felül a 100 CAP-os Shoulder eredményét.</div></div></div><div class="actions"><button class="danger" id="resetCap">Ennek a CAP-nak a szabályait alaphelyzetbe</button><button class="alt" id="resetAll">Összes szerver és SET törlése</button></div></section>`;}
 function helpViewEnglish(){return `<section class="panel"><h2>ⓘ Guide / known limitations</h2>
  <div class="layout2"><div class="feature">
  <h3>Getting started</h3>
@@ -3501,8 +3586,8 @@ document.querySelectorAll('[data-blue-chance-max]').forEach(el=>el.onchange=()=>
   save();paint();
  });
  let sim=$('#simulateBtn');if(sim)sim.onclick=simulate;
- let rc=$('#resetCap');if(rc)rc.onclick=()=>{if(confirmUI(`Visszaállítod a ${S.cap} CAP SZABÁLYAIT? A beírt itemek nem törlődnek.`)){S.cfg[S.cap]=freshConfig(+S.cap);lastSim=null;save();paint();}};
- let ra=$('#resetAll');if(ra)ra.onclick=()=>{if(confirmUI('Ez MINDEN CAP-hoz tartozó összes SET-et, itemet, szabályt és előzményt töröl a v4 mentésből. Biztosan?')){S=initial();normalizeGoals();normalizeSetBank();lastSim=null;save();paint();}};
+ let rc=$('#resetCap');if(rc)rc.onclick=resetCurrentCapRules;
+ let ra=$('#resetAll');if(ra)ra.onclick=resetAllSavedProfiles;
 }
 function genRandom(seed){return ()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return ((t^t>>>14)>>>0)/4294967296;};}
 function simulate(){let id=S.active,c=currentCfg(),o=itm(id),v=check(id);if(!chancesComplete(c,id))return toast('Töltsd ki az aktív Blue-fajták 100%-ra összegződő esélyeit és szükséges maximumait.');if(o.count===0)return toast('Előbb add meg a jelenlegi item valódi Wheel-sorait.');let rnd=genRandom(1987),types=blueTypesFor(id),p=chanceWeightsFor(id,c),weights=types.map(x=>num(p[x])),trials=30000,improved=0,metGoal=0,ready=0,avg=0;
