@@ -364,7 +364,7 @@ test('second browser tab can change only server profile metadata and still be pr
 test('CAP rules reset includes manual Blue type/maximum/probability rules without deleting stored SETs',()=>{
  for(const html of [base,publicHtml]){
   const {audit,store}=boot(html),st=audit.state();
-  const originalSet=JSON.stringify(st.setBank[90]);
+  const originalSet=JSON.stringify(st.setBank[90].entries.map(e=>({id:e.id,name:e.name,data:e.data})));
   st.cfg[90].maxAR=58;
   st.blueCatalogOverrides??={};st.blueCatalogOverrides['90_9']={shoulder:['STR','INT']};
   st.blueTypeMaxima??={};st.blueTypeMaxima['90_9']={STUN:87};
@@ -376,7 +376,8 @@ test('CAP rules reset includes manual Blue type/maximum/probability rules withou
   assert.equal(audit.state().blueTypeMaxima['90_9'],undefined);
   assert.equal(audit.state().blueChanceProfiles['90_9'],undefined);
   assert.deepEqual(Array.from(audit.state().blueCatalogOverrides['100_10'].shoulder),['STR']);
-  assert.equal(JSON.stringify(audit.state().setBank[90]),originalSet);
+  assert.equal(JSON.stringify(audit.state().setBank[90].entries.map(e=>({id:e.id,name:e.name,data:e.data}))),originalSet);
+  // Save refreshes updatedAt; that timestamp is metadata, not a SET/item change.
   assert.match(html,/Wheel_Cap_Szabalyok_Elotti_Mentes/);
   assert.equal(JSON.parse(store['sailor-wheel-calculator-v4']).cfg[90].maxAR,40);
  }
