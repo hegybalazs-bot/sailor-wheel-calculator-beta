@@ -398,6 +398,46 @@ try{
  });
 
 
+
+ await check('global reset backs up every server, clears all profiles and restores them from JSON',async()=>{
+  const {context,page,errors}=await newPage({width:1150,height:850});
+  try{
+   await page.goto(origin+'/');
+   await page.locator('.serverbar > .compact-manage summary').click();
+   page.once('dialog',dialog=>dialog.accept('Rumlord Reset Test'));
+   await page.locator('#newServerBtn').click();
+   await page.waitForFunction(()=>document.querySelectorAll('#serverPicker option').length===2);
+   await page.selectOption('#capSel','120');
+   await page.locator('#goalSel').fill('93');
+   await page.locator('#goalSel').press('Tab');
+   await page.locator('[data-tab="rules"]').click();
+   let promptText='';
+   page.once('dialog',dialog=>{promptText=dialog.message();dialog.accept();});
+   const [backup]=await Promise.all([
+    page.waitForEvent('download',{timeout:16000}),
+    page.locator('#resetAll').click()
+   ]);
+   assert.match(promptText,/ÖSSZES szerverprofilját/);
+   assert.match(backup.suggestedFilename(),/Osszes_Adat_Torles_Elotti_Mentes/);
+   const bytes=await readFile(await backup.path());
+   const data=JSON.parse(bytes.toString('utf8'));
+   assert.equal(data.serverProfiles.entries.length,2);
+   assert.equal(data.serverProfiles.entries.find(e=>e.name==='Rumlord Reset Test').data.goal,93);
+   await page.waitForFunction(()=>document.querySelectorAll('#serverPicker option').length===1,null,{timeout:12000});
+   assert.equal(await page.locator('#capSel').inputValue(),'90');
+   assert.equal(await page.locator('#goalSel').inputValue(),'75');
+   await page.reload();
+   assert.equal(await page.locator('#serverPicker option').count(),1);
+   page.on('dialog',dialog=>dialog.accept());
+   await page.locator('#importFile').setInputFiles({
+    name:'restore-reset-servers.json',mimeType:'application/json',buffer:bytes
+   });
+   await page.waitForFunction(()=>document.querySelectorAll('#serverPicker option').length===2,null,{timeout:12000});
+   assert.equal(await page.locator('#capSel').inputValue(),'120');
+   assert.equal(await page.locator('#goalSel').inputValue(),'93');
+   assert.deepEqual(errors,[]);
+  }finally{await context.close();}
+ });
  await check('two simultaneous tabs never overwrite newer saved SET data and can export stale edits',async()=>{
   const context=await browser.newContext({viewport:{width:1100,height:800},acceptDownloads:true});
   const first=await context.newPage(),second=await context.newPage(),errors=[];
