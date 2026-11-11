@@ -1,0 +1,40 @@
+name: Silkdle Web CI
+on:
+  pull_request:
+    paths:
+      - 'silkdle/**'
+      - '.github/workflows/silkdle-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'silkdle/**'
+permissions:
+  contents: read
+jobs:
+  api-integration:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: silkdle
+          POSTGRES_PASSWORD: ci_only_test_password
+          POSTGRES_DB: silkdle_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: silkdle/package-lock.json
+      - run: npm install --prefix silkdle --no-audit --no-fund
+      - run: node --test silkdle/test/server.test.cjs
+        env:
+          TEST_DATABASE_URL: postgres://silkdle:ci_only_test_password@127.0.0.1:5432/silkdle_ci
