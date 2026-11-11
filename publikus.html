@@ -562,6 +562,7 @@ a:hover{color:#ffe5ac}
 
 .icon-recovery-link{display:inline-flex;align-items:center;justify-content:center;padding:8px 12px;border-radius:10px;border:1px solid #b28c52;color:#ffe7b9;background:#23332e;text-decoration:none;font-weight:700}.icon-recovery-link:hover{background:#305648;color:#fff0ce}.icon-recovery-link:focus-visible{outline:2px solid #ffdb98;outline-offset:2px}
 .wheel-sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.storage-conflict{color:#ffdf96!important;border-color:#c99743!important;background:#33230e!important;white-space:normal!important}
 </style>
 </head>
 <body><div class="shell">
@@ -1379,6 +1380,37 @@ function importAllProfiles(data){
  }
 }
 initServerProfiles();
+// The two locally stored keys represent one logical user profile bank.
+// Optimistic checking prevents a stale browser tab from overwriting edits saved
+// by another tab. No automatic merging or silent reload of in-memory edits.
+let STORAGE_OBSERVED=null,STORAGE_STALE=false;
+function storedWheelPair(){
+ return {state:localStorage.getItem(STORAGE),profiles:localStorage.getItem(SERVERS_STORAGE)};
+}
+function staleWheelWarning(){
+ return UI_LANG==='en'?
+  '⚠ Another tab changed your saved SETs. This tab cannot overwrite them. Export your unsaved edits as JSON, then reload this tab.':
+  '⚠ Másik böngészőlapon változtak a SET-ek. Ez a lap nem írhatja felül őket. Mentsd ki a nem mentett módosításaidat JSON-ba, majd frissítsd ezt a lapot!';
+}
+function markWheelStale(){
+ STORAGE_STALE=true;
+ const status=$('#saveStatus');
+ if(status){
+  status.textContent=staleWheelWarning();
+  status.classList?.add('storage-conflict');
+ }
+}
+function staleWheelPair(current){
+ return STORAGE_OBSERVED!==null &&
+ (current.state!==STORAGE_OBSERVED.state||
+  current.profiles!==STORAGE_OBSERVED.profiles);
+}
+try{STORAGE_OBSERVED=storedWheelPair();}catch(_){STORAGE_OBSERVED=null;}
+window.addEventListener?.('storage',event=>{
+ if(event.key!==STORAGE&&event.key!==SERVERS_STORAGE)return;
+ if(event.storageArea&&event.storageArea!==localStorage)return;
+ try{if(staleWheelPair(storedWheelPair()))markWheelStale();}catch(_){}
+});
 function promptUI(message,defaultValue){return prompt(translateText(message),defaultValue==null?defaultValue:translateText(String(defaultValue)));}
 function confirmUI(message){return confirm(translateText(message));}
 function alertUI(message){return alert(translateText(message));}
@@ -1451,7 +1483,42 @@ function refreshSetPicker(){let bank=activeBank();let picker=$('#setPicker');if(
 }
 
 let lastSim=null;let toastTimer;
-function save(){try{applyFixedStatLimits();syncActiveSet();snapshotDegreeModel(currentCfg());S.schemaVersion=SCHEMA_VERSION;localStorage.setItem(STORAGE,JSON.stringify(S));if(typeof P!=='undefined'&&P?.entries)localStorage.setItem(SERVERS_STORAGE,JSON.stringify(P));$('#saveStatus').textContent=UI_LANG==='en'?'✓ Set saved in this browser':'✓ SET helyben mentve';return true;}catch(_){$('#saveStatus').textContent=translateText('⚠ A böngésző nem engedi a tárolást – exportálj JSON-t!');return false;}}
+function save(){
+ let prior=null,startedWrite=false;
+ try{
+  prior=storedWheelPair();
+  if(STORAGE_STALE||staleWheelPair(prior)){
+   markWheelStale();
+   return false;
+  }
+  applyFixedStatLimits();syncActiveSet();snapshotDegreeModel(currentCfg());
+  S.schemaVersion=SCHEMA_VERSION;
+  const nextState=JSON.stringify(S),nextProfiles=JSON.stringify(P);
+  startedWrite=true;
+  localStorage.setItem(STORAGE,nextState);
+  localStorage.setItem(SERVERS_STORAGE,nextProfiles);
+  // Keep the expected pair in sync only AFTER both successful writes.
+  STORAGE_OBSERVED={state:nextState,profiles:nextProfiles};
+  const status=$('#saveStatus');
+  status.textContent=UI_LANG==='en'?"✓ Set saved in this browser":"✓ SET helyben mentve";
+  status.classList?.remove('storage-conflict');
+  return true;
+ }catch(_){
+  // If a storage quota error interrupted the second key, undo the first key
+  // instead of leaving an inconsistent half-import/half-profile snapshot.
+  if(startedWrite&&prior){
+   try{
+    if(prior.state===null)localStorage.removeItem(STORAGE);
+    else localStorage.setItem(STORAGE,prior.state);
+    if(prior.profiles===null)localStorage.removeItem(SERVERS_STORAGE);
+    else localStorage.setItem(SERVERS_STORAGE,prior.profiles);
+   }catch(_rollback){}
+  }
+  const status=$('#saveStatus');
+  status.textContent=translateText('⚠ A böngésző nem engedi a tárolást – exportálj JSON-t!');
+  return false;
+ }
+}
 function currentCfg(){return S.cfg[S.cap];}function items(){return S.sets[S.cap];}
 function weaponId(cap=S.cap){return normalizeWeapon(S.weaponByCap?.[cap]||S.weapon);}
 function critRequired(id=weaponId(),cap=S.cap){return S.critOverrides?.[cap]?.[id]===undefined?WEAPONS[id].crit:Boolean(S.critOverrides[cap][id]);}
@@ -3514,7 +3581,13 @@ $('#newSetBtn').onclick=()=>createSet(false);
 $('#copySetBtn').onclick=()=>createSet(true);
 $('#renameSetBtn').onclick=renameSet;
 $('#deleteSetBtn').onclick=deleteSet;
-paint();save();
+paint();
+// Do not rewrite an existing profile merely because another tab was opened.
+// A later user edit will persist any schema migrations performed in memory.
+let needsFirstSave=true;
+try{needsFirstSave=localStorage.getItem(STORAGE)===null||
+ localStorage.getItem(SERVERS_STORAGE)===null||legacyMigrated;}catch(_){}
+if(needsFirstSave)save();
 if(window.WHEEL_LOCAL_PACK?.restore){
  window.WHEEL_LOCAL_PACK.restore().then(found=>{if(found)paint();}).catch(()=>{});
 }

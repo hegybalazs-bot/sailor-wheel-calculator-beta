@@ -397,6 +397,44 @@ try{
   }finally{await context.close();await recovery.context.close();}
  });
 
+
+ await check('two simultaneous tabs never overwrite newer saved SET data and can export stale edits',async()=>{
+  const context=await browser.newContext({viewport:{width:1100,height:800},acceptDownloads:true});
+  const first=await context.newPage(),second=await context.newPage(),errors=[];
+  first.on('pageerror',error=>errors.push('first '+error.message));
+  second.on('pageerror',error=>errors.push('second '+error.message));
+  try{
+   await first.goto(origin+'/');
+   await second.goto(origin+'/');
+   const stateKey='sailor-wheel-calculator-v4';
+   await first.locator('#goalSel').fill('81');
+   await first.locator('#goalSel').press('Tab');
+   await first.waitForFunction(key=>JSON.parse(localStorage.getItem(key)).goal===81,stateKey);
+   await second.waitForFunction(()=>document.querySelector('#saveStatus')?.textContent?.includes('Másik böngészőlapon'),null,{timeout:15000});
+   await second.locator('#goalSel').fill('62');
+   await second.locator('#goalSel').press('Tab');
+   assert.equal(await second.locator('#goalSel').inputValue(),'62',
+    'stale tab keeps its own unsaved input');
+   assert.match(await second.locator('#saveStatus').innerText(),/Másik böngészőlapon/);
+   assert.equal(await second.evaluate(key=>JSON.parse(localStorage.getItem(key)).goal,stateKey),81,
+    'last written data from first tab must not be overwritten');
+   const [download]=await Promise.all([
+    second.waitForEvent('download',{timeout:16000}),
+    second.locator('#exportBtn').click()
+   ]);
+   const emergency=JSON.parse((await readFile(await download.path())).toString('utf8'));
+   assert.equal(emergency.goal,62,'stale tab retains unsaved edits for emergency JSON export');
+   assert.equal(emergency.serverProfiles.entries.length,1);
+   await second.reload();
+   assert.equal(await second.locator('#goalSel').inputValue(),'81',
+    'reload picks up latest committed data');
+   await second.locator('#goalSel').fill('84');
+   await second.locator('#goalSel').press('Tab');
+   await second.waitForFunction(key=>JSON.parse(localStorage.getItem(key)).goal===84,stateKey);
+   assert.match(await second.locator('#saveStatus').innerText(),/SET helyben mentve/);
+   assert.deepEqual(errors,[]);
+  }finally{await context.close();}
+ });
  await check('export/import manual CAP/Degree rules without sharing or overwriting personal SETs',async()=>{
   const from=await newPage({width:1160,height:850}),to=await newPage({width:1160,height:850});
   try{

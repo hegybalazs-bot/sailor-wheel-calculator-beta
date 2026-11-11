@@ -28,6 +28,14 @@ Before applying a matching file, the browser initiates a **complete** regular JS
 - HP 2300 and Parry 60 from 130 CAP upward
 - 140 CAP inherits 130 base where no later update is known; player-editable exceptions where the field supports it
 
+## Multiple browser tabs: protect unsaved changes
+
+If you open the **same public site in two tabs**, both tabs initially show their own in-memory copies of the browser-local SET data. A newer version guards against an older tab silently overwriting the newer saved copy.
+
+When a different tab saves SETs or server profiles, the older tab shows a persistent **"Másik böngészőlapon változtak a SET-ek"** warning and blocks subsequent saves from that tab. It **does not silently reload** its edited values, so you can choose **↓ Mentés JSON-ba** to download that tab's current unsaved state before closing or reloading it. Reload the stale tab to reopen the newest stored copy. Imported profiles, Blue settings and CAP rules still use the ordinary validated JSON flow.
+
+This is *best-effort client-side overwrite protection*, not live collaboration, version-control merging, or a transactional database. Avoid editing the same browser-local profile simultaneously in multiple tabs/devices; each web origin remains independent. On storage failures, export a JSON backup before closing the tab.
+
 ## Privacy and presentation
 
 - Every player's server settings are browser-local. Changing Blue types/maxima affects only their own locally saved profiles; it does not publish shared rules or modify anyone else's SET.
