@@ -28,6 +28,15 @@ Before applying a matching file, the browser initiates a **complete** regular JS
 - HP 2300 and Parry 60 from 130 CAP upward
 - 140 CAP inherits 130 base where no later update is known; player-editable exceptions where the field supports it
 
+## Destructive resets (with whole-profile rollback export)
+
+The **CAP settings** page has two separate reset commands.
+
+- **Ennek a CAP-nak a szabályait alaphelyzetbe** resets only the *active CAP's* manual configuration, including per-Degree Blue-type pools, specialty Blue maxima, manually assumed probability profiles and grade/weapon limit rules. Existing SET items, actual rolls, history and other CAPs remain unchanged.
+- **Összes szerver és SET törlése** removes *every locally saved server profile* and all its CAPs, SETs and Wheel history, returning the calculator to one fresh Sailor Online profile. Its effect is global within the current browser/origin.
+
+**Both** ask for explicit confirmation and initiate a complete, downloadable JSON archive of *all* server profiles before modifying data. Confirm the file is in Downloads. They verify both local storage keys and attempt to restore the original data if the browser refuses to save the reset. A private icon ZIP held separately in IndexedDB might still remain; these commands do not delete that asset store. If needed, recover from the exported JSON via normal **Betöltés**. They do not clear cloud accounts or game files; none are connected.
+
 ## Multiple browser tabs: protect unsaved changes
 
 If you open the **same public site in two tabs**, both tabs initially show their own in-memory copies of the browser-local SET data. A newer version guards against an older tab silently overwriting the newer saved copy.
