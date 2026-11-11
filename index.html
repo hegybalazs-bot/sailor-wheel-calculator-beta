@@ -3643,7 +3643,13 @@ $('#newSetBtn').onclick=()=>createSet(false);
 $('#copySetBtn').onclick=()=>createSet(true);
 $('#renameSetBtn').onclick=renameSet;
 $('#deleteSetBtn').onclick=deleteSet;
-paint();save();
+paint();
+// Do not rewrite an existing profile merely because another tab was opened.
+// A later user edit will persist any schema migrations performed in memory.
+let needsFirstSave=true;
+try{needsFirstSave=localStorage.getItem(STORAGE)===null||
+ localStorage.getItem(SERVERS_STORAGE)===null||legacyMigrated;}catch(_){}
+if(needsFirstSave)save();
 if(window.WHEEL_LOCAL_PACK?.restore){
  window.WHEEL_LOCAL_PACK.restore().then(found=>{if(found)paint();}).catch(()=>{});
 }
