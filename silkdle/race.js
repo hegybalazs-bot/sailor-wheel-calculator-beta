@@ -19,7 +19,7 @@ let view="classic",language=()=>document.documentElement.lang==="en"?"en":"hu",t
 const samples=[
 {id:"s01",image:"./art/s01.svg",answer:"Tiger Girl",choices:["Tiger Girl","Cerberus","Captain Ivy","Uruchi","Isyutaru","Lord Yarkan"],world:"Chinese"},
 {id:"s02",image:"./art/s02.svg",answer:"Cerberus",choices:["Tiger Girl","Cerberus","Captain Ivy","Uruchi","Isyutaru","Lord Yarkan"],world:"European"},
-{id:"s03",image:"./art/s03.svg",answer:"Glaive",choices:["Glaive","Spear","Bow","Blade","Sword","Shield"],world:"Chinese"},
+{id:"s03",image:"./art/s03.svg",answer:"Glavie",choices:["Glavie","Spear","Bow","Blade","Sword","Shield"],world:"Chinese"},
 {id:"s04",image:"./art/s04.svg",answer:"Harp",choices:["Harp","Cleric Rod","Crossbow","Dagger","Staff","Dark Staff"],world:"European"}
 ];
 function el(tag,cl,text,parent){const x=document.createElement(tag);if(cl)x.className=cl;if(text!==null&&text!==undefined)x.textContent=text;if(parent)parent.append(x);return x}
@@ -30,7 +30,7 @@ function info(text,cls="rmuted"){return el("p",cls,text,screen)}
 function showError(err){info(err?.message||t().connection,"rerror")}
 function choose(parent,list){const s=el("select","",null,parent);const ph=el("option","",t().choose,s);ph.value="";s.value="";list.forEach(n=>{const o=el("option","",n,s);o.value=n});return s}
 function typedAnswer(parent){const input=el("input","",null,parent);input.type="text";input.autocomplete="off";input.spellcheck=false;input.maxLength=80;input.placeholder=t().choose;return input}
-function matchAnswer(a,b){return String(a).normalize("NFKC").trim().toLocaleLowerCase("en")===String(b).normalize("NFKC").trim().toLocaleLowerCase("en")}
+function matchAnswer(a,b){const normal=s=>String(s).normalize("NFKC").trim().toLocaleLowerCase("en").replace(/\bglavie\b/g,"glaive");return normal(a)===normal(b)}
 function dayKey(){return new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/Budapest",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date())}
 function selectSample(){return samples[currentIndex%samples.length]}
 function newCommunity(){const mode=document.getElementById("world")?.value||"all",matches=samples.filter(s=>mode==="all"||s.world===mode);if(!matches.length)return samples[0];return matches[currentIndex%matches.length]}
