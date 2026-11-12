@@ -43,7 +43,7 @@ const answer=match?.answer||$("answer").value.trim(),category=match?.category||$
 if(!answer||answer.length<2){skipped++;continue}
 try{message("Feldolgozás: "+(i+1)+"/"+files.length+" • "+file.name,"warn");
 const image=await imageBlob(file);
-await api("/api/admin/image/import","POST",{...image,catalogId:match?.id||"",answer,aliases:(files.length===1?$("aliases").value.split(","):(match?.aliases||[])).map(x=>x.trim()).filter(Boolean),category,world,region:match?.region||"",sourceUrl:$("sourceUrl").value.trim()||"admin screenshot import: "+file.name,rightsNote:$("rightsNote").value.trim()});uploaded++
+await api("/api/admin/image/import","POST",{...image,catalogId:match?.id||"",answer,aliases:(files.length===1?$("aliases").value.split(","):(match?.aliases||[])).map(x=>x.trim()).filter(Boolean),category,world,region:match?.region||"",sourceUrl:$("sourceUrl").value.trim()||"admin screenshot import: "+file.name,rightsNote:$("rightsNote").value.trim(),...cropCoords()});uploaded++
 }catch(e){failed++;message("Kép hiba: "+file.name+": "+e.message,"error")}
 }
 btn.disabled=false;message("Feltöltés befejezve. Ellenőrzésre vár: "+uploaded+" | kihagyott: "+skipped+" | hibás: "+failed+".\nTöbb fájl esetén a fájlnévnek a katalógusban szereplő névvel/azonosítóval kell egyeznie.",uploaded?"ok":"warn");await Promise.all([status(),reload()])}
@@ -59,8 +59,22 @@ const reviewBtn=make("button",row.status==="approved"?"Visszavonás":"Jóváhagy
 function exportCatalog(){if(!state.catalog.length){message("Először csatlakozz az adminhoz.","warn");return}
 const data=JSON.stringify({schemaVersion:1,exportedAt:new Date().toISOString(),entries:state.catalog},null,2),blob=new Blob([data],{type:"application/json"}),url=URL.createObjectURL(blob),link=make("a",null,document.body);link.href=url;link.download="silkdle-kepkatalogus.json";link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),500)}
 $("connect").onclick=connect;$("refreshList").onclick=reload;$("exportCatalog").onclick=exportCatalog;
-$("catalogSearch").oninput=mapCatalog;$("catalogSearch").onchange=pickCatalog;$("fileInput").onchange=displayPreview;$("uploadForm").onsubmit=upload;status();api("/api/image/catalog").then(d=>{state.catalog=d.entries;message(d.entries.length+" előkészített tétel böngészhető. A publikáláshoz adatbázis és admin kulcs kell.","warn")}).catch(e=>message(e.message,"error"));
+$("catalogSearch").oninput=mapCatalog;$("catalogSearch").onchange=pickCatalog;$("fileInput").onchange=()=>{displayPreview();renderCropPreview()};$("uploadForm").onsubmit=upload;status();api("/api/image/catalog").then(d=>{state.catalog=d.entries;message(d.entries.length+" előkészített tétel böngészhető. A publikáláshoz adatbázis és admin kulcs kell.","warn")}).catch(e=>message(e.message,"error"));
 
+
+function cropCoords(){return {cropX:Number($("cropX")?.value||50)/100,cropY:Number($("cropY")?.value||45)/100}}
+function renderCropPreview(){
+ const container=$("cropPreview");if(!container)return;
+ const f=$("fileInput").files?.[0];container.replaceChildren();if(!f)return;
+ const image=make("img",null,container),url=URL.createObjectURL(f);image.src=url;image.onload=()=>URL.revokeObjectURL(url);
+ updateCropPreview();
+}
+function updateCropPreview(){
+ const {cropX,cropY}=cropCoords();$("cropXvalue").textContent=Math.round(cropX*100)+"%";$("cropYvalue").textContent=Math.round(cropY*100)+"%";
+ const img=$("cropPreview").querySelector("img");if(img){img.style.transform="scale(10)";img.style.transformOrigin=Math.round(cropX*100)+"% "+Math.round(cropY*100)+"%"}
+}
+$("cropX").oninput=updateCropPreview;
+$("cropY").oninput=updateCropPreview;
 
 /* Private offline screenshot import; this does not publish or grant site-wide rights. */
 const local=()=>window.SILKDLE_LOCAL_GALLERY;
@@ -93,7 +107,7 @@ async function saveOffline(){
   try{
    localMessage("Kép import: "+(i+1)+"/"+files.length+" – "+file.name,"warn");
    const encoded=await imageBlob(file),blob=await (await fetch("data:"+encoded.mime+";base64,"+encoded.data)).blob();
-   await local().storeScreenshot({blob,answer,aliases:matched?.aliases||$("aliases").value.split(",").map(x=>x.trim()).filter(Boolean),category:matched?.category||$("category").value,world:matched?.world||$("world").value,region:matched?.region||"",source:$("sourceUrl").value.trim()||"Saját fájl: "+file.name,filename:file.name});
+   await local().storeScreenshot({blob,answer,aliases:matched?.aliases||$("aliases").value.split(",").map(x=>x.trim()).filter(Boolean),category:matched?.category||$("category").value,world:matched?.world||$("world").value,region:matched?.region||"",source:$("sourceUrl").value.trim()||"Saját fájl: "+file.name,filename:file.name,...cropCoords()});
    done++;
   }catch(e){failed++;localMessage(file.name+": "+e.message,"error")}
  }
