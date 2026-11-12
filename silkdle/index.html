@@ -48,6 +48,22 @@ h2{font-size:1.65rem;letter-spacing:-.5px;margin:7px 0}.hint{color:#b1c5be;line-
 @media(max-width:760px){.modegrid{grid-template-columns:repeat(2,minmax(0,1fr))}.sigil{display:none}.hero{padding:30px 0 16px}.panel{padding:17px}.topinner{min-height:64px}h1{letter-spacing:-1.5px}}
 @media(max-width:640px){.topinner{flex-wrap:wrap;padding-top:10px;padding-bottom:10px}.controls{width:100%;justify-content:space-between}.controls .select{flex:1;min-width:0;max-width:none}.smallbtn{flex:0 0 auto}}
 @media(max-width:490px){.modegrid{gap:9px}.mode{min-height:144px;padding:15px}.choices{grid-template-columns:1fr}.stats{gap:7px}.stat{min-width:85px}.brand{font-size:1rem}.tag{letter-spacing:1px}.smallbtn{padding:9px}.select{max-width:123px;padding:9px}.searchrow{flex-direction:column}}
+
+/* LoLdle-inspired deduction UI: each wrong guess is informative */
+.deduction-legend{display:flex;gap:10px;flex-wrap:wrap;font-size:.81rem;color:#b6c9c1;margin:10px 0}
+.deduction-legend span{display:inline-flex;align-items:center;gap:6px}
+.deduction-dot{display:inline-block;width:10px;height:10px;border-radius:3px}
+.deduction-dot.exact,.comparison-cell.exact{background:#195942;color:#e1fff0;border-color:#45bd86}
+.deduction-dot.partial,.comparison-cell.partial{background:#685128;color:#fff0ca;border-color:#d6a34d}
+.deduction-dot.miss,.comparison-cell.miss{background:#502e37;color:#ffe3e6;border-color:#b36b78}
+.comparison-list{display:grid;gap:10px;margin:14px 0}
+.comparison-row{border:1px solid #406157;background:#12252a;border-radius:12px;padding:12px}
+.comparison-name{font-weight:800;margin-bottom:9px;color:#f4f6eb}
+.comparison-cells{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.comparison-cell{padding:10px 6px;border:1px solid;border-radius:8px;text-align:center;min-width:0;font-weight:800;font-size:.88rem}
+.comparison-cell small{display:block;font-size:.66rem;opacity:.8;font-weight:600;margin-bottom:3px;letter-spacing:.3px}
+.clue-progression{color:#8be0b6;font-size:.82rem;margin-top:10px}
+@media(max-width:450px){.comparison-cells{gap:4px}.comparison-cell{font-size:.78rem;padding:8px 4px}}
 </style>
 </head>
 <body>
@@ -167,20 +183,101 @@ function renderShell(){$("lang").textContent=lang==="hu"?"EN":"HU";$("eyebrow").
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function renderPanel(){const p=$("panel"),name=t().modes[defs.findIndex(d=>d[0]===mode)][0];p.replaceChildren();const head=document.createElement("div");head.className="panelhead";head.innerHTML='<div><div class="tag">'+(daily?t().daily:t().practice)+'</div><h2>'+name+'</h2><div class="hint">'+t().intro+'</div></div><span class="pill">'+(world==="all"?"Chinese + European":world)+'</span>';p.append(head);if(mode==="knowledge")renderQuiz(p);else renderGuess(p)}
 function make(tag,cls,html,parent){let n=document.createElement(tag);n.className=cls;if(html!=null)n.innerHTML=html;parent.append(n);return n}
-function renderGuess(p){const entries=collection(),target=entries[state.target],done=state.done,n=state.guesses.length;
-make("hr","divider","",p);
-const textClue=difficulty==="easy"?target.clue[lang]:(difficulty==="veteran"?(n>=2?target.clue[lang]:(lang==="hu"?"A pontos segítséget két hibás tipp után kapod.":"Exact hints unlock after two wrong guesses.")):(n>=3?target.clue[lang]:(lang==="hu"?"LEGEND: Nincs kezdő leírás. A felismeréshez gondolkodnod kell.":"LEGEND: No initial description. Rely on your knowledge.")));const clue=make("div","cluebox","<strong>"+t().first+"</strong><div>"+escapeHtml(textClue)+"</div>",p);
-const tags=make("div","clues",null,clue);
-if(difficulty!=="legend"||n>=1||done)make("span","clue","🌍 "+(target.world==="all"?"Chinese + European":target.world),tags);
-if(n>=(difficulty==="easy"?2:difficulty==="veteran"?3:4)||done)make("span","clue","🗺️ "+escapeHtml(target.region||""),tags);
-if((n>=(difficulty==="legend"?5:4)||done)&&target.level!=null)make("span","clue","⭐ "+target.level,tags);
-if((n>=(difficulty==="legend"?5:4)||done)&&target.detail)make("span","clue","🔍 "+escapeHtml(target.detail[lang]),tags);
-const meter=make("div","meter",null,p);for(let i=0;i<6;i++)make("span",i<n?"used":"",null,meter);
-if(n) {make("div","hint",t().attempts+":",p);const attempts=make("div","feedback",null,p);state.guesses.forEach(g=>{const guessed=entries.find(x=>x.name===g);let hint=guessed&&target.level!=null&&guessed.level!=null?(guessed.level<target.level?" ↑ "+t().higher:guessed.level>target.level?" ↓ "+t().lower:" = "+t().same):"";make("div","attempt",escapeHtml(g)+(g===target.name?' <span class="correct">✓</span>':' <span class="wrong">✗</span>')+escapeHtml(hint),attempts)})}
-if(done){renderResult(p,target.name);return}
-const row=make("div","searchrow",null,p);const input=make("input","",null,row);input.id="answer";input.placeholder=t().guess;if(difficulty==="easy")input.setAttribute("list","suggestions");input.autocomplete="off";input.setAttribute("aria-label",t().guess);const dl=make("datalist","",null,row);dl.id="suggestions";entries.forEach(x=>{let op=document.createElement("option");op.value=x.name;dl.append(op)});
-const submit=make("button","primary",t().send,row);function doGuess(){const guess=input.value.trim();if(!guess)return;const found=entries.find(x=>x.name.toLocaleLowerCase()===guess.toLocaleLowerCase());const submitted=found?.name||guess;if(state.guesses.some(g=>g.toLocaleLowerCase()===submitted.toLocaleLowerCase())){input.value="";return}state.guesses.push(submitted);state.won=submitted.toLocaleLowerCase()===target.name.toLocaleLowerCase();state.done=state.won||state.guesses.length>=6;if(state.done)state.score=state.won?[100,80,60,40,30,20][state.guesses.length-1]:0;save();renderPanel()}
-submit.onclick=doGuess;input.onkeydown=e=>{if(e.key==="Enter")doGuess()};make("div","notice",t().ready,p)}
+function faintHint(target,n){
+const lower=lang==="hu";
+const level=Number(target.level)||0;
+const band=level<=40?(lower?"korai szinttartomány":"early-level range"):level<=75?(lower?"közepes szinttartomány":"mid-level range"):(lower?"magas szinttartomány":"high-level range");
+const type=target.region||"";
+if(mode==="unique")return lower?"Egy Unique. Első nyom: "+band+".":"A Unique. First clue: "+band+".";
+if(mode==="mob")return lower?"Szörny, amely a "+band+" részét képezi.":"Monster from the "+band+".";
+if(mode==="mastery"){
+ const info=type==="Support"?(lower?"támogató szerepkör":"support role"):type==="Magic"?(lower?"mágikus szerepkör":"magic role"):type==="Physical"?(lower?"fizikai harci szerepkör":"physical combat role"):(lower?"fegyverre épülő szerepkör":"weapon-focused role");
+ return lower?"A mastery fő jellege: "+info+".":"Mastery archetype: "+info+".";
+}
+if(mode==="gear"){
+ const role=type==="Ranged"?(lower?"távolsági":"ranged"):type==="Magic"?(lower?"mágikus":"magical"):type==="One-handed"?(lower?"egykezes":"one-handed"):type==="Two-handed"?(lower?"kétkezes":"two-handed"):(lower?"közelharci":"melee");
+ return lower?"A felszerelés harci jellege: "+role+".":"Equipment combat archetype: "+role+".";
+}
+if(mode==="map")return type==="City"?(lower?"A helyszín lakott település.":"This place is a settlement."):(lower?"A helyszín egy nagyobb terület.":"This is a wider region.");
+return lower?"A kategóriára utaló halvány nyom.":"A subtle category hint.";
+}
+function matchCell(label,value,kind){return '<div class="comparison-cell '+kind+'"><small>'+escapeHtml(label)+'</small>'+escapeHtml(value)+'</div>'}
+function compareEntry(guessed,target){
+ const sameWorld=guessed.world===target.world,partialWorld=!sameWorld&&(guessed.world==="all"||target.world==="all");
+ const worldLabel=lang==="hu"?"Világ":"World",areaLabel=lang==="hu"?"Terület / típus":"Area / Type",levelLabel=lang==="hu"?"Szint":"Level";
+ let html=matchCell(worldLabel,guessed.world==="all"?"CH + EU":guessed.world,sameWorld?"exact":partialWorld?"partial":"miss");
+ const regionSame=(guessed.region||"") === (target.region||"");
+ html+=matchCell(areaLabel,guessed.region||"—",regionSame?"exact":"miss");
+ if(guessed.level!=null&&target.level!=null){
+ const difference=Number(guessed.level)-Number(target.level),direction=difference<0?" ↑":difference>0?" ↓":" ✓";
+ html+=matchCell(levelLabel,String(guessed.level)+direction,difference===0?"exact":Math.abs(difference)<=10?"partial":"miss");
+ } else {
+ const gd=guessed.detail?.[lang]||guessed.detail?.hu;
+ const td=target.detail?.[lang]||target.detail?.hu;
+ html+=matchCell(lang==="hu"?"Specializáció":"Specialization",gd||"—",gd&&gd===td?"exact":"miss");
+ }
+ return html;
+}
+function renderGuess(p){
+ const entries=collection(),target=entries[state.target],done=state.done,n=state.guesses.length;
+ if(!target){p.append(document.createTextNode("No puzzle available"));return}
+ make("hr","divider","",p);
+ const clue=make("div","cluebox",null,p);
+ make("strong","",lang==="hu"?"APRÓ ELSŐ NYOM":"SMALL FIRST CLUE",clue);
+ make("div","",escapeHtml(faintHint(target,n)),clue);
+ const tags=make("div","clues",null,clue);
+ // Exactly one small but meaningful clue is visible from the start.
+ if(n>=1||done)make("span","clue","🌍 "+(target.world==="all"?"Chinese + European":target.world),tags);
+ if(n>=2||done){
+ const wide=target.level!=null?(Number(target.level)<=40?"1–40":Number(target.level)<=75?"41–75":"76+"):"";
+ if(wide)make("span","clue","⚖ "+wide,tags);
+ }
+ if(n>=3||done)make("span","clue","🗺️ "+escapeHtml(target.region||"—"),tags);
+ if(n>=4||done){
+ if(target.level!=null){const lo=Math.max(1,Math.floor(Number(target.level)/10)*10);make("span","clue","🔢 "+lo+"–"+(lo+9),tags)}
+ else if(target.detail)make("span","clue","🔍 "+escapeHtml(target.detail[lang]),tags);
+ }
+ if(n>=5||done){
+ if(target.level!=null)make("span","clue","⭐ "+target.level,tags);
+ if(target.detail)make("span","clue","🔍 "+escapeHtml(target.detail[lang]),tags);
+ }
+ make("div","clue-progression",escapeHtml((lang==="hu"?"Új támpont hibás tipp után • ":"New clue after each miss • ")+n+"/6"),clue);
+ const meter=make("div","meter",null,p);for(let i=0;i<6;i++)make("span",i<n?"used":"",null,meter);
+ if(n){
+  make("div","hint",t().attempts+":",p);
+  const legend=make("div","deduction-legend",null,p);
+  legend.innerHTML='<span><i class="deduction-dot exact"></i>'+(lang==="hu"?"Pontos":"Exact")+'</span><span><i class="deduction-dot partial"></i>'+(lang==="hu"?"Közeli / részleges":"Near / partial")+'</span><span><i class="deduction-dot miss"></i>'+(lang==="hu"?"Eltérő":"Different")+'</span>';
+  const grid=make("div","comparison-list",null,p);
+  for(const g of state.guesses){
+   const guessed=entries.find(x=>x.name.toLocaleLowerCase()===String(g).toLocaleLowerCase());
+   const row=make("div","comparison-row",null,grid);
+   make("div","comparison-name",escapeHtml(g)+(guessed?.name===target.name?" ✓":""),row);
+   if(guessed)make("div","comparison-cells",compareEntry(guessed,target),row);
+   else make("div","hint",lang==="hu"?"Ismeretlen név – nincs összehasonlítható adat":"Unknown name – no comparison data",row);
+  }
+ }
+ if(done){renderResult(p,target.name);return}
+ const row=make("div","searchrow",null,p),input=make("input","",null,row);
+ input.id="answer";input.placeholder=t().guess;
+ // Suggestions only in Beginner mode; expert players can still enter any known name.
+ if(difficulty==="easy")input.setAttribute("list","suggestions");
+ input.autocomplete="off";input.setAttribute("aria-label",t().guess);
+ const dl=make("datalist","",null,row);dl.id="suggestions";
+ for(const e of entries){const op=document.createElement("option");op.value=e.name;dl.append(op)}
+ const submit=make("button","primary",t().send,row);
+ function doGuess(){
+  const guess=input.value.trim();if(!guess)return;
+  const found=entries.find(x=>x.name.toLocaleLowerCase()===guess.toLocaleLowerCase());
+  if(!found){input.placeholder=lang==="hu"?"A játék adatbázisában szereplő nevet írj":"Enter a name from the known roster";input.value="";return}
+  if(state.guesses.some(g=>g.toLocaleLowerCase()===found.name.toLocaleLowerCase())){input.value="";return}
+  state.guesses.push(found.name);state.won=found.name===target.name;
+  state.done=state.won||state.guesses.length>=6;
+  if(state.done)state.score=state.won?[100,80,60,40,30,20][state.guesses.length-1]:0;
+  save();renderPanel();
+ }
+ submit.onclick=doGuess;input.onkeydown=e=>{if(e.key==="Enter")doGuess()};
+ make("div","notice",lang==="hu"?"A színes mezők és a nyilak valódi következtetést tesznek lehetővé.":"The colored cells and arrows let you narrow down the target.",p);
+}
 function renderQuiz(p){const total=state.questions.length,step=state.answered.length;make("hr","divider","",p);if(state.done){renderResult(p,lang==="hu"?state.answered.filter(a=>a.correct).length+" / "+total+" "+t().answered:state.answered.filter(a=>a.correct).length+" / "+total+" "+t().answered);return}const q=collection()[state.questions[step]];if(!q){p.append(document.createTextNode("No questions available."));return}
 make("div","progress","<b>"+(step+1)+" / "+total+"</b><span>"+state.score+" "+t().points+"</span>",p);
 make("div","cluebox","<strong>SRO KNOWLEDGE</strong><div style='font-size:1.2rem;font-weight:700'>"+escapeHtml(q[lang])+"</div>",p);
