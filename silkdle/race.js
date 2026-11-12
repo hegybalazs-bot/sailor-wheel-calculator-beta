@@ -124,6 +124,7 @@ async function showCommunity(){
   showDemoCommunity();
   info(language()==="hu"?"Nincs még publikált, ellenőrzött Silkroad-kép. A négy fantáziaillusztráció kizárólag demó. Képfeltöltés: /admin.html":"No approved Silkroad screenshots yet. The four fantasy drawings are demo content only. Import images through /admin.html","rerror");
   const link=el("a","",language()==="hu"?"Képkatalógus / admin":"Image catalog / admin",screen);link.href="./admin.html";
+  try{const localCount=await localGallery()?.count();if(view==="picture"&&localCount>0)btn((language()==="hu"?"🗂️ Saját képeimmel játszom (":"🗂️ Play my screenshots (")+localCount+")",screen,()=>switchView("local"),"rsecondary")}catch{}
   return;
  }
  if(!community||community.type!=="real"){
