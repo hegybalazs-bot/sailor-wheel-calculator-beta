@@ -5,12 +5,19 @@ Silkdle is an unofficial fan-made, mobile-friendly Silkroad Online quiz. It live
 ## Play modes
 
 - **Classic**: Mob Guess, Unique Hunter, Equipment, Mastery, Map Explorer, SRO Knowledge (daily + practice, HU/EN, CH/EU/Mixed).
-- **Image Hunt (community)**: Free, accountless image recognition. A 5×5 cover initially reveals only one tile; wrong guesses or the Reveal button open more pieces. No timer; no leaderboard points.
-- **Speed Hunt (ranked beta)**: one shared puzzle every Budapest-local day; 60 seconds, at most three wrong guesses, one attempt per account/day. Server determines start time, correctness, elapsed time, and score. Faster correct answers receive more points. Each wrong guess subtracts 100 points.
+- **Image Hunt (community)**: Free, accountless image recognition. A **10×10 cover** initially reveals only 1% of the image. The player must type a name without a visible choice list; wrong guesses or the Reveal button open more pieces. Six wrong attempts end the round. No ranked points.
+- **Speed Hunt (ranked beta)**: one shared puzzle every Budapest-local day; **45 seconds, two wrong guesses**, one attempt per account/day. No answer dropdown. The server measures elapsed time, correctness and points; faster correct answers receive more points. Each wrong guess subtracts 250 points.
 - **Leaderboard**: today's highest ranked score and all-time cumulative points, stored in PostgreSQL.
 - **Accounts**: username, email, password, login/logout, server-side sessions and account deletion.
 
 Scoring: on correct answer before deadline, \`max(100, 1000 - floor(elapsed_ms / 1000) * 12 - 100 * wrong_guesses)\`. On timeout or reaching three wrong guesses, 0 points. A user can play community mode without registering; only ranked mode writes shared leaderboard scores.
+
+## Expert difficulty
+
+- Classic defaults to **Legend**, with **Veteran** and Beginner available as alternatives.
+- Initial clues and autocomplete are suppressed in Legend; further clues unlock only after wrong guesses.
+- A new bank of **34 Veteran/Legend questions** emphasizes verified vSRO 1.188 quest requirements, NPCs, quantities, European mastery classifications and classic unique comparisons. Answer positions are shuffled by puzzle/day.
+- Sources for editorial review: [vSRO quest guide](https://github.com/AlighieriDemiurgs/SROquests), [classic uniques](https://silkroadonline.wiki/guides/uniques) and [class mastery taxonomy](https://silkroadonline.fandom.com/wiki/Skills). Version-dependent answers must retain source/version metadata.
 
 ## Demo pictures and future content
 
