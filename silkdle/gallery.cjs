@@ -4,7 +4,7 @@ const catalog=JSON.parse(fs.readFileSync(path.join(__dirname,"data/image-manifes
 const CATEGORIES=["unique","mob","weapon","armor","location","npcquest"],WORLDS=["Chinese","European","all"];
 const RIGHTS=["own_capture_noncommercial","official_fansite_terms","written_permission"];
 const sessions=new Map(),rate=new Map();
-const norm=x=>String(x||"").normalize("NFKC").trim().toLowerCase();
+const norm=x=>String(x||"").normalize("NFKC").trim().toLowerCase().replace(/\bglavie\b/g,"glaive");
 function json(res,code,obj){res.writeHead(code,{"content-type":"application/json","cache-control":"no-store","x-content-type-options":"nosniff"});res.end(JSON.stringify(obj))}
 const fail=(res,code,msg)=>json(res,code,{error:msg});
 function validAdmin(req,secret){const a=Buffer.from(String(req.headers["x-silkdle-admin-key"]||"")),b=Buffer.from(secret||"");return b.length>=24&&a.length===b.length&&crypto.timingSafeEqual(a,b)}
