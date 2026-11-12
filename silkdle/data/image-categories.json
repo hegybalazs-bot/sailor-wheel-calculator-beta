@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "categories": [
+    {
+      "id": "unique",
+      "label_hu": "Unique bossok"
+    },
+    {
+      "id": "mob",
+      "label_hu": "Szörnyek"
+    },
+    {
+      "id": "weapon",
+      "label_hu": "Fegyverek"
+    },
+    {
+      "id": "armor",
+      "label_hu": "Ruhák és páncélok"
+    },
+    {
+      "id": "location",
+      "label_hu": "Helyszínek"
+    },
+    {
+      "id": "npcquest",
+      "label_hu": "NPC-k és questek"
+    }
+  ]
+}
