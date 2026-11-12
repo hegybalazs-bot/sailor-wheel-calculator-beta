@@ -34,7 +34,7 @@ function matchAnswer(a,b){return String(a).normalize("NFKC").trim().toLocaleLowe
 function dayKey(){return new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/Budapest",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date())}
 function selectSample(){return samples[currentIndex%samples.length]}
 function newCommunity(){const mode=document.getElementById("world")?.value||"all",matches=samples.filter(s=>mode==="all"||s.world===mode);if(!matches.length)return samples[0];return matches[currentIndex%matches.length]}
-function imageBox(image,parent,cropX=.5,cropY=.45){const box=el("div","imgframe",null,parent);const img=el("img","",null,box);img.src=image;img.alt=(image.startsWith("/api/image/file/")||image.startsWith("blob:"))?(language()==="hu"?"Rejtett Silkroad játékbeli kép":"Hidden Silkroad gameplay screenshot"):(language()==="hu"?"Demó fantáziarajz":"Demo fantasy illustration");img.loading="eager";const mask=el("div","maskgrid zoom-crop",null,box);for(let i=0;i<100;i++)el("i","",null,mask);mask._cropImage=img;img.style.transformOrigin=Math.round(Math.min(1,Math.max(0,Number(cropX)))*100)+"% "+Math.round(Math.min(1,Math.max(0,Number(cropY)))*100)+"%";return mask}
+function imageBox(image,parent,cropX=.5,cropY=.45){const box=el("div","imgframe",null,parent);const img=el("img","",null,box);img.src=image;if(image.startsWith("https://"))img.referrerPolicy="no-referrer";img.alt=(image.startsWith("/api/image/file/")||image.startsWith("blob:"))?(language()==="hu"?"Rejtett Silkroad játékbeli kép":"Hidden Silkroad gameplay screenshot"):(language()==="hu"?"Demó fantáziarajz":"Demo fantasy illustration");img.loading="eager";const mask=el("div","maskgrid zoom-crop",null,box);for(let i=0;i<100;i++)el("i","",null,mask);mask._cropImage=img;img.style.transformOrigin=Math.round(Math.min(1,Math.max(0,Number(cropX)))*100)+"% "+Math.round(Math.min(1,Math.max(0,Number(cropY)))*100)+"%";return mask}
 const revealOrder=Array.from({length:100},(_,i)=>i).sort((a,b)=>{const distance=k=>Math.abs(k%10-4.5)+Math.abs(Math.floor(k/10)-4.5);return distance(a)-distance(b)||((a*37)%101)-((b*37)%101)});
 function reveal(mask,count){const tiles=mask.children;for(let i=0;i<100;i++)tiles[revealOrder[i]].classList.toggle("revealed",i<count);
  if(mask._cropImage){const progress=Math.max(0,Math.min(1,count/100)),zoom=1+9*Math.pow(1-progress,4);mask._cropImage.style.transform="scale("+zoom.toFixed(2)+")";mask._cropImage.setAttribute("data-zoom",zoom.toFixed(2));}
@@ -114,6 +114,62 @@ function drawLocal(){
  btn(t().reveal,right,()=>{game.opened=Math.min(1,game.opened+.12);reveal(mask,Math.round(game.opened*100))},"rsecondary");
 }
 
+
+/* Source-linked public practice: no copied game assets; no leaderboards or account required. */
+let webHistory=[],webBroken=new Set();
+function webChoices(){return [["all",language()==="hu"?"Összes kategória":"All categories"],["unique","Unique"],["mob","Mob"],["weapon",language()==="hu"?"Fegyver":"Weapon"],["location",language()==="hu"?"Helyszín":"Location"],["npcquest","NPC / Quest"]]}
+function newWebPuzzle(){
+ const world=document.getElementById("world")?.value||"all";
+ const allowed=(window.SILKDLE_WEB_IMAGES_V1||[]).filter(x=>!webBroken.has(x.id)&&(imageCategory==="all"||x.category===imageCategory)&&(world==="all"||x.world==="all"||x.world===world));
+ if(!allowed.length)return null;
+ const unique=allowed.filter(x=>!webHistory.includes(x.id)),arr=unique.length?unique:allowed;
+ let index=Math.floor(Math.random()*arr.length);
+ if(typeof crypto!=="undefined"&&crypto.getRandomValues){const v=new Uint32Array(1);crypto.getRandomValues(v);index=v[0]%arr.length}
+ const item=arr[index];webHistory.push(item.id);if(webHistory.length>Math.max(1,Math.min(10,allowed.length-1)))webHistory.shift();
+ return {type:"web",item,wrong:0,opened:.01,done:false,correct:false};
+}
+function showWebCommunity(){
+ if(view!=="picture")return;
+ if(community?.type!=="web")community=newWebPuzzle();
+ drawWebCommunity()
+}
+function drawWebCommunity(){
+ if(view!=="picture")return;
+ clear();title(language()==="hu"?"Képfelismerés – valódi Silkroad-képek":"Image Hunt – real Silkroad screenshots");
+ info(language()==="hu"?"Interneten talált valódi Silkroad-képekkel játszhatsz. Nem kell képet hozzáadnod. Nincs időlimit; ez forráshivatkozásos gyakorlómód, nem a közös ranglista.":"Play with real Silkroad screenshots found online. No uploads required. This is unranked, source-linked practice.");
+ const filter=el("select","",null,screen);
+ for(const [value,label] of webChoices()){const o=el("option","",label,filter);o.value=value}
+ filter.value=imageCategory;
+ filter.onchange=()=>{imageCategory=filter.value;community=newWebPuzzle();drawWebCommunity()};
+ if(!community){info(language()==="hu"?"Ehhez a szűrőhöz nincs működő online kép. Válts az összes kategóriára.":"No working image for this filter. Try all categories.","rerror");btn(language()==="hu"?"Összes kategória":"All categories",screen,()=>{imageCategory="all";community=newWebPuzzle();drawWebCommunity()},"rsecondary");return}
+ const game=community,item=game.item,layout=el("div","rgrid",null,screen),left=el("div","",null,layout),right=el("div","",null,layout),mask=imageBox(item.image,left,item.cropX,item.cropY);
+ const picture=mask._cropImage;
+ picture.onerror=()=>{webBroken.add(item.id);if(view!=="picture"||community?.item?.id!==item.id)return;community=newWebPuzzle();drawWebCommunity()};
+ reveal(mask,Math.round(game.opened*100));
+ const intro=el("p","rlegend",language()==="hu"?"Külső forrásból betöltött Silkroad-játékfotó • A kép elérhetősége a forrástól függ":"Externally hosted Silkroad screenshot • Availability depends on the original site",left);
+ const cite=el("a","rlegend",language()==="hu"?"Forrásoldal megnyitása":"Open original source",left);
+ cite.href=item.source;cite.target="_blank";cite.rel="noopener noreferrer";cite.style.cssText="display:block;color:#9adfbe;word-wrap:break-word";
+ const count=el("div","rstatline",null,right);el("span","",t().mistakes+": "+game.wrong+" / 6",count);
+ const next=()=>{community=newWebPuzzle();drawWebCommunity()};
+ if(game.done){
+  reveal(mask,100);el("h2",game.correct?"rok":"rerror",game.correct?t().correct:t().finish,right);
+  el("p","rmuted",t().answer+": "+item.answer,right);btn(t().again,right,next);return
+ }
+ const input=typedAnswer(right),notice=el("p","rmuted","",right);
+ const submit=()=>{const value=input.value.trim();if(!value)return;
+ if([item.answer,...(item.aliases||[])].some(x=>matchAnswer(x,value))){game.done=true;game.correct=true;game.opened=1;drawWebCommunity();return}
+ game.wrong++;game.opened=[.01,.025,.07,.18,.45,.7,1][game.wrong];
+ if(game.wrong>=6){game.done=true;game.opened=1;drawWebCommunity();return}
+ notice.textContent=t().wrong;count.replaceChildren();el("span","",t().mistakes+": "+game.wrong+" / 6",count);
+ reveal(mask,Math.round(game.opened*100));input.value="";input.focus();
+ };
+ btn(t().guess,right,submit);input.onkeydown=e=>{if(e.key==="Enter")submit()};
+ const controls=el("div","rcontrols",null,right);
+ btn(t().reveal,controls,()=>{game.opened=Math.min(1,game.opened+.12);reveal(mask,Math.round(game.opened*100))},"rsecondary");
+ btn(language()==="hu"?"Másik kép":"Next image",controls,next,"rsecondary");
+ el("p","rlegend",language()==="hu"?"Külső képek: az eredeti szerzői és játékjogok a tulajdonosokat illetik; ezek nem a Silkdle tárhelyén tárolt képek.":"Third-party screenshot rights remain with their respective owners; files are not stored on Silkdle.",right);
+}
+
 async function showCommunity(){
  clear();title(t().pictureTitle);info("Képek betöltése / Loading images...");
  let availability;
@@ -121,6 +177,7 @@ async function showCommunity(){
  if(view!=="picture")return;
  if(availability.approved===0){
   if(community?.type==="real")community=null;
+  if(Array.isArray(window.SILKDLE_WEB_IMAGES_V1)&&window.SILKDLE_WEB_IMAGES_V1.length){showWebCommunity();return}
   showDemoCommunity();
   info(language()==="hu"?"Nincs még publikált, ellenőrzött Silkroad-kép. A négy fantáziaillusztráció kizárólag demó. Képfeltöltés: /admin.html":"No approved Silkroad screenshots yet. The four fantasy drawings are demo content only. Import images through /admin.html","rerror");
   const link=el("a","",language()==="hu"?"Képkatalógus / admin":"Image catalog / admin",screen);link.href="./admin.html";
