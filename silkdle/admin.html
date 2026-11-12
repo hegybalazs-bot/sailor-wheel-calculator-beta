@@ -21,12 +21,44 @@ button{border:0;border-radius:11px;background:#4bd09a;color:#0a281c;font-weight:
 .status{color:#e8c37c}.status.approved{color:#64eaa3}.footer{font-size:.8rem;margin:30px 0;color:#8fae9d}
 @media(max-width:800px){.grid{grid-template-columns:1fr}.wrap{padding:15px}.panel{padding:15px}}
 @media(max-width:450px){.form{grid-template-columns:1fr}}
+
+/* External image gallery: source-linked preview, not server-approved storage. */
+#onlineGallery{margin-top:16px}
+#onlineGallery .gallery-bar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:13px 0}
+#onlineGallery .gallery-bar input{flex:2;min-width:180px}
+#onlineGallery .gallery-bar select{flex:1;min-width:120px}
+#webGalleryCards{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:14px;margin-top:16px}
+.web-image-card{display:flex;flex-direction:column;min-width:0;overflow:hidden;border:1px solid #3f6457;border-radius:14px;background:#0c2222}
+.web-image-preview{aspect-ratio:1.35;position:relative;background:#0b1518;overflow:hidden;display:grid;place-items:center}
+.web-image-preview img{display:block;width:100%;height:100%;object-fit:cover}
+.web-image-preview .broken{color:#f1c38c;text-align:center;padding:13px;font-size:.85rem}
+.web-image-content{display:flex;flex-direction:column;gap:7px;padding:12px;flex:1}
+.web-image-content strong{font-size:1.04rem;color:#eaf7e8}
+.web-image-content small{font-size:.78rem;color:#a2c3b5}
+.web-image-content .source{display:inline-block;margin-top:auto;color:#94ebc6;font-size:.82rem;text-decoration:underline;text-underline-offset:3px}
+.gallery-note{background:#17342d;border-left:3px solid #d4a960;color:#d9ddc7;padding:10px 13px;border-radius:8px}
+details#adminPanel summary{cursor:pointer;font-size:1.08rem;font-weight:800;color:#a0ebc2;padding:4px 0}
+details#adminPanel .advanced-inner{padding-top:15px}
+@media(max-width:550px){#webGalleryCards{grid-template-columns:repeat(2,minmax(0,1fr))}.web-image-content{padding:9px}.web-image-content strong{font-size:.9rem}}
 </style></head>
 <body><main class="wrap">
 <div class="header"><div><strong>⚔️ SILKDLE</strong><span class="pill">Screenshot Studio • Admin Beta</span></div><a href="./index.html">← Játékhoz vissza</a></div>
 <section class="hero"><h1>Valódi Silkroad képkatalógus</h1><p>Képeket tölthetsz fel, forrást rögzíthetsz, ellenőrizheted a helyes választ és jóváhagyhatod a publikálást. A fel nem dolgozott képek soha nem kerülnek be automatikusan a játékba.</p></section>
-<div class="panel"><div class="row" id="stats"><span class="pill">Státusz lekérése...</span></div><p class="small">Az adminjogot a Render környezeti változóban tárolt, legalább 24 karakteres SILKDLE_ADMIN_KEY védi. A kulcsot ez az oldal nem menti el.</p>
-<div class="form"><div class="field"><label for="adminKey">Admin kulcs (csak ebben a böngésző-fülben)</label><input id="adminKey" type="password" autocomplete="off" spellcheck="false" placeholder="SILKDLE_ADMIN_KEY"/></div><div class="field"><label>&nbsp;</label><button id="connect">Admin csatlakozás</button></div></div><p id="message" aria-live="polite"></p></div>
+<section id="onlineGallery" class="panel" aria-labelledby="onlineTitle">
+<div class="row"><h2 id="onlineTitle">🖼️ Internetes Silkroad-képek</h2><span class="pill" id="onlineCount">Képek betöltése...</span></div>
+<p><strong>Ezeket a Silkroad-játékfotókat már összegyűjtöttem az internetről.</strong> Itt megnézheted, melyikhez van kép és melyikhez nem. Nem kell őket külön feltöltened.</p>
+<p class="gallery-note">A képek külső weboldalakon vannak, nem a Silkdle szerverén. Az elérhetőségük változhat; a forrás és a felhasználási jogok még ellenőrzendők. A közös ranglistához külön, jóváhagyott képtár szükséges.</p>
+<div class="gallery-bar">
+<input id="webSearch" placeholder="Keresés: Tiger Girl, Uruchi, Cerberus..." aria-label="Online képek keresése"/>
+<select id="webCategory" aria-label="Kép kategóriája"><option value="all">Összes kategória</option><option value="unique">Unique</option><option value="mob">Mob</option><option value="weapon">Fegyver</option><option value="location">Helyszín</option><option value="npcquest">NPC</option></select>
+<select id="webWorld" aria-label="Chinese vagy European"><option value="all">Chinese + European</option><option value="Chinese">Chinese</option><option value="European">European</option></select>
+</div>
+<div id="webGalleryCards" aria-live="polite"></div>
+<div class="row" style="margin-top:16px"><a class="pill" href="./index.html">🎮 Képfelismerés játék megnyitása</a></div>
+</section>
+<details id="adminPanel" class="panel"><summary>🔐 Haladó: szerveres képtár, adatbázis és admin beállítások</summary>
+<div class="advanced-inner"><div class="row" id="stats"><span class="pill">Státusz lekérése...</span></div><p class="small">Az adminjogot a Render környezeti változóban tárolt, legalább 24 karakteres SILKDLE_ADMIN_KEY védi. A kulcsot ez az oldal nem menti el.</p>
+<div class="form"><div class="field"><label for="adminKey">Admin kulcs (csak ebben a böngésző-fülben)</label><input id="adminKey" type="password" autocomplete="off" spellcheck="false" placeholder="SILKDLE_ADMIN_KEY"/></div><div class="field"><label>&nbsp;</label><button id="connect">Admin csatlakozás</button></div></div><p id="message" aria-live="polite"></p></div></details>
 <section class="grid">
 <div class="panel"><h2>Képfeltöltés</h2>
 <form id="uploadForm" class="form">
@@ -61,6 +93,7 @@ button{border:0;border-radius:11px;background:#4bd09a;color:#0a281c;font-weight:
 </div>
 </section><div class="footer">Silkdle fan project – nincs automatikus jogellenőrzés; az adminnak ellenőriznie kell az egyes képek jogos felhasználását. A Render ideiglenes PostgreSQL adatbázis nem alkalmas végleges képarchívumnak.</div>
 </main>
+<script src="./web-image-sources.js" defer></script>
 <script src="./offline-gallery.js" defer></script>
 <script src="./gallery-admin.js" defer></script>
 </body></html>
