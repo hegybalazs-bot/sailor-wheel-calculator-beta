@@ -15,4 +15,6 @@ Current technical implementation:
 4. Use Screenshot Studio for manual review and approval. Automated import guesses filename matches only; do not auto-publish without visual review.
 5. Replace shared admin key with role-scoped auth, backups and audit logs; add copyright/permission review; add email verification, password reset and privacy policy for account launch.
 
+6. **NEW:** The website now has private, IndexedDB-backed Local Screenshot Hunt. It works without a Render database. Users can bring their own screenshot PNG/JPG packs, adjust the crop focal point in Screenshot Studio, save photos locally, and play. Photos are not automatically uploaded or added to the public leaderboard. Keep source screenshot files backed up.
+
 Run checks: `npm install --prefix silkdle` and `node --test silkdle/test/*.test.cjs`. Use `TEST_DATABASE_URL` for temporary PostgreSQL integration tests. All tests on GitHub Actions use disposable Postgres in CI.
