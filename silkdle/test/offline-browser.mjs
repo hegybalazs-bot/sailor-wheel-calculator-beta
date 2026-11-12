@@ -38,8 +38,7 @@ async function main(){
    await page.locator("#world").selectOption("Chinese");
    await page.locator("#fileInput").setInputFiles({name:"uruchi.png",mimeType:"image/png",buffer:png()});
    await page.locator("#localSave").click();
-   await page.locator("#localStatus").getByText?.("1 helyi");
-   await page.waitForFunction(()=>document.getElementById("localStatus").textContent.includes("1 sikeres"),{timeout});
+   await page.waitForFunction(()=>document.getElementById("localStatus").textContent.includes("1 sikeres"),null,{timeout});
    assert.match(await page.locator("#localStatus").innerText(),/1 sikeres/);
    assert.equal(await page.locator("#localList .item").count(),1);
    await page.goto(base+"/");
@@ -47,7 +46,7 @@ async function main(){
    await page.waitForSelector("#racescreen img[src^='blob:']", {timeout});
    await page.locator("#racescreen input[type=text]").fill("Uruchi");
    await page.locator("#racescreen button").filter({hasText:"Válasz beküldése"}).click();
-   await page.waitForFunction(()=>document.getElementById("racescreen").textContent.includes("Megvan!"),{timeout});
+   await page.waitForFunction(()=>document.getElementById("racescreen").textContent.includes("Megvan!"),null,{timeout});
    assert.match(await page.locator("#racescreen").innerText(),/Megvan!/);
    await page.reload();
    await page.locator(".racebar button").filter({hasText:"Saját képek"}).click();
