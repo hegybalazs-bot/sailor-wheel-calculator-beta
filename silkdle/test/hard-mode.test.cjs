@@ -95,3 +95,40 @@ test("Image challenges start at 1% visibility and require free text",()=>{
  assert.doesNotMatch(src,/choose\(right,puzzle\.choices\)/);
  assert.doesNotThrow(()=>new Function(src));
 });
+
+
+test("Screenshot staging manifest has unique IDs, valid categories, crop coordinates, and no fake active images",()=>{
+ const dir=path.join(__dirname,"..","data"),manifest=JSON.parse(fs.readFileSync(path.join(dir,"image-manifest.json"),"utf8"));
+ const pools=JSON.parse(fs.readFileSync(path.join(dir,"image-pools.json"),"utf8"));
+ const rules=JSON.parse(fs.readFileSync(path.join(dir,"daily-rules.json"),"utf8"));
+ assert.ok(manifest.entries.length>=200);
+ assert.ok(Array.isArray(pools.categories));
+ const ids=new Set();
+ for(const x of manifest.entries){
+  assert.ok(!ids.has(x.id),"Duplicate "+x.id);ids.add(x.id);
+  assert.ok(pools.categories.includes(x.category),x.id);
+  assert.ok(["Chinese","European","all"].includes(x.world),x.id);
+  assert.ok(x.answer.length>=2,x.id);
+  assert.ok(!x.image,"Unreviewed candidate must not pretend to have an image");
+  assert.equal(x.status,"needs_image");
+  assert.notEqual(x.licenseStatus,"approved");
+  for(const c of x.cropPresets){
+   for(const key of ["x","y","w","h"])assert.ok(c[key]>=0&&c[key]<=1,x.id+" "+key);
+   assert.ok(c.x+c.w<=1.00001&&c.y+c.h<=1.00001,x.id+" crop exceeds image");
+  }
+ }
+ assert.equal(rules.timezone,"Europe/Budapest");
+ assert.deepEqual([...pools.allowedStatuses],["approved"]);
+});
+test("Admin UI validates MIME and backend routes remain separate",()=>{
+ const html=fs.readFileSync(path.join(__dirname,"..","admin.html"),"utf8");
+ const js=fs.readFileSync(path.join(__dirname,"..","gallery-admin.js"),"utf8");
+ const api=fs.readFileSync(path.join(__dirname,"..","gallery.cjs"),"utf8");
+ assert.match(html,/SILKDLE_ADMIN_KEY/);
+ assert.match(js,/createImageBitmap/);
+ assert.match(js,/admin\/image\/import/);
+ assert.match(js,/admin\/image\/catalog/);
+ assert.match(api,/x-silkdle-admin-key/);
+ assert.match(api,/status='approved'/);
+ assert.doesNotThrow(()=>new Function(js));
+});
