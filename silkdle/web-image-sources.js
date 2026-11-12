@@ -229,5 +229,65 @@ window.SILKDLE_WEB_IMAGES_V1 = [
     "cropX": 0.55,
     "cropY": 0.47,
     "sourceStatus": "external_unverified_reuse_rights"
+  },
+  {
+    "id": "haroeris-boss",
+    "answer": "Haroeris",
+    "aliases": [],
+    "category": "unique",
+    "world": "all",
+    "image": "https://store.donanimhaber.com/72/62/ae/7262aeff87b28efb7b4749d08862d9f3.jpg",
+    "source": "https://forum.donanimhaber.com/neith-selket-ve-anubis-haroeris-ve-gold-coin-eklendi--39475374",
+    "cropX": 0.48,
+    "cropY": 0.48,
+    "sourceStatus": "external_unverified_reuse_rights"
+  },
+  {
+    "id": "haroeris-official-model",
+    "answer": "Haroeris",
+    "aliases": [],
+    "category": "unique",
+    "world": "all",
+    "image": "https://www.gamesfrm.com/proxy.php?hash=8eee60b4c417fa9099b6d0d8f9df3b34&image=http%3A%2F%2Fkrimg.joymax.com%2Fproperty%2Fsilkroad%2Fsilkroadonline_6%2Fgamedata%2Fmonster%2Fegypt%2Fegd_view%2F41.jpg",
+    "source": "https://www.gamesfrm.com/konu/silkroad-job-temple-unique-spawn-saatleri-guncel.12866/",
+    "cropX": 0.56,
+    "cropY": 0.47,
+    "sourceStatus": "external_unverified_reuse_rights"
+  },
+  {
+    "id": "anubis-boss",
+    "answer": "Anubis",
+    "aliases": [],
+    "category": "unique",
+    "world": "all",
+    "image": "https://i.hizliresim.com/q879hmg.png",
+    "source": "https://www.srolobby.com/konular/silkroad-online-job-temple-uniquelerinden-dusen-coinler.2136/",
+    "cropX": 0.49,
+    "cropY": 0.48,
+    "sourceStatus": "external_unverified_reuse_rights"
+  },
+  {
+    "id": "anubis-official-model",
+    "answer": "Anubis",
+    "aliases": [],
+    "category": "unique",
+    "world": "all",
+    "image": "https://www.gamesfrm.com/proxy.php?hash=3ff28cdf0afa58f0674f4d24a204e066&image=http%3A%2F%2Fkrimg.joymax.com%2Fproperty%2Fsilkroad%2Fsilkroadonline_6%2Fgamedata%2Fmonster%2Fegypt%2Fegd_view%2F30.jpg",
+    "source": "https://www.gamesfrm.com/konu/silkroad-job-temple-unique-spawn-saatleri-guncel.12866/",
+    "cropX": 0.45,
+    "cropY": 0.48,
+    "sourceStatus": "external_unverified_reuse_rights"
+  },
+  {
+    "id": "samarkand-wizard",
+    "answer": "Samarkand",
+    "aliases": [],
+    "category": "location",
+    "world": "European",
+    "image": "https://i.hizliresim.com/Y4mc1M.jpg",
+    "source": "https://www.srolobby.com/konular/2-adet-parti-karakteri-114-wiz-cleric-121-warrior-dagger.200/",
+    "cropX": 0.52,
+    "cropY": 0.46,
+    "sourceStatus": "external_unverified_reuse_rights"
   }
 ];
