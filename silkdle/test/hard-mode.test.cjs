@@ -165,7 +165,7 @@ test("Online image hunt uses authentic externally sourced screenshots with sourc
 });
 
 
-test("Glavie and Glaive are interchangeable answers in Silkroad Picture Hunt",()=>{
+test("GLAVIE is canonical; Glaive remains accepted as a legacy alias",()=>{
  const src=fs.readFileSync(path.join(__dirname,"..","race.js"),"utf8");
  const images=fs.readFileSync(path.join(__dirname,"..","web-image-sources.js"),"utf8");
  const ctx={window:{}};vm.runInNewContext(images,ctx,{timeout:1000});
@@ -181,5 +181,14 @@ test("Glavie and Glaive are interchangeable answers in Silkroad Picture Hunt",()
  const classic=fs.readFileSync(path.join(__dirname,"..","index.html"),"utf8");
  assert.match(classic,/normalizedGuess=guess\.toLocaleLowerCase\(\)\.replace/);
  const api=fs.readFileSync(path.join(__dirname,"..","server.cjs"),"utf8");
- assert.match(api,/replace\(\/\\bglavie\\b\/g,"glaive"\)/);
+ assert.match(api,/replace\(\/\\bglaive\\b\/g,"glavie"\)/);
+});
+
+test("Glaive/Glavie weapon catalog displays GLAVIE by default while retaining aliases",()=>{
+ const catalog=JSON.parse(fs.readFileSync(path.join(__dirname,"..","data","image-manifest.json"),"utf8"));
+ const candidates=catalog.entries.filter(x=>x.category==="weapon"&&x.subcategory==="Glavie");
+ assert.equal(candidates.length,10);
+ for(const x of candidates){assert.ok(x.answer.startsWith("Glavie "));assert.ok(x.aliases.some(a=>a.startsWith("Glaive ")));}
+ const src=fs.readFileSync(path.join(__dirname,"..","index.html"),"utf8");
+ assert.match(src,/name:"Glavie"/);assert.match(src,/Spear \/ Glavie/);
 });
