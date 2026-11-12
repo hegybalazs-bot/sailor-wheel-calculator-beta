@@ -30,7 +30,7 @@ function info(text,cls="rmuted"){return el("p",cls,text,screen)}
 function showError(err){info(err?.message||t().connection,"rerror")}
 function choose(parent,list){const s=el("select","",null,parent);const ph=el("option","",t().choose,s);ph.value="";s.value="";list.forEach(n=>{const o=el("option","",n,s);o.value=n});return s}
 function typedAnswer(parent){const input=el("input","",null,parent);input.type="text";input.autocomplete="off";input.spellcheck=false;input.maxLength=80;input.placeholder=t().choose;return input}
-function matchAnswer(a,b){const normal=s=>String(s).normalize("NFKC").trim().toLocaleLowerCase("en").replace(/\bglavie\b/g,"glaive");return normal(a)===normal(b)}
+function matchAnswer(a,b){const normal=s=>String(s).normalize("NFKC").trim().toLocaleLowerCase("en").replace(/\bglaive\b/g,"glavie");return normal(a)===normal(b)}
 function dayKey(){return new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/Budapest",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date())}
 function selectSample(){return samples[currentIndex%samples.length]}
 function newCommunity(){const mode=document.getElementById("world")?.value||"all",matches=samples.filter(s=>mode==="all"||s.world===mode);if(!matches.length)return samples[0];return matches[currentIndex%matches.length]}
