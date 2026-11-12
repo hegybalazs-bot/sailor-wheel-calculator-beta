@@ -132,3 +132,34 @@ test("Admin UI validates MIME and backend routes remain separate",()=>{
  assert.match(api,/status='approved'/);
  assert.doesNotThrow(()=>new Function(js));
 });
+
+test("Online image hunt uses authentic externally sourced screenshots with source links",()=>{
+ const script=fs.readFileSync(path.join(__dirname,"..","web-image-sources.js"),"utf8");
+ const ctx={window:{}};
+ vm.runInNewContext(script,ctx,{timeout:1000});
+ const items=ctx.window.SILKDLE_WEB_IMAGES_V1;
+ assert.ok(Array.isArray(items));
+ assert.ok(items.length>=20,"Online source pool should meaningfully exceed four demo illustrations");
+ const ids=new Set(),answers=new Set(),worlds=new Set();
+ for(const x of items){
+  assert.ok(x.id&&!ids.has(x.id),"Duplicate image ID: "+x.id);ids.add(x.id);
+  assert.ok(x.answer.length>=3,"Nonempty answer required");
+  answers.add(x.answer);worlds.add(x.world);
+  assert.ok(["unique","mob","weapon","armor","location","npcquest"].includes(x.category),x.id);
+  assert.ok(["Chinese","European","all"].includes(x.world),x.id);
+  assert.ok(x.image.startsWith("https://"),x.id+" HTTPS image expected");
+  assert.ok(x.source.startsWith("https://"),x.id+" source attribution expected");
+  assert.equal(x.sourceStatus,"external_unverified_reuse_rights","No permission claim permitted");
+  assert.ok(x.cropX>=0&&x.cropX<=1&&x.cropY>=0&&x.cropY<=1,x.id);
+ }
+ assert.ok(answers.size>=12,"Avoid dozens of trivial duplicates");
+ assert.ok(worlds.has("Chinese")&&worlds.has("European"));
+ const html=fs.readFileSync(path.join(__dirname,"..","index.html"),"utf8");
+ const race=fs.readFileSync(path.join(__dirname,"..","race.js"),"utf8");
+ assert.match(html,/web-image-sources\.js/);
+ assert.match(race,/showWebCommunity\(\);return/);
+ assert.match(race,/function drawWebCommunity\(\)/);
+ assert.match(race,/source-linked/);
+ assert.match(race,/webBroken\.add/);
+ assert.match(race,/item\.source/);
+});
