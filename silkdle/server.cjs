@@ -8,7 +8,7 @@ const gallery=require("./gallery.cjs")(db,process.env.SILKDLE_ADMIN_KEY);
 const puzzles=[
 {id:"s01",kind:"Unique",world:"Chinese",image:"/art/s01.svg",answer:"Tiger Girl",names:["Tiger Girl","Cerberus","Captain Ivy","Uruchi","Isyutaru","Lord Yarkan"]},
 {id:"s02",kind:"Unique",world:"European",image:"/art/s02.svg",answer:"Cerberus",names:["Tiger Girl","Cerberus","Captain Ivy","Uruchi","Isyutaru","Lord Yarkan"]},
-{id:"s03",kind:"Weapon",world:"Chinese",image:"/art/s03.svg",answer:"Glaive",names:["Glaive","Spear","Bow","Blade","Sword","Shield"]},
+{id:"s03",kind:"Weapon",world:"Chinese",image:"/art/s03.svg",answer:"Glavie",names:["Glavie","Spear","Bow","Blade","Sword","Shield"]},
 {id:"s04",kind:"Weapon",world:"European",image:"/art/s04.svg",answer:"Harp",names:["Harp","Cleric Rod","Crossbow","Dagger","Staff","Dark Staff"]}
 ];
 function dayKey(d=new Date()){return new Intl.DateTimeFormat("en-CA",{timeZone:DAY_ZONE,year:"numeric",month:"2-digit",day:"2-digit"}).format(d)}
@@ -16,7 +16,7 @@ function hash32(v){return crypto.createHash("sha256").update(v).digest().readUIn
 function gameImage(p){if(p&&p.id.startsWith("img_"))return {...p,kind:p.category,image:"/api/image/file/"+p.id};return p}
 async function dailyPuzzle(day){const all=await gallery.approved();if(all.length>=40){const p=all[hash32("silkdle:"+day)%all.length];return gameImage(p)}return puzzles[hash32(day)%puzzles.length]}
 function safeEq(a,b){let A=Buffer.from(a),B=Buffer.from(b);return A.length===B.length&&crypto.timingSafeEqual(A,B)}
-function normalize(v){return String(v||"").normalize("NFKC").trim().toLocaleLowerCase("en").replace(/\bglavie\b/g,"glaive")}
+function normalize(v){return String(v||"").normalize("NFKC").trim().toLocaleLowerCase("en").replace(/\bglaive\b/g,"glavie")}
 function randomId(){return crypto.randomBytes(32).toString("hex")}
 async function hashPassword(password){const salt=crypto.randomBytes(16).toString("hex");const key=await scrypt(password,salt,64);return "scrypt$"+salt+"$"+key.toString("hex")}
 async function checkPassword(password,stored){const parts=String(stored).split("$");if(parts.length!==3||parts[0]!=="scrypt")return false;const actual=Buffer.from(parts[2],"hex"),candidate=await scrypt(password,parts[1],64);return actual.length===candidate.length&&crypto.timingSafeEqual(actual,candidate)}
