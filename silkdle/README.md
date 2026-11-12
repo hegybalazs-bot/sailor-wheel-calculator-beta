@@ -5,7 +5,7 @@ Silkdle is an unofficial fan-made, mobile-friendly Silkroad Online quiz. It live
 ## Play modes
 
 - **Classic**: Mob Guess, Unique Hunter, Equipment, Mastery, Map Explorer, SRO Knowledge (daily + practice, HU/EN, CH/EU/Mixed).
-- **Image Hunt (community)**: Free, accountless image recognition. A **10×10 cover** initially reveals only 1% of the image. The player must type a name without a visible choice list; wrong guesses or the Reveal button open more pieces. Six wrong attempts end the round. No ranked points.
+- **Image Hunt (community)**: Free, accountless image recognition. A **roughly 1% zoomed-in crop** is shown first, LoLdle Splash-style. The player types a name without a visible choice list; wrong guesses or the Reveal button zoom progressively farther out. The retained 10×10 mask supports later variation. Six wrong attempts end the round. No ranked points.
 - **Speed Hunt (ranked beta)**: one shared puzzle every Budapest-local day; **45 seconds, two wrong guesses**, one attempt per account/day. No answer dropdown. The server measures elapsed time, correctness and points; faster correct answers receive more points. Each wrong guess subtracts 250 points.
 - **Leaderboard**: today's highest ranked score and all-time cumulative points, stored in PostgreSQL.
 - **Accounts**: username, email, password, login/logout, server-side sessions and account deletion.
