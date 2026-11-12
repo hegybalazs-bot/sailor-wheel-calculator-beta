@@ -19,6 +19,16 @@ Scoring: on correct answer before deadline, \`max(100, 1000 - floor(elapsed_ms /
 - A new bank of **34 Veteran/Legend questions** emphasizes verified vSRO 1.188 quest requirements, NPCs, quantities, European mastery classifications and classic unique comparisons. Answer positions are shuffled by puzzle/day.
 - Sources for editorial review: [vSRO quest guide](https://github.com/AlighieriDemiurgs/SROquests), [classic uniques](https://silkroadonline.wiki/guides/uniques) and [class mastery taxonomy](https://silkroadonline.fandom.com/wiki/Skills). Version-dependent answers must retain source/version metadata.
 
+## Internet-sourced Silkroad Image Hunt (no upload required)
+
+The community **Picture Hunt / Képfelismerés** now starts with a curated pool of **24 externally linked, genuine Silkroad Online game screenshots** when no administrator-approved internal images are configured. The images cover Chinese/European uniques, places, mobs and NPCs, including Tiger Girl, Cerberus, Captain Ivy, Uruchi, Isyutaru, Lord Yarkan, Roc, Haroeris, Anubis and Mangyang. Different screenshots of the same subject remain separate guessing rounds. Players do **not** need to upload their own images to see this mode.
+
+- Image links and each corresponding original article are held in `web-image-sources.js`; the game shows the credit/source link.
+- Third-party image files remain on their original hosts. Silkdle does **not** download, redistribute or commit those image files to GitHub, and does **not** claim redistribution rights to them. They may fail, be blocked or withdrawn. A failed image is skipped in that browser session.
+- This is **unranked practice**, not the central daily scoreboard. Shared ranked mode still requires a durable database and administrator-approved image rights.
+- The mode retains a narrow initial crop, gradual reveal, free-text answers, source link and Chinese/European filtering. Once official approved Silkroad images are present in the server database, those have priority over third-party image links.
+- If the original host's permission policy disallows embedding, remove its link immediately; review each source's reuse conditions before a permanent public launch. An old Joymax fansite FAQ is not permission to use arbitrary community screenshots from other websites.
+
 ## Local Screenshot Hunt (no server database needed)
 
 A separate **🗂️ Saját képek / My screenshots** mode now uses IndexedDB directly in the player's browser. This bypasses the Render database limitation without claiming that pictures are shared publicly.
