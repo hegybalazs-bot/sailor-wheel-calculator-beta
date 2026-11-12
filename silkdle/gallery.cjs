@@ -61,9 +61,11 @@ module.exports=function(db,adminKey){
    const b=await body(req,1000),cat=CATEGORIES.includes(b.category)?b.category:null,world=WORLDS.includes(b.world)?b.world:null;
    const rows=(await approved()).filter(x=>(!cat||x.category===cat)&&(!world||world==="all"||x.world===world||x.world==="all"));
    if(!rows.length){fail(res,409,"No approved screenshot yet for this category");return true}
-   const selected=rows[crypto.randomInt(rows.length)],key=crypto.randomBytes(24).toString("hex");
+   const previous=sessions.get(cookie(req,"silkdle_practice")),history=Array.isArray(previous?.history)?previous.history:[];
+   const novel=rows.filter(x=>!history.includes(x.id)),pool=novel.length?novel:rows,selected=pool[crypto.randomInt(pool.length)],key=crypto.randomBytes(24).toString("hex");
    if(sessions.size>10000){for(const [k,v] of sessions)if(v.expires<Date.now())sessions.delete(k)}
-   sessions.set(key,{id:selected.id,wrong:0,expires:Date.now()+1200000,finished:false});
+   const maxRecent=Math.max(1,Math.min(10,rows.length-1));
+   sessions.set(key,{id:selected.id,wrong:0,expires:Date.now()+1200000,finished:false,history:[...history,selected.id].slice(-maxRecent)});
    res.setHeader("Set-Cookie","silkdle_practice="+key+"; Path=/; HttpOnly; SameSite=Strict; Max-Age=1200"+(req.headers["x-forwarded-proto"]==="https"?"; Secure":""));
    json(res,200,{id:selected.id,image:"/api/image/file/"+selected.id,category:selected.category,world:selected.world,cropX:Number(selected.cropX??.5),cropY:Number(selected.cropY??.45),wrong:0,opened:.01,maxWrong:6});return true
   }
