@@ -1,4 +1,4 @@
-/* Veteran / Legend questions checked against quest guide (vSRO 1.188), mastery and classic unique reference. */
+/* Expert quiz content. Source: vSRO 1.188 quest guide, classic Silkroad mastery and unique references. */
 window.SILKDLE_HARD_QUIZ={
   "veteran": [
     {
@@ -241,7 +241,13 @@ window.SILKDLE_HARD_QUIZ={
         "Háromszor",
         "Négyszer"
       ],
-      "a": 1
+      "a": 1,
+      "o_en": [
+        "Once",
+        "Twice",
+        "Three times",
+        "Four times"
+      ]
     },
     {
       "w": "Chinese",
