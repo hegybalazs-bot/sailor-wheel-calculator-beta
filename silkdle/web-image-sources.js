@@ -220,8 +220,8 @@ window.SILKDLE_WEB_IMAGES_V1 = [
   },
   {
     "id": "glaive-1",
-    "answer": "Glaive",
-    "aliases": [],
+    "answer": "Glavie",
+    "aliases": ["Glaive"],
     "category": "weapon",
     "world": "Chinese",
     "image": "https://store.donanimhaber.com/07/b7/43/07b743c60682f9f62382688c22372a46.jpg",
