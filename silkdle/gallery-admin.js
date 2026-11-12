@@ -22,8 +22,17 @@ const canvas=document.createElement("canvas");canvas.width=w;canvas.height=h;can
 const data=canvas.toDataURL("image/jpeg",.86).split(",")[1];if(data.length>4_850_000)throw Error("Túl nagy képfájl");
 ok({mime:"image/jpeg",data});
 }catch(e){no(e)}})}
-function matchFile(file){const base=file.name.replace(/\.(png|jpg|jpeg)$/i,"").toLowerCase().replace(/[^a-z0-9]+/g,"-");
-return state.catalog.find(x=>x.id.endsWith(base)||x.id===base||x.answer.toLowerCase().replace(/[^a-z0-9]+/g,"-")===base)||null}
+function matchFile(file){
+ const normalize=s=>String(s).toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+ const base=normalize(file.name.replace(/\.(png|jpg|jpeg)$/i,""));
+ const matches=[];
+ for(const row of state.catalog){
+ const labels=[row.id,row.answer,...(row.aliases||[])];
+ if(labels.some(label=>{const n=normalize(label);return base===n||base.startsWith(n+"-")}))matches.push(row);
+ }
+ matches.sort((a,b)=>b.answer.length-a.answer.length);
+ return matches[0]||null
+}
 async function upload(e){e.preventDefault();if(!state.key){message("Előbb admin belépés szükséges.","warn");return}
 const files=[...$("fileInput").files];if(!files.length){message("Válassz egy vagy több képet.","warn");return}const btn=$("upload");btn.disabled=true;
 let uploaded=0,skipped=0,failed=0;
