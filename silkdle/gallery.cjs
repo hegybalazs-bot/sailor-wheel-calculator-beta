@@ -24,6 +24,7 @@ module.exports=function(db,adminKey){
   const p=url.pathname;
   if(!p.startsWith("/api/image/")&&!p.startsWith("/api/admin/image"))return false;
   const ip=String(req.headers["x-forwarded-for"]||req.socket.remoteAddress||"unknown").split(",")[0],now=Date.now(),r=rate.get(ip)||{end:now+60000,count:0};if(r.end<now){r.end=now+60000;r.count=0}r.count++;rate.set(ip,r);if(rate.size>10000){for(const [key,v] of rate)if(v.end<now)rate.delete(key)}if(r.count>60){fail(res,429,"Too many requests");return true}
+  if(p==="/api/image/catalog"&&req.method==="GET"){json(res,200,{schemaVersion:catalog.schemaVersion,entries:catalog.entries.map(e=>({id:e.id,answer:e.answer,aliases:e.aliases,category:e.category,world:e.world,region:e.region,level:e.level,degree:e.degree,status:e.status}))});return true}
   if(p==="/api/image/status"&&req.method==="GET"){const n=db?Number((await db.query("select count(*)::int as n from silkdle_images where status='approved'")).rows[0].n):0;json(res,200,{configured:!!db,staged:catalog.entries.length,approved:n,adminConfigured:!!adminKey&&adminKey.length>=24});return true}
   if(!db){fail(res,503,"Database is not connected");return true}
   const admin=validAdmin(req,adminKey);
