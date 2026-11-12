@@ -52,6 +52,18 @@ async function main(){
    await page.reload();
    await page.locator(".racebar button").filter({hasText:"Saját képek"}).click();
    await page.waitForSelector("#racescreen img[src^='blob:']", {timeout});
+   // The public image mode must display a sourced real SRO image without manual import.
+   // External media requests are fulfilled by a test PNG, so CI does not depend on remote hosts.
+   await page.route("https://**",route=>route.fulfill({status:200,contentType:"image/png",body:png()}));
+   await page.locator(".racebar button").filter({hasText:"Képfelismerés"}).click();
+   await page.waitForSelector('#racescreen img[src^="https://"]',{timeout});
+   const remoteSrc=await page.locator('#racescreen img[src^="https://"]').getAttribute("src");
+   const expected=await page.evaluate(url=>window.SILKDLE_WEB_IMAGES_V1.find(x=>x.image===url)?.answer,remoteSrc);
+   assert.ok(expected,"source-linked image missing answer metadata");
+   await page.locator("#racescreen input[type=text]").fill(expected);
+   await page.locator("#racescreen button").filter({hasText:"Válasz beküldése"}).click();
+   await page.waitForFunction(()=>document.getElementById("racescreen").textContent.includes("Megvan!"),null,{timeout});
+   console.log(name+": online sourced SRO image appears and can be solved: PASS");
    assert.deepEqual(errors,[],name+" JavaScript errors");
    console.log(name+": local offline PNG screenshot import → play → success → reload: PASS");
    await context.close();
