@@ -20,7 +20,7 @@ x=await endpoint("/me","GET",undefined,cookie);assert.equal(x.data.user.username
 x=await endpoint("/auth/register","POST",{username:nick.toUpperCase(),email:"other"+email,password:pass});assert.equal(x.response.status,409);
 x=await endpoint("/race/start","POST",{},cookie);assert.equal(x.response.status,200);assert.equal(x.data.started,true);assert.ok(x.data.puzzle.image);assert.ok(!("answer" in x.data));assert.equal("choices" in x.data.puzzle,false);assert.equal(x.data.limitMs,undefined);
 let first=x.data;assert.equal(first.wrong,0);
-const expected={s01:"Tiger Girl",s02:"Cerberus",s03:"Glaive",s04:"Harp"}[first.puzzle.id];assert.ok(expected);
+const expected={s01:"Tiger Girl",s02:"Cerberus",s03:"Glavie",s04:"Harp"}[first.puzzle.id];assert.ok(expected);
 x=await endpoint("/race/guess","POST",{guess:expected},cookie);assert.equal(x.response.status,200);assert.equal(x.data.correct,true);assert.equal(x.data.finished,true);assert.ok(x.data.score>0);
 x=await endpoint("/leaderboard?scope=daily");assert.equal(x.response.status,200);assert.ok(x.data.entries.some(e=>e.username===nick&&e.score>0));
 x=await endpoint("/race/start","POST",{},cookie);assert.equal(x.data.finished,true);assert.equal(x.data.answer,expected);
