@@ -34,7 +34,7 @@ function matchAnswer(a,b){return String(a).normalize("NFKC").trim().toLocaleLowe
 function dayKey(){return new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/Budapest",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date())}
 function selectSample(){return samples[currentIndex%samples.length]}
 function newCommunity(){const mode=document.getElementById("world")?.value||"all",matches=samples.filter(s=>mode==="all"||s.world===mode);if(!matches.length)return samples[0];return matches[currentIndex%matches.length]}
-function imageBox(image,parent){const box=el("div","imgframe",null,parent);const img=el("img","",null,box);img.src=image;img.alt=(image.startsWith("/api/image/file/")||image.startsWith("blob:"))?(language()==="hu"?"Rejtett Silkroad játékbeli kép":"Hidden Silkroad gameplay screenshot"):(language()==="hu"?"Demó fantáziarajz":"Demo fantasy illustration");img.loading="eager";const mask=el("div","maskgrid zoom-crop",null,box);for(let i=0;i<100;i++)el("i","",null,mask);mask._cropImage=img;return mask}
+function imageBox(image,parent,cropX=.5,cropY=.45){const box=el("div","imgframe",null,parent);const img=el("img","",null,box);img.src=image;img.alt=(image.startsWith("/api/image/file/")||image.startsWith("blob:"))?(language()==="hu"?"Rejtett Silkroad játékbeli kép":"Hidden Silkroad gameplay screenshot"):(language()==="hu"?"Demó fantáziarajz":"Demo fantasy illustration");img.loading="eager";const mask=el("div","maskgrid zoom-crop",null,box);for(let i=0;i<100;i++)el("i","",null,mask);mask._cropImage=img;img.style.transformOrigin=Math.round(Math.min(1,Math.max(0,Number(cropX)))*100)+"% "+Math.round(Math.min(1,Math.max(0,Number(cropY)))*100)+"%";return mask}
 const revealOrder=Array.from({length:100},(_,i)=>i).sort((a,b)=>{const distance=k=>Math.abs(k%10-4.5)+Math.abs(Math.floor(k/10)-4.5);return distance(a)-distance(b)||((a*37)%101)-((b*37)%101)});
 function reveal(mask,count){const tiles=mask.children;for(let i=0;i<100;i++)tiles[revealOrder[i]].classList.toggle("revealed",i<count);
  if(mask._cropImage){const progress=Math.max(0,Math.min(1,count/100)),zoom=1+9*Math.pow(1-progress,4);mask._cropImage.style.transform="scale("+zoom.toFixed(2)+")";mask._cropImage.setAttribute("data-zoom",zoom.toFixed(2));}
@@ -94,7 +94,7 @@ function drawLocal(){
  link.href="./admin.html";link.style.cssText="display:block;color:#85dfb5;margin:12px 0";
  if(!localGame){info(language()==="hu"?"Még nincs ilyen kategóriájú helyi képed. Az adminoldalon JPG/PNG képekből készíthetsz saját feladványokat.":"No local screenshots match this category. Add real JPG/PNG game captures in Screenshot Studio.","rerror");return}
  const game=localGame;
- const layout=el("div","rgrid",null,screen),left=el("div","",null,layout),right=el("div","",null,layout),mask=imageBox(localImageUrl,left);
+ const layout=el("div","rgrid",null,screen),left=el("div","",null,layout),right=el("div","",null,layout),mask=imageBox(localImageUrl,left,game.target.cropX,game.target.cropY);
  reveal(mask,Math.round(game.opened*100));
  el("p","rlegend",language()==="hu"?"Helyi képtár – csak ezen a készüléken":"On-device screenshot, not shared globally",left);
  const progress=el("div","rstatline",null,right);el("span","",t().mistakes+": "+game.wrong+" / 6",progress);
@@ -144,7 +144,7 @@ function drawRealCommunity(){
  for(const [value,label] of options){const o=el("option","",label,filter);o.value=value}
  filter.value=imageCategory;filter.onchange=()=>{imageCategory=filter.value;community=null;showCommunity()};
  const data=community.data,layout=el("div","rgrid",null,screen),left=el("div","",null,layout),right=el("div","",null,layout);
- const mask=imageBox(data.image,left);reveal(mask,Math.round((community.opened||.01)*100));
+ const mask=imageBox(data.image,left,data.cropX,data.cropY);reveal(mask,Math.round((community.opened||.01)*100));
  const counter=el("div","rstatline",null,right);el("span","",t().mistakes+": "+community.wrong+" / 6",counter);
  const next=()=>{community=null;showCommunity()};
  if(community.done){reveal(mask,100);el("h2",community.correct?"rok":"rerror",community.correct?t().correct:t().finish,right);el("p","rmuted",t().answer+": "+community.answer,right);btn(t().again,right,next);return}
@@ -165,7 +165,7 @@ function counter(parent,serverState){const row=el("div","rstatline",null,parent)
 async function showRanked(){clear();title(t().rankTitle);info(t().rankIntro);await fetchMe();if(view!=="ranked")return;if(!dbAvailable){showError({message:t().unavailable});return}if(!me){info(t().guest);btn(t().signIn,screen,()=>switchView("account"));return}const name=el("p","rok",t().accountOk+": "+me.username,screen);name.dataset.user=me.username;try{const d=await api("/race/status");if(view!=="ranked")return;if(d.started){round=d;drawRound(d)}else{btn(t().start,screen,async()=>{if(lock)return;lock=true;try{const s=await api("/race/start","POST",{});if(view==="ranked"){round=s;drawRound(s)}}catch(e){showError(e)}finally{lock=false}})}}catch(e){showError(e)}}
 function drawRound(s){if(view!=="ranked")return;clearInterval(clock);clear();title(t().rankTitle);info(t().rankIntro);
 const puzzle=s.puzzle;if(!puzzle){info(t().connection);return}
-const layout=el("div","rgrid",null,screen),left=el("div","",null,layout),right=el("div","",null,layout),mask=imageBox(puzzle.image,left);
+const layout=el("div","rgrid",null,screen),left=el("div","",null,layout),right=el("div","",null,layout),mask=imageBox(puzzle.image,left,puzzle.cropX,puzzle.cropY);
 el("p","rlegend",t().demo,left);
 const {time,wrong,bar}=counter(right,s);
 const duration=Math.max(1,s.expiresAt-s.startedAt||45000),remaining=Math.max(0,s.expiresAt-(s.serverNow||Date.now()));
