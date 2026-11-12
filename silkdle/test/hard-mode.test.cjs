@@ -89,6 +89,8 @@ test("Image challenges start at 1% visibility and require free text",()=>{
  const src=fs.readFileSync(path.join(__dirname,"..","race.js"),"utf8");
  assert.match(src,/grid-template-columns:repeat\(10,1fr\)/);
  assert.match(src,/length:100/);
+ assert.match(src,/zoom-crop/);
+ assert.match(src,/Math\.pow\(1-progress,4\)/);
  assert.match(src,/function typedAnswer/);
  assert.doesNotMatch(src,/choose\(right,puzzle\.choices\)/);
  assert.doesNotThrow(()=>new Function(src));
