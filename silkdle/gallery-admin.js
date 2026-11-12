@@ -17,8 +17,12 @@ try{const [data,uploaded]=await Promise.all([api("/api/admin/image/catalog"),api
 function displayPreview(){const f=$("fileInput").files?.[0],container=$("preview");container.replaceChildren();if(!f){make("span","Nincs kiválasztott kép",container);return}const image=make("img",null,container);const url=URL.createObjectURL(f);image.onload=()=>URL.revokeObjectURL(url);image.src=url}
 function imageBlob(file){return new Promise(async(ok,no)=>{try{
 if(!["image/png","image/jpeg"].includes(file.type))throw Error("Csak valódi JPG/PNG kép engedélyezett");
-const bitmap=await createImageBitmap(file),scale=Math.min(1,1800/Math.max(bitmap.width,bitmap.height)),w=Math.round(bitmap.width*scale),h=Math.round(bitmap.height*scale);if(w<160||h<160)throw Error("Túl kicsi kép");
-const canvas=document.createElement("canvas");canvas.width=w;canvas.height=h;canvas.getContext("2d").drawImage(bitmap,0,0,w,h);bitmap.close();
+let bitmap=null;
+if(typeof createImageBitmap==="function"){try{bitmap=await createImageBitmap(file)}catch(e){/* Safari/WebKit may reject otherwise valid file-backed images */}}
+if(!bitmap){bitmap=await new Promise((ok,no)=>{const url=URL.createObjectURL(file),img=new Image();img.onload=()=>{URL.revokeObjectURL(url);ok(img)};img.onerror=()=>{URL.revokeObjectURL(url);no(Error("A kép nem olvasható"))};img.src=url})}
+const width=bitmap.naturalWidth||bitmap.width,height=bitmap.naturalHeight||bitmap.height;
+const scale=Math.min(1,1800/Math.max(width,height)),w=Math.round(width*scale),h=Math.round(height*scale);if(w<160||h<160)throw Error("Túl kicsi kép");
+const canvas=document.createElement("canvas");canvas.width=w;canvas.height=h;canvas.getContext("2d").drawImage(bitmap,0,0,w,h);if(typeof bitmap.close==="function")bitmap.close();
 const data=canvas.toDataURL("image/jpeg",.86).split(",")[1];if(data.length>4_850_000)throw Error("Túl nagy képfájl");
 ok({mime:"image/jpeg",data});
 }catch(e){no(e)}})}
