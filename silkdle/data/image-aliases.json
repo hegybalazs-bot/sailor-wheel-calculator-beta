@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "notes": "Aliases must not be ambiguous. Each approved entry has its own accepted aliases.",
+  "examples": {
+    "Tiger Girl": [
+      "tiger girl",
+      "tigergirl",
+      "tg"
+    ],
+    "Lord Yarkan": [
+      "lord yarkan",
+      "yarkan"
+    ],
+    "Demon Shaitan": [
+      "demon shaitan",
+      "shaitan"
+    ],
+    "Crossbow": [
+      "crossbow",
+      "xbow"
+    ]
+  }
+}
