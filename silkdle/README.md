@@ -19,6 +19,20 @@ Scoring: on correct answer before deadline, \`max(100, 1000 - floor(elapsed_ms /
 - A new bank of **34 Veteran/Legend questions** emphasizes verified vSRO 1.188 quest requirements, NPCs, quantities, European mastery classifications and classic unique comparisons. Answer positions are shuffled by puzzle/day.
 - Sources for editorial review: [vSRO quest guide](https://github.com/AlighieriDemiurgs/SROquests), [classic uniques](https://silkroadonline.wiki/guides/uniques) and [class mastery taxonomy](https://silkroadonline.fandom.com/wiki/Skills). Version-dependent answers must retain source/version metadata.
 
+## Local Screenshot Hunt (no server database needed)
+
+A separate **🗂️ Saját képek / My screenshots** mode now uses IndexedDB directly in the player's browser. This bypasses the Render database limitation without claiming that pictures are shared publicly.
+
+1. Open `/admin.html` and choose one or more genuine Silkroad screenshots (PNG/JPG).
+2. Select a catalog candidate or enter an answer and world/category. For batch imports, name files after a catalog answer, e.g. `Uruchi-01.png` or `Tiger-Girl-2.jpg`.
+3. Adjust the **crop focal point** sliders to preview the initial close-up.
+4. Click **Mentés a saját képtárba** to save images locally; no admin key required for offline storage.
+5. Open `/`, select **🗂️ Saját képek**, and play with a gradually zooming real screenshot and free-text answers.
+
+The local pool persists across reloads and supports up to 500 photos per browser profile, subject to available storage. No local result enters the shared leaderboard, and local uploads are never transmitted to the Silkdle backend. **Do not clear browser website data if you want to keep them. Keep your original screenshot files as backups.** To make these pictures publicly playable, the admin must upload them to the server's reviewed image pool after the durable database is connected and permissions are checked.
+
+The same crop focal coordinates are saved in the PostgreSQL screenshot metadata and returned with published image puzzles.
+
 ## Screenshot Studio and real-image database
 
 The website now includes a separate **[Screenshot Studio](/admin.html)**. It contains a read-only browser for **441 preclassified candidate slots** (16 uniques, 32 mobs, 150 weapon + degree targets, 216 armor + degree targets, 20 locations and 7 NPCs). **No actual Silkroad screenshots are bundled or claimed for those slots.** They are pending editorial image, answer, and copyright review.
