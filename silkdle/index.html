@@ -259,11 +259,11 @@ function renderGuess(p){
  if(done){renderResult(p,target.name);return}
  const row=make("div","searchrow",null,p),input=make("input","",null,row);
  input.id="answer";input.placeholder=t().guess;
- // Suggestions only in Beginner mode; expert players can still enter any known name.
- if(difficulty==="easy")input.setAttribute("list","suggestions");
+ // LoLdle-like name search: candidates appear only after at least two typed characters.
+ input.setAttribute("list","suggestions");
  input.autocomplete="off";input.setAttribute("aria-label",t().guess);
  const dl=make("datalist","",null,row);dl.id="suggestions";
- for(const e of entries){const op=document.createElement("option");op.value=e.name;dl.append(op)}
+ input.oninput=()=>{dl.replaceChildren();const typed=input.value.trim().toLocaleLowerCase();if(typed.length<2)return;for(const entry of entries.filter(x=>x.name.toLocaleLowerCase().includes(typed)).slice(0,6)){const option=document.createElement("option");option.value=entry.name;dl.append(option)}};
  const submit=make("button","primary",t().send,row);
  function doGuess(){
   const guess=input.value.trim();if(!guess)return;
