@@ -32,6 +32,19 @@ async function main(){
    const context=await browser.newContext({viewport:{width:1024,height:768}});
    const page=await context.newPage(),errors=[];
    page.on("pageerror",e=>errors.push(String(e)));
+   // Mirror remote images in CI; never depend on third-party server availability.
+   await page.route("https://**",route=>route.fulfill({status:200,contentType:"image/png",body:png()}));
+   await page.goto(base+"/admin.html");
+   await page.waitForSelector("#webGalleryCards .web-image-card",{timeout});
+   assert.equal(await page.locator("#webGalleryCards .web-image-card").count(),24,"Admin must show all 24 internet image links before login");
+   assert.equal(await page.locator("#webGalleryCards .source").count(),24,"Every image must credit its source");
+   assert.ok(!(await page.locator("#adminPanel").evaluate(el=>el.open)),"Server admin login should be collapsed by default");
+   await page.locator("#webSearch").fill("Uruchi");
+   assert.equal(await page.locator("#webGalleryCards .web-image-card").count(),1);
+   await page.locator("#webSearch").fill("");
+   await page.locator('#onlineGallery a[href*="mode=picture"]').click();
+   await page.waitForSelector('#racescreen img[src^="https://"]',{timeout});
+   assert.ok(page.url().includes("mode=picture"),"Play image button must open Picture Hunt directly");
    await page.goto(base+"/admin.html");
    await page.locator("#answer").fill("Uruchi");
    await page.locator("#category").selectOption("unique");
@@ -54,7 +67,6 @@ async function main(){
    await page.waitForSelector("#racescreen img[src^='blob:']", {timeout});
    // The public image mode must display a sourced real SRO image without manual import.
    // External media requests are fulfilled by a test PNG, so CI does not depend on remote hosts.
-   await page.route("https://**",route=>route.fulfill({status:200,contentType:"image/png",body:png()}));
    await page.locator(".racebar button").filter({hasText:"Képfelismerés"}).click();
    await page.waitForSelector('#racescreen img[src^="https://"]',{timeout});
    const remoteSrc=await page.locator('#racescreen img[src^="https://"]').getAttribute("src");
