@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "targets": {
+    "unique": 30,
+    "mob": 100,
+    "weapon": 50,
+    "armor": 50,
+    "location": 40,
+    "npcquest": 30
+  },
+  "publishCriteria": "Image uploaded, original answer checked, rights reviewed, crop approved and moderation complete.",
+  "initialState": "draft"
+}
