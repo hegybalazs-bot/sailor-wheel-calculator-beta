@@ -163,3 +163,23 @@ test("Online image hunt uses authentic externally sourced screenshots with sourc
  assert.match(race,/webBroken\.add/);
  assert.match(race,/item\.source/);
 });
+
+
+test("Glavie and Glaive are interchangeable answers in Silkroad Picture Hunt",()=>{
+ const src=fs.readFileSync(path.join(__dirname,"..","race.js"),"utf8");
+ const images=fs.readFileSync(path.join(__dirname,"..","web-image-sources.js"),"utf8");
+ const ctx={window:{}};vm.runInNewContext(images,ctx,{timeout:1000});
+ const weapon=ctx.window.SILKDLE_WEB_IMAGES_V1.find(x=>x.id==="glaive-1");
+ assert.equal(weapon.answer,"Glavie");
+ assert.ok(weapon.aliases.includes("Glaive"));
+ const fn=src.match(/function matchAnswer\(a,b\)\{[^\n]+\}/);
+ assert.ok(fn);
+ const compare=new Function(fn[0]+";return matchAnswer;");
+ assert.equal(compare()("Glavie","Glaive"),true);
+ assert.equal(compare()("Glaive","Glavie"),true);
+ assert.equal(compare()("Glavie","Spear"),false);
+ const classic=fs.readFileSync(path.join(__dirname,"..","index.html"),"utf8");
+ assert.match(classic,/normalizedGuess=guess\.toLocaleLowerCase\(\)\.replace/);
+ const api=fs.readFileSync(path.join(__dirname,"..","server.cjs"),"utf8");
+ assert.match(api,/replace\(\/\\bglavie\\b\/g,"glaive"\)/);
+});
