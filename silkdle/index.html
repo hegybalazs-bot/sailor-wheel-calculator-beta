@@ -109,7 +109,7 @@ const items={
  gear:[
   {name:"Sword",world:"Chinese",region:"One-handed",clue:{hu:"Kínai egykezes penge",en:"Chinese one-handed blade"},detail:{hu:"Bicheon fegyvercsalád",en:"Bicheon weapon family"}},
   {name:"Blade",world:"Chinese",region:"One-handed",clue:{hu:"Kínai egykezes vágófegyver",en:"Chinese one-handed cutting weapon"},detail:{hu:"Bicheon fegyvercsalád",en:"Bicheon weapon family"}},
-  {name:"Glaive",world:"Chinese",region:"Two-handed",clue:{hu:"Hosszú nyelű kínai közelharci fegyver",en:"Long-pole Chinese melee weapon"},detail:{hu:"Heuksal fegyvercsalád",en:"Heuksal weapon family"}},
+  {name:"Glavie",world:"Chinese",region:"Two-handed",clue:{hu:"Hosszú nyelű kínai közelharci fegyver",en:"Long-pole Chinese melee weapon"},detail:{hu:"Heuksal fegyvercsalád",en:"Heuksal weapon family"}},
   {name:"Bow",world:"Chinese",region:"Ranged",clue:{hu:"Kínai távolsági fegyver",en:"Chinese ranged weapon"},detail:{hu:"Pacheon fegyvercsalád",en:"Pacheon weapon family"}},
   {name:"Crossbow",world:"European",region:"Ranged",clue:{hu:"Rogue távolsági fegyver",en:"Rogue ranged weapon"},detail:{hu:"European Rogue",en:"European Rogue"}},
   {name:"Dagger",world:"European",region:"Melee",clue:{hu:"Rogue közelharci fegyver",en:"Rogue melee weapon"},detail:{hu:"European Rogue",en:"European Rogue"}},
@@ -119,7 +119,7 @@ const items={
  ],
  mastery:[
   {name:"Bicheon",world:"Chinese",region:"Weapon",clue:{hu:"Kínai kardos mastery",en:"Chinese sword mastery"},detail:{hu:"Sword / Blade",en:"Sword / Blade"}},
-  {name:"Heuksal",world:"Chinese",region:"Weapon",clue:{hu:"Kínai hosszú fegyveres mastery",en:"Chinese polearm mastery"},detail:{hu:"Spear / Glaive",en:"Spear / Glaive"}},
+  {name:"Heuksal",world:"Chinese",region:"Weapon",clue:{hu:"Kínai hosszú fegyveres mastery",en:"Chinese polearm mastery"},detail:{hu:"Spear / Glavie",en:"Spear / Glavie"}},
   {name:"Pacheon",world:"Chinese",region:"Weapon",clue:{hu:"Kínai íjász mastery",en:"Chinese archer mastery"},detail:{hu:"Bow",en:"Bow"}},
   {name:"Warrior",world:"European",region:"Physical",clue:{hu:"Európai közelharci class",en:"European melee class"},detail:{hu:"1H / 2H Sword / Dual Axe",en:"1H / 2H Sword / Dual Axe"}},
   {name:"Rogue",world:"European",region:"Physical",clue:{hu:"Európai lopakodó vagy távolsági támadó",en:"European stealth or ranged attacker"},detail:{hu:"Dagger / Crossbow",en:"Dagger / Crossbow"}},
@@ -147,7 +147,7 @@ const quiz=[
  {w:"Chinese",hu:"Melyik unique szintje 40 a klasszikus SRO-ban?",en:"Which classic unique is level 40?",o:["Tiger Girl","Cerberus","Isyutaru","Uruchi"],a:3},
  {w:"Chinese",hu:"Melyik területhez kötődik Isyutaru?",en:"Which region is associated with Isyutaru?",o:["Karakoram","Roc Mountain","Tiger Mountain","Asia Minor"],a:0},
  {w:"European",hu:"Melyik európai class használ Cleric Rodot?",en:"Which European class uses a Cleric Rod?",o:["Wizard","Bard","Cleric","Rogue"],a:2},
- {w:"Chinese",hu:"Melyik kínai mastery-hez tartozik a Spear és Glaive?",en:"Which Chinese mastery uses Spear and Glaive?",o:["Pacheon","Heuksal","Bicheon","Cold"],a:1},
+ {w:"Chinese",hu:"Melyik kínai mastery-hez tartozik a Spear és Glavie?",en:"Which Chinese mastery uses Spear and Glavie?",o:["Pacheon","Heuksal","Bicheon","Cold"],a:1},
  {w:"all",hu:"Melyik unique kapcsolódik a Taklamakan sivataghoz?",en:"Which unique is associated with Taklamakan?",o:["Cerberus","Uruchi","Lord Yarkan","Captain Ivy"],a:2},
  {w:"European",hu:"Melyik európai város a kezdőterület központja?",en:"Which European city serves as a starter hub?",o:["Donwhang","Hotan","Jangan","Constantinople"],a:3},
  {w:"Chinese",hu:"Melyik kínai mastery-hez tartozik a Sword / Blade?",en:"Which Chinese mastery uses Sword / Blade?",o:["Heuksal","Pacheon","Bicheon","Lightning"],a:2},
@@ -267,7 +267,7 @@ function renderGuess(p){
  const submit=make("button","primary",t().send,row);
  function doGuess(){
   const guess=input.value.trim();if(!guess)return;
-  const normalizedGuess=guess.toLocaleLowerCase().replace(/\bglavie\b/g,"glaive");const found=entries.find(x=>x.name.toLocaleLowerCase().replace(/\bglavie\b/g,"glaive")===normalizedGuess);
+  const normalizedGuess=guess.toLocaleLowerCase().replace(/\bglaive\b/g,"glavie");const found=entries.find(x=>x.name.toLocaleLowerCase().replace(/\bglaive\b/g,"glavie")===normalizedGuess);
   if(!found){input.placeholder=lang==="hu"?"A játék adatbázisában szereplő nevet írj":"Enter a name from the known roster";input.value="";return}
   if(state.guesses.some(g=>g.toLocaleLowerCase()===found.name.toLocaleLowerCase())){input.value="";return}
   state.guesses.push(found.name);state.won=found.name===target.name;
