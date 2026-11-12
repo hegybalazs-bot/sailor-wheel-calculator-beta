@@ -267,7 +267,7 @@ function renderGuess(p){
  const submit=make("button","primary",t().send,row);
  function doGuess(){
   const guess=input.value.trim();if(!guess)return;
-  const found=entries.find(x=>x.name.toLocaleLowerCase()===guess.toLocaleLowerCase());
+  const normalizedGuess=guess.toLocaleLowerCase().replace(/\bglavie\b/g,"glaive");const found=entries.find(x=>x.name.toLocaleLowerCase().replace(/\bglavie\b/g,"glaive")===normalizedGuess);
   if(!found){input.placeholder=lang==="hu"?"A játék adatbázisában szereplő nevet írj":"Enter a name from the known roster";input.value="";return}
   if(state.guesses.some(g=>g.toLocaleLowerCase()===found.name.toLocaleLowerCase())){input.value="";return}
   state.guesses.push(found.name);state.won=found.name===target.name;
