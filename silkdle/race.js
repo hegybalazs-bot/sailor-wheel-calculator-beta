@@ -252,5 +252,5 @@ function renderFields(){fields.replaceChildren();const username=field(signup?t()
 btn(signup?t().submitRegister:t().submitLogin,fields,async()=>{notice.textContent="";if(!username.value||!password.value||(email&&!email.value)){notice.textContent=t().connection;return}lock=true;try{await api(signup?"/auth/register":"/auth/login","POST",signup?{username:username.value.trim(),email:email.value.trim(),password:password.value}:{login:username.value.trim(),password:password.value});await fetchMe();if(view==="account")showAccount()}catch(e){notice.textContent=e.message}finally{lock=false}})}
 btn(t().signIn,tabs,()=>{signup=false;renderFields()},"rsecondary");btn(t().signUp,tabs,()=>{signup=true;renderFields()},"rsecondary");renderFields();info(t().accountHint)}
 const langButton=document.getElementById("lang");if(langButton)langButton.addEventListener("click",()=>{if(view!=="classic")switchView(view)});
-switchView("classic");
+switchView(window.location?.search?.includes("mode=picture")?"picture":"classic");
 })();
