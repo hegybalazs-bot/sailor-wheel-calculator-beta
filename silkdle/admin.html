@@ -15,7 +15,7 @@ button{border:0;border-radius:11px;background:#4bd09a;color:#0a281c;font-weight:
 .row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}.pill{font-size:.83rem;border:1px solid #406859;border-radius:30px;padding:5px 10px;color:#c6ebd7}
 #message{white-space:pre-wrap;font-size:.9rem}.ok{color:#70e7a8!important}.warn{color:#edbd77!important}.error{color:#ff9997!important}.small{font-size:.84rem}
 #preview{width:100%;aspect-ratio:16/10;background:#071114;border-radius:12px;border:1px dashed #55776c;display:grid;place-items:center;overflow:hidden}
-#preview img{max-width:100%;max-height:100%;object-fit:contain}.list{display:grid;gap:10px;max-height:600px;overflow:auto}
+#preview img{max-width:100%;max-height:100%;object-fit:contain}#cropPreview{height:230px;max-width:420px;overflow:hidden;border:1px solid #648575;border-radius:13px;background:#0a181a;margin-top:10px}#cropPreview img{width:100%;height:100%;object-fit:cover;transition:transform .2s ease}input[type=range]{accent-color:#58d4a2;padding:0;max-width:100%}.list{display:grid;gap:10px;max-height:600px;overflow:auto}
 .item{border:1px solid #315750;padding:12px;border-radius:13px;background:#0d2223;display:flex;gap:12px;justify-content:space-between;align-items:start;flex-wrap:wrap}
 .item strong{display:block}.item small{display:block;color:#9cbaa9;margin-top:4px}
 .status{color:#e8c37c}.status.approved{color:#64eaa3}.footer{font-size:.8rem;margin:30px 0;color:#8fae9d}
@@ -39,6 +39,11 @@ button{border:0;border-radius:11px;background:#4bd09a;color:#0a281c;font-weight:
 <div class="field full"><label for="sourceUrl">Kép forrása (URL vagy saját felvétel megnevezése)</label><input id="sourceUrl" maxlength="2000" placeholder="Saját képernyőkép / forrás URL"/></div>
 <div class="field full"><label for="fileInput">Valódi in-game kép (JPG/PNG, max 2560px)</label><input id="fileInput" type="file" accept="image/png,image/jpeg" required multiple/></div>
 <div class="field full"><div id="preview"><span class="small">Előnézet a fájl kiválasztása után</span></div></div>
+<div class="field full"><label>Kivágás kezdőpontja – a képen belül állítsd be</label>
+<div class="row"><label for="cropX">Vízszintes: <output id="cropXvalue">50%</output></label><input aria-label="Vízszintes képkivágás" id="cropX" type="range" min="0" max="100" value="50" step="1" />
+<label for="cropY">Függőleges: <output id="cropYvalue">45%</output></label><input aria-label="Függőleges képkivágás" id="cropY" type="range" min="0" max="100" value="45" step="1" /></div>
+<div id="cropPreview" aria-label="Kezdő képrészlet előnézete"></div>
+<p class="small">A feladvány ehhez hasonló közeli részletből indul, majd hibás tippnél távolodik.</p></div>
 <div class="field full"><label for="rightsNote">Forrás és jogok megjegyzése</label><textarea id="rightsNote" placeholder="Ki készítette, mikor, milyen nem kereskedelmi felhasználásra alkalmas?"></textarea></div>
 <div class="field full"><button id="upload" type="submit">Feltöltés ellenőrzésre</button></div>
 </form></div>
