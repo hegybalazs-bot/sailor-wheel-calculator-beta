@@ -39,18 +39,64 @@ function reveal(mask,count){const tiles=mask.children;for(let i=0;i<100;i++)tile
  if(mask._cropImage){const progress=Math.max(0,Math.min(1,count/100)),zoom=1+9*Math.pow(1-progress,4);mask._cropImage.style.transform="scale("+zoom.toFixed(2)+")";mask._cropImage.setAttribute("data-zoom",zoom.toFixed(2));}
 }
 function switchView(next){view=next;clearInterval(clock);clock=null;lock=false;modeGrid.hidden=next!=="classic";classicPanel.hidden=next!=="classic";screen.hidden=next==="classic";buttons.forEach(([k],i)=>{bar.children[i].textContent=t()[k];bar.children[i].classList.toggle("on",next===k)});if(next==="picture")showCommunity();if(next==="ranked")showRanked();if(next==="leaderboard")showLeaderboard();if(next==="account")showAccount()}
-function showCommunity(){clear();title(t().pictureTitle);info(t().pictureIntro);if(!community)community={sample:newCommunity(),mistakes:0,opened:1,done:false};
+function showDemoCommunity(){clear();title(t().pictureTitle);info(t().pictureIntro);if(!community)community={sample:newCommunity(),mistakes:0,opened:1,done:false};
 const sample=community.sample,layout=el("div","rgrid",null,screen),left=el("div","",null,layout),right=el("div","",null,layout),mask=imageBox(sample.image,left);
 reveal(mask,community.done?100:community.opened);el("p","rlegend",t().demo,left);
 el("div","rstatline",null,right).append(el("span","",t().mistakes+": "+community.mistakes+" / 6"));
-if(community.done){el("h2",community.mistakes<6?"rok":"rerror",community.mistakes<6?t().correct:t().finish,right);el("p","rmuted",t().answer+": "+sample.answer,right);btn(t().again,right,()=>{currentIndex++;community={sample:newCommunity(),mistakes:0,opened:1,done:false};showCommunity()});return}
+if(community.done){el("h2",community.mistakes<6?"rok":"rerror",community.mistakes<6?t().correct:t().finish,right);el("p","rmuted",t().answer+": "+sample.answer,right);btn(t().again,right,()=>{currentIndex++;community={sample:newCommunity(),mistakes:0,opened:1,done:false};showDemoCommunity()});return}
 const input=typedAnswer(right),message=el("p","rmuted","",right);
-const submit=()=>{const v=input.value.trim();if(!v)return;if(matchAnswer(v,sample.answer)){community.done=true;showCommunity();return}
-community.mistakes++;community.opened=Math.min(100,community.opened+6);if(community.mistakes>=6){community.done=true;showCommunity();return}
+const submit=()=>{const v=input.value.trim();if(!v)return;if(matchAnswer(v,sample.answer)){community.done=true;showDemoCommunity();return}
+community.mistakes++;community.opened=Math.min(100,community.opened+6);if(community.mistakes>=6){community.done=true;showDemoCommunity();return}
 message.textContent=t().wrong;reveal(mask,community.opened);input.value="";input.focus()};
 btn(t().guess,right,submit);input.onkeydown=e=>{if(e.key==="Enter")submit()};
 el("div","",null,right).append(btn(t().reveal,right,()=>{community.opened=Math.min(100,community.opened+3);reveal(mask,community.opened)},"rsecondary"));
 }
+
+let imageCategory="all";
+async function showCommunity(){
+ clear();title(t().pictureTitle);info("Képek betöltése / Loading images...");
+ let availability;
+ try{availability=await api("/image/status")}catch(e){availability={approved:0,configured:false}}
+ if(view!=="picture")return;
+ if(availability.approved===0){
+  if(community?.type==="real")community=null;
+  showDemoCommunity();
+  info(language()==="hu"?"Nincs még publikált, ellenőrzött Silkroad-kép. A négy fantáziaillusztráció kizárólag demó. Képfeltöltés: /admin.html":"No approved Silkroad screenshots yet. The four fantasy drawings are demo content only. Import images through /admin.html","rerror");
+  const link=el("a","",language()==="hu"?"Képkatalógus / admin":"Image catalog / admin",screen);link.href="./admin.html";
+  return;
+ }
+ if(!community||community.type!=="real"){
+  try{
+   const r=await api("/image/practice/start","POST",{category:imageCategory,world:document.getElementById("world")?.value||"all"});
+   community={type:"real",data:r,done:false,wrong:0,answer:null,opened:.01}
+  }catch(e){clear();title(t().pictureTitle);info(e.message,"rerror");const again=btn(language()==="hu"?"Összes kategória":"All categories",screen,()=>{imageCategory="all";community=null;showCommunity()});return}
+ }
+ drawRealCommunity()
+}
+function drawRealCommunity(){
+ if(view!=="picture"||community?.type!=="real")return;
+ clear();title(t().pictureTitle);
+ info(language()==="hu"?"Valódi, admin által jóváhagyott Silkroad-kép. Szűk részletből kell felismerned, a megfejtést írd be.":"Real administrator-approved Silkroad screenshot. Identify it from a tiny crop; type the name.");
+ const filter=el("select","",null,screen);
+ const options=[["all",language()==="hu"?"Összes kategória":"All categories"],["unique","Unique"],["mob","Mob"],["weapon",language()==="hu"?"Fegyver":"Weapon"],["armor",language()==="hu"?"Ruha / páncél":"Armor"],["location",language()==="hu"?"Helyszín":"Location"],["npcquest","NPC / Quest"]];
+ for(const [value,label] of options){const o=el("option","",label,filter);o.value=value}
+ filter.value=imageCategory;filter.onchange=()=>{imageCategory=filter.value;community=null;showCommunity()};
+ const data=community.data,layout=el("div","rgrid",null,screen),left=el("div","",null,layout),right=el("div","",null,layout);
+ const mask=imageBox(data.image,left);reveal(mask,Math.round((community.opened||.01)*100));
+ const counter=el("div","rstatline",null,right);el("span","",t().mistakes+": "+community.wrong+" / 6",counter);
+ const next=()=>{community=null;showCommunity()};
+ if(community.done){reveal(mask,100);el("h2",community.correct?"rok":"rerror",community.correct?t().correct:t().finish,right);el("p","rmuted",t().answer+": "+community.answer,right);btn(t().again,right,next);return}
+ const input=typedAnswer(right),notice=el("p","rmuted","",right);
+ const submit=async()=>{const guess=input.value.trim();if(!guess||lock)return;lock=true;try{
+ const outcome=await api("/image/practice/guess","POST",{guess});community.wrong=outcome.wrong;community.opened=outcome.opened;
+ community.done=outcome.finished;community.correct=outcome.correct;community.answer=outcome.answer||null;
+ if(outcome.finished){drawRealCommunity();return}
+ notice.textContent=t().wrong;reveal(mask,Math.round(outcome.opened*100));counter.replaceChildren();el("span","",t().mistakes+": "+outcome.wrong+" / 6",counter);input.value="";input.focus()
+ }catch(e){notice.textContent=e.message}finally{lock=false}};
+ btn(t().guess,right,submit);input.onkeydown=e=>{if(e.key==="Enter")submit()};
+ el("p","rlegend",language()==="hu"?"A helyes választ a szerver ellenőrzi. A kép csak jóváhagyás után kerül játékba.":"Answers are verified by the server. Only approved screenshots are playable.",right);
+}
+
 async function api(route,method="GET",body){const opts={method,credentials:"same-origin",headers:{"accept":"application/json"}};if(method!=="GET"){opts.headers["content-type"]="application/json";opts.body=JSON.stringify(body||{})}const resp=await fetch("/api"+route,opts);let data;try{data=await resp.json()}catch{throw Error(t().unavailable)}if(!resp.ok)throw Error(data.error||t().connection);return data}
 async function fetchMe(){try{const d=await api("/me");me=d.user;dbAvailable=true}catch(e){me=null;dbAvailable=false}}
 function counter(parent,serverState){const row=el("div","rstatline",null,parent);const time=el("span","rtimer","45.0s",row),wrong=el("span","",t().mistakes+": "+serverState.wrong,row),progress=el("div","rprogress",null,parent),bar=el("div","",null,progress);return {time,wrong,bar}}
