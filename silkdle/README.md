@@ -19,6 +19,26 @@ Scoring: on correct answer before deadline, \`max(100, 1000 - floor(elapsed_ms /
 - A new bank of **34 Veteran/Legend questions** emphasizes verified vSRO 1.188 quest requirements, NPCs, quantities, European mastery classifications and classic unique comparisons. Answer positions are shuffled by puzzle/day.
 - Sources for editorial review: [vSRO quest guide](https://github.com/AlighieriDemiurgs/SROquests), [classic uniques](https://silkroadonline.wiki/guides/uniques) and [class mastery taxonomy](https://silkroadonline.fandom.com/wiki/Skills). Version-dependent answers must retain source/version metadata.
 
+## Screenshot Studio and real-image database
+
+The website now includes a separate **[Screenshot Studio](/admin.html)**. It contains a read-only browser for **441 preclassified candidate slots** (16 uniques, 32 mobs, 150 weapon + degree targets, 216 armor + degree targets, 20 locations and 7 NPCs). **No actual Silkroad screenshots are bundled or claimed for those slots.** They are pending editorial image, answer, and copyright review.
+
+Once a durable PostgreSQL `DATABASE_URL` and secret `SILKDLE_ADMIN_KEY` (minimum 24 characters; use 32+) have been configured in Render, the Studio can:
+
+- filter the staged catalog and prefill metadata,
+- upload individual JPEG/PNG screenshots, or batch-import files named after catalog IDs / answers,
+- resize and remove most image metadata by redrawing uploads to compressed JPEG in the browser,
+- store originals-as-normalized-JPEG in PostgreSQL as `pending`,
+- preview unpublished media with a privileged admin key,
+- approve after permission basis and source note review, or revoke approval,
+- export the preclassified catalog JSON.
+
+Public `/api/image/status` exposes staged and approved counts. Real community Image Hunt will use **approved** pictures as soon as at least one is available. Until then, users see only the clearly marked four original demo illustrations. Ranked Speed Hunt uses an approved collection if **at least 40** reviewed pictures exist (otherwise its original demo collection is used).
+
+**The free Render PostgreSQL database is not connected to the web service in this initial release and expires in 30 days. It must be upgraded, backed up and connected before public account/image rollout.** No API/admin key or connection string belongs in public source control.
+
+See [image guidelines](./docs/IMAGE_GUIDELINES.md), [content rules](./docs/CONTENT_RULES.md), [review checklist](./docs/SCREENSHOT_CHECKLIST.md), and [next steps](./docs/NEXT_ACTION.md).
+
 ## Demo pictures and future content
 
 Four **original vector illustrations** are provided solely as gameplay placeholders. They do not claim to be Silkroad screenshots and do not reproduce copyrighted client artwork. Replace them with authorized, vetted, answer-tagged actual SRO screenshots later. Do not silently copy game files into this public repository.
