@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Silkdle • Screenshot Studio</title>
+<style>
+:root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#e1f3e9;background:#081519;--edge:#315850;--panel:#122626;--accent:#54d29b}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 80% 0,#1b4237,transparent 36%),#081519}
+a{color:#81e4b6}.wrap{max-width:1180px;margin:auto;padding:24px}.header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.hero{padding:24px 0}
+h1{font-size:clamp(1.7rem,5vw,3.1rem);margin:4px 0}h2{margin:0 0 15px}p{color:#a9c7ba;line-height:1.5}
+.panel{border:1px solid var(--edge);border-radius:18px;background:var(--panel);padding:20px;margin:15px 0}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.field{display:grid;gap:6px}.full{grid-column:1/-1}
+label{font-size:.87rem;color:#c3dfd0;font-weight:750}input,select,textarea{width:100%;padding:12px;background:#0a1a1b;border:1px solid #43665c;color:#e9fff4;border-radius:10px;font:inherit}textarea{min-height:74px}
+input:focus,select:focus,textarea:focus{outline:2px solid #78dbb3}input[type=file]{padding:10px}
+button{border:0;border-radius:11px;background:#4bd09a;color:#0a281c;font-weight:850;font-size:.95rem;padding:11px 16px;cursor:pointer}button.secondary{border:1px solid #43665c;background:#1c3a32;color:#d6f3e4}button:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}.pill{font-size:.83rem;border:1px solid #406859;border-radius:30px;padding:5px 10px;color:#c6ebd7}
+#message{white-space:pre-wrap;font-size:.9rem}.ok{color:#70e7a8!important}.warn{color:#edbd77!important}.error{color:#ff9997!important}.small{font-size:.84rem}
+#preview{width:100%;aspect-ratio:16/10;background:#071114;border-radius:12px;border:1px dashed #55776c;display:grid;place-items:center;overflow:hidden}
+#preview img{max-width:100%;max-height:100%;object-fit:contain}.list{display:grid;gap:10px;max-height:600px;overflow:auto}
+.item{border:1px solid #315750;padding:12px;border-radius:13px;background:#0d2223;display:flex;gap:12px;justify-content:space-between;align-items:start;flex-wrap:wrap}
+.item strong{display:block}.item small{display:block;color:#9cbaa9;margin-top:4px}
+.status{color:#e8c37c}.status.approved{color:#64eaa3}.footer{font-size:.8rem;margin:30px 0;color:#8fae9d}
+@media(max-width:800px){.grid{grid-template-columns:1fr}.wrap{padding:15px}.panel{padding:15px}}
+@media(max-width:450px){.form{grid-template-columns:1fr}}
+</style></head>
+<body><main class="wrap">
+<div class="header"><div><strong>⚔️ SILKDLE</strong><span class="pill">Screenshot Studio • Admin Beta</span></div><a href="./index.html">← Játékhoz vissza</a></div>
+<section class="hero"><h1>Valódi Silkroad képkatalógus</h1><p>Képeket tölthetsz fel, forrást rögzíthetsz, ellenőrizheted a helyes választ és jóváhagyhatod a publikálást. A fel nem dolgozott képek soha nem kerülnek be automatikusan a játékba.</p></section>
+<div class="panel"><div class="row" id="stats"><span class="pill">Státusz lekérése...</span></div><p class="small">Az adminjogot a Render környezeti változóban tárolt, legalább 24 karakteres SILKDLE_ADMIN_KEY védi. A kulcsot ez az oldal nem menti el.</p>
+<div class="form"><div class="field"><label for="adminKey">Admin kulcs (csak ebben a böngésző-fülben)</label><input id="adminKey" type="password" autocomplete="off" spellcheck="false" placeholder="SILKDLE_ADMIN_KEY"/></div><div class="field"><label>&nbsp;</label><button id="connect">Admin csatlakozás</button></div></div><p id="message" aria-live="polite"></p></div>
+<section class="grid">
+<div class="panel"><h2>Képfeltöltés</h2>
+<form id="uploadForm" class="form">
+<div class="field full"><label for="catalogSearch">Katalóguskereső (441 előkészített jelölt)</label><input id="catalogSearch" placeholder="pl. Uruchi, Glaive 9D, Jangan" autocomplete="off" list="catalogSuggestions"/>
+<datalist id="catalogSuggestions"></datalist></div>
+<div class="field"><label for="category">Kategória</label><select id="category"><option value="unique">Unique</option><option value="mob">Mob</option><option value="weapon">Fegyver</option><option value="armor">Páncél / ruha</option><option value="location">Helyszín</option><option value="npcquest">NPC / Quest</option></select></div>
+<div class="field"><label for="world">Világ</label><select id="world"><option value="Chinese">Chinese</option><option value="European">European</option><option value="all">Mixed / all</option></select></div>
+<div class="field full"><label for="answer">Ellenőrzött megfejtés</label><input id="answer" maxlength="120" required placeholder="pl. Uruchi"/></div>
+<div class="field full"><label for="aliases">Elfogadott nevek (vesszővel elválasztva)</label><input id="aliases" placeholder="Uruchi, ..."/></div>
+<div class="field full"><label for="sourceUrl">Kép forrása (URL vagy saját felvétel megnevezése)</label><input id="sourceUrl" maxlength="2000" placeholder="Saját képernyőkép / forrás URL"/></div>
+<div class="field full"><label for="fileInput">Valódi in-game kép (JPG/PNG, max 2560px)</label><input id="fileInput" type="file" accept="image/png,image/jpeg" required multiple/></div>
+<div class="field full"><div id="preview"><span class="small">Előnézet a fájl kiválasztása után</span></div></div>
+<div class="field full"><label for="rightsNote">Forrás és jogok megjegyzése</label><textarea id="rightsNote" placeholder="Ki készítette, mikor, milyen nem kereskedelmi felhasználásra alkalmas?"></textarea></div>
+<div class="field full"><button id="upload" type="submit">Feltöltés ellenőrzésre</button></div>
+</form></div>
+<div class="panel"><h2>Ellenőrzés és publikálás</h2>
+<p>Csak tényleges játékbeli kép kerülhet az adatbázisba. A feltöltés után a kép <b>pending</b> állapotban van. Publikálás előtt válassz jogalapot és rögzítsd a forrást.</p>
+<div class="field"><label for="rightsBasis">Felhasználási jogalap</label><select id="rightsBasis"><option value="">Válassz csak ellenőrzés után</option><option value="own_capture_noncommercial">Saját in-game screenshot – nem kereskedelmi fansite</option><option value="official_fansite_terms">Hivatalos oldali kép – ellenőrzött fansite-feltételek</option><option value="written_permission">Írásos felhasználási engedély</option></select></div>
+<div class="row" style="margin:13px 0"><button id="refreshList" class="secondary">Lista frissítése</button><button id="exportCatalog" class="secondary">Katalógus JSON export</button></div>
+<div id="imageList" class="list" aria-live="polite"><p>Az adminbejelentkezés után megjelennek a feltöltött képek.</p></div>
+</div>
+</section><div class="footer">Silkdle fan project – nincs automatikus jogellenőrzés; az adminnak ellenőriznie kell az egyes képek jogos felhasználását. A Render ideiglenes PostgreSQL adatbázis nem alkalmas végleges képarchívumnak.</div>
+</main>
+<script src="./gallery-admin.js" defer></script>
+</body></html>
