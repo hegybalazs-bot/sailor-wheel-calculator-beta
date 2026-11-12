@@ -35,7 +35,7 @@ test("Quiz defaults to Legend, separate daily key, and progressively gated hints
  assert.match(src,/function faintHint\(target,n\)/);
  assert.match(src,/APRÓ ELSŐ NYOM/);
  assert.match(src,/comparison-cells/);
- assert.match(src,/comparison-cell exact/);
+ assert.match(src,/\.comparison-cell\.exact/);
  assert.match(src,/date\(\),world,difficulty,mode/);
  assert.match(src,/input\.oninput=/);
  assert.match(src,/typed\.length<2/);
