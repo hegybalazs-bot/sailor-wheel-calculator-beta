@@ -122,3 +122,38 @@ $("localSave").onclick=saveOffline;
 $("localRefresh").onclick=refreshLocal;
 $("localClear").onclick=async()=>{if(!confirm("Biztosan törlöd az összes helyi screenshotot ebből a böngészőből?"))return;await local().clear();refreshLocal()};
 refreshLocal();
+
+
+/* Read-only gallery of externally hosted real Silkroad screenshots.
+ * Only URLs and source attributions are displayed; not server approved images.
+ */
+function initExternalGallery(){
+ const gallery=document.getElementById("webGalleryCards"),search=document.getElementById("webSearch"),cat=document.getElementById("webCategory"),world=document.getElementById("webWorld"),count=document.getElementById("onlineCount");
+ if(!gallery||!search||!cat||!world||!count)return;
+ const all=Array.isArray(window.SILKDLE_WEB_IMAGES_V1)?window.SILKDLE_WEB_IMAGES_V1:[];
+ const uniqueAnswers=new Set(all.map(i=>String(i.answer).toLocaleLowerCase()));
+ function draw(){
+  const q=search.value.trim().normalize("NFKC").toLocaleLowerCase("hu"),c=cat.value,w=world.value;
+  const filtered=all.filter(i=>(!q||String(i.answer).normalize("NFKC").toLocaleLowerCase("hu").includes(q))&&(c==="all"||i.category===c)&&(w==="all"||i.world===w||i.world==="all"));
+  count.textContent=all.length+" internetes képhivatkozás • "+uniqueAnswers.size+" megfejtés";
+  gallery.replaceChildren();
+  if(!filtered.length){const empty=make("p","Nincs találat ebben a kategóriában. Válassz más szűrőt.",gallery);empty.className="small";return}
+  for(const item of filtered){
+   if(!/^https:\/\//.test(item.image)||!/^https:\/\//.test(item.source))continue;
+   const card=make("article",null,gallery);card.className="web-image-card";
+   const imageArea=make("div",null,card);imageArea.className="web-image-preview";
+   const img=make("img",null,imageArea);img.alt="Silkroad Online – "+item.answer;
+   img.loading="lazy";img.referrerPolicy="no-referrer";img.decoding="async";
+   const broken=()=>{img.remove();if(!imageArea.querySelector(".broken")){const hint=make("span","Kép nem tölthető be innen. A forrásoldal továbbra is megnyitható.",imageArea);hint.className="broken";card.dataset.imageStatus="failed"}};
+   img.onerror=broken;img.onload=()=>{card.dataset.imageStatus="loaded"};
+   img.src=item.image;
+   const details=make("div",null,card);details.className="web-image-content";
+   make("strong",item.answer,details);
+   make("small",item.category.toUpperCase()+" • "+(item.world==="all"?"Chinese + European":item.world),details);
+   const attribution=make("a","Forrásoldal / eredeti képtár",details);
+   attribution.className="source";attribution.href=item.source;attribution.target="_blank";attribution.rel="noopener noreferrer";
+  }
+ }
+ search.addEventListener("input",draw);cat.addEventListener("change",draw);world.addEventListener("change",draw);draw();
+}
+initExternalGallery();
