@@ -60,3 +60,47 @@ function exportCatalog(){if(!state.catalog.length){message("Először csatlakozz
 const data=JSON.stringify({schemaVersion:1,exportedAt:new Date().toISOString(),entries:state.catalog},null,2),blob=new Blob([data],{type:"application/json"}),url=URL.createObjectURL(blob),link=make("a",null,document.body);link.href=url;link.download="silkdle-kepkatalogus.json";link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),500)}
 $("connect").onclick=connect;$("refreshList").onclick=reload;$("exportCatalog").onclick=exportCatalog;
 $("catalogSearch").oninput=mapCatalog;$("catalogSearch").onchange=pickCatalog;$("fileInput").onchange=displayPreview;$("uploadForm").onsubmit=upload;status();api("/api/image/catalog").then(d=>{state.catalog=d.entries;message(d.entries.length+" előkészített tétel böngészhető. A publikáláshoz adatbázis és admin kulcs kell.","warn")}).catch(e=>message(e.message,"error"));
+
+
+/* Private offline screenshot import; this does not publish or grant site-wide rights. */
+const local=()=>window.SILKDLE_LOCAL_GALLERY;
+function localMessage(text,kind=""){const p=$("localStatus");if(!p)return;p.textContent=text;p.className="small "+kind}
+async function refreshLocal(){
+ const list=$("localList");if(!list)return;list.replaceChildren();
+ if(!local()){localMessage("Offline image library is unavailable in this browser","error");return}
+ try{
+ const entries=await local().list();localMessage(entries.length+" helyi Silkroad-feladvány ezen a készüléken. Mások számára nem publikus.","ok");
+ if(!entries.length){make("p","Még nincs helyi kép. Tölts fel képet a felső részen, majd kattints a Mentés a saját képtárba gombra.",list);return}
+ for(const item of entries){
+  const card=make("div",null,list);card.className="item";
+  const details=make("div",null,card);make("strong",item.answer+" • "+item.category,details);make("small",item.world+" | "+(item.filename||"helyi kép")+" | "+new Date(item.createdAt).toLocaleString("hu-HU"),details);
+  const controls=make("div",null,card);controls.className="row";
+  const show=make("button","Előnézet",controls);show.className="secondary";
+  show.onclick=async()=>{const image=await local().getBlob(item.id);if(!image)return;const url=URL.createObjectURL(image),preview=make("img",null,card);preview.src=url;preview.alt="Helyi screenshot: "+item.answer;preview.style.cssText="max-width:230px;max-height:190px;object-fit:contain";preview.onload=()=>URL.revokeObjectURL(url)};
+  const remove=make("button","Törlés",controls);remove.className="secondary";
+  remove.onclick=async()=>{if(!confirm("Eltávolítod ezt a helyi képet? "+item.answer))return;await local().remove(item.id);refreshLocal()};
+ }
+ }catch(e){localMessage("Helyi képtárhiba: "+e.message,"error")}
+}
+async function saveOffline(){
+ if(!local()){localMessage("A böngésződ nem támogatja ezt a funkciót.","error");return}
+ const files=[...$("fileInput").files];if(!files.length){localMessage("Előbb válassz ki egy vagy több JPG/PNG screenshotot fent!","warn");return}
+ const b=$("localSave");b.disabled=true;let done=0,skipped=0,failed=0;
+ for(let i=0;i<files.length;i++){
+  const file=files[i],matched=files.length===1?(state.selected||matchFile(file)):matchFile(file);
+  const answer=matched?.answer||$("answer").value.trim();
+  if(!answer||(files.length>1&&!matched)){skipped++;continue}
+  try{
+   localMessage("Kép import: "+(i+1)+"/"+files.length+" – "+file.name,"warn");
+   const encoded=await imageBlob(file),blob=await (await fetch("data:"+encoded.mime+";base64,"+encoded.data)).blob();
+   await local().storeScreenshot({blob,answer,aliases:matched?.aliases||$("aliases").value.split(",").map(x=>x.trim()).filter(Boolean),category:matched?.category||$("category").value,world:matched?.world||$("world").value,region:matched?.region||"",source:$("sourceUrl").value.trim()||"Saját fájl: "+file.name,filename:file.name});
+   done++;
+  }catch(e){failed++;localMessage(file.name+": "+e.message,"error")}
+ }
+ b.disabled=false;await refreshLocal();
+ localMessage("Helyi mentés: "+done+" sikeres • "+skipped+" kihagyott • "+failed+" hibás. Nyisd meg a Játék → Saját képek menüt.",done?"ok":"warn");
+}
+$("localSave").onclick=saveOffline;
+$("localRefresh").onclick=refreshLocal;
+$("localClear").onclick=async()=>{if(!confirm("Biztosan törlöd az összes helyi screenshotot ebből a böngészőből?"))return;await local().clear();refreshLocal()};
+refreshLocal();
