@@ -9,6 +9,7 @@ document.head.append(styles);
 const bar=document.createElement("nav");bar.className="racebar";
 const buttons=[["classic","⚔️ Classic"],["picture","🖼️ Picture Hunt"],["ranked","⏱️ Speed Hunt"],["leaderboard","🏆 Ranking"],["account","👤 Account"]];
 buttons.forEach(([k,label])=>{const b=document.createElement("button");b.textContent=label;b.dataset.view=k;b.onclick=()=>switchView(k);bar.append(b)});
+const studioLink=document.createElement("a");studioLink.href="./admin.html";studioLink.textContent="📷 Studio";studioLink.title="Silkdle Screenshot Studio";studioLink.style.cssText="display:inline-flex;align-items:center;padding:11px 13px;border:1px solid #45635b;border-radius:11px;color:#b7ecd3;text-decoration:none;background:#122c27;font-weight:750";bar.append(studioLink);
 const modeGrid=document.getElementById("modes"),classicPanel=document.getElementById("panel");modeGrid.parentNode.insertBefore(bar,modeGrid);
 const screen=document.createElement("section");screen.className="rpanel";screen.id="racescreen";screen.hidden=true;classicPanel.after(screen);
 const translations={
@@ -33,7 +34,7 @@ function matchAnswer(a,b){return String(a).normalize("NFKC").trim().toLocaleLowe
 function dayKey(){return new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/Budapest",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date())}
 function selectSample(){return samples[currentIndex%samples.length]}
 function newCommunity(){const mode=document.getElementById("world")?.value||"all",matches=samples.filter(s=>mode==="all"||s.world===mode);if(!matches.length)return samples[0];return matches[currentIndex%matches.length]}
-function imageBox(image,parent){const box=el("div","imgframe",null,parent);const img=el("img","",null,box);img.src=image;img.alt=language()==="hu"?"Rejtett fantáziakép":"Hidden fantasy illustration";img.loading="eager";const mask=el("div","maskgrid zoom-crop",null,box);for(let i=0;i<100;i++)el("i","",null,mask);mask._cropImage=img;return mask}
+function imageBox(image,parent){const box=el("div","imgframe",null,parent);const img=el("img","",null,box);img.src=image;img.alt=image.startsWith("/api/image/file/")?(language()==="hu"?"Rejtett Silkroad játékbeli kép":"Hidden Silkroad gameplay screenshot"):(language()==="hu"?"Demó fantáziarajz":"Demo fantasy illustration");img.loading="eager";const mask=el("div","maskgrid zoom-crop",null,box);for(let i=0;i<100;i++)el("i","",null,mask);mask._cropImage=img;return mask}
 const revealOrder=Array.from({length:100},(_,i)=>i).sort((a,b)=>{const distance=k=>Math.abs(k%10-4.5)+Math.abs(Math.floor(k/10)-4.5);return distance(a)-distance(b)||((a*37)%101)-((b*37)%101)});
 function reveal(mask,count){const tiles=mask.children;for(let i=0;i<100;i++)tiles[revealOrder[i]].classList.toggle("revealed",i<count);
  if(mask._cropImage){const progress=Math.max(0,Math.min(1,count/100)),zoom=1+9*Math.pow(1-progress,4);mask._cropImage.style.transform="scale("+zoom.toFixed(2)+")";mask._cropImage.setAttribute("data-zoom",zoom.toFixed(2));}
