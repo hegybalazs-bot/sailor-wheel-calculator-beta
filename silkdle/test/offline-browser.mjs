@@ -38,7 +38,8 @@ async function main(){
    await page.locator("#world").selectOption("Chinese");
    await page.locator("#fileInput").setInputFiles({name:"uruchi.png",mimeType:"image/png",buffer:png()});
    await page.locator("#localSave").click();
-   await page.waitForFunction(()=>document.getElementById("localStatus").textContent.includes("1 sikeres"),null,{timeout});
+   try{await page.waitForFunction(()=>document.getElementById("localStatus").textContent.includes("1 sikeres"),null,{timeout})}
+   catch(e){throw Error(name+" import failed. localStatus="+await page.locator("#localStatus").innerText()+"; pageerrors="+JSON.stringify(errors)+"; "+e.message)}
    assert.match(await page.locator("#localStatus").innerText(),/1 sikeres/);
    assert.equal(await page.locator("#localList .item").count(),1);
    await page.goto(base+"/");
