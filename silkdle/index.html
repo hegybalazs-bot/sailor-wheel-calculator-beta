@@ -52,7 +52,7 @@ h2{font-size:1.65rem;letter-spacing:-.5px;margin:7px 0}.hint{color:#b1c5be;line-
 <body>
 <header class="top"><div class="wrap topinner">
 <div class="brand"><div class="logo">⚔</div><div>Silkdle <div class="tag">The Silkroad Quiz</div></div></div>
-<div class="controls"><button class="smallbtn" id="lang">EN</button><select class="select" id="world"><option value="all">🌐 Mixed</option><option value="Chinese">🐉 Chinese</option><option value="European">🛡️ European</option></select></div>
+<div class="controls"><button class="smallbtn" id="lang">EN</button><select class="select" id="difficulty" aria-label="Difficulty"><option value="veteran">⚔️ Veteran</option><option value="legend" selected>🔥 Legend</option><option value="easy">🌱 Beginner</option></select><select class="select" id="world"><option value="all">🌐 Mixed</option><option value="Chinese">🐉 Chinese</option><option value="European">🛡️ European</option></select></div>
 </div></header>
 <main class="wrap">
 <section class="hero"><div><div class="eyebrow" id="eyebrow">THE DAILY SILKROAD CHALLENGE</div><h1>Guess. Fight. <span>Remember.</span></h1><p class="subtitle" id="subtitle">Mennyire ismered a Silkroad Online világát? Chinese és European fejtörők, napi kihívások és korlátlan gyakorlás. Ingyenes, regisztráció nélkül.</p></div><div class="sigil" aria-hidden="true">⚔️</div></section>
@@ -61,6 +61,7 @@ h2{font-size:1.65rem;letter-spacing:-.5px;margin:7px 0}.hint{color:#b1c5be;line-
 <section class="panel" id="panel" aria-live="polite"></section>
 </main>
 <footer class="wrap foot">Silkdle – független rajongói projekt, nem hivatalos Silkroad Online termék. <span id="footnote">Béta: mintakérdések, helyi mentés. Képes feladványok és globális ranglista későbbi verzióban.</span></footer>
+<script src="./hard-quiz.js"></script>
 <script>
 "use strict";
 const T={
@@ -148,36 +149,36 @@ const quiz=[
  {w:"European",hu:"Melyik európai unique szintje 30?",en:"Which European unique is level 30?",o:["Captain Ivy","Cerberus","Uruchi","Isyutaru"],a:0}
 ];
 const defs=[["mob","🐾"],["unique","👑"],["gear","🗡️"],["mastery","✨"],["map","🧭"],["knowledge","📜"]];
-const $=id=>document.getElementById(id), choiceKey="silkdle-mvp-v1";
-let lang="hu",world="all",daily=true,mode="unique",state=null,practiceIndex=0;
+const $=id=>document.getElementById(id), choiceKey="silkdle-expert-v2";
+let lang="hu",world="all",difficulty="legend",daily=true,mode="knowledge",state=null,practiceIndex=0;
 const t=()=>T[lang], date=()=>new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/Budapest",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
-const key=()=>[choiceKey,date(),world,mode].join(":");
+const key=()=>[choiceKey,date(),world,difficulty,mode].join(":");
 function seed(s){let h=2166136261;for(const ch of s)h=Math.imul(h^ch.charCodeAt(0),16777619);return h>>>0}
 function eligible(w){return world==="all" || w==="all" || w===world}
-function collection(){return mode==="knowledge"?quiz.filter(x=>eligible(x.w)):items[mode].filter(x=>eligible(x.world))}
+function collection(){const bank=difficulty==="easy"?quiz:(window.SILKDLE_HARD_QUIZ?.[difficulty]||quiz);return mode==="knowledge"?bank.filter(x=>eligible(x.w)):items[mode].filter(x=>eligible(x.world))}
 function indexFor(n,extra){return seed(date()+world+mode+extra)%n}
 function newState(){const c=collection();if(mode==="knowledge"){const sorted=c.map((x,i)=>({x,i,h:seed(date()+world+x.hu+(daily?"":String(practiceIndex))) })).sort((a,b)=>a.h-b.h).slice(0,5);return {mode,answered:[],questions:sorted.map(v=>v.i),done:false,score:0}}return {mode,target:daily?indexFor(c.length,"daily"):Math.floor(Math.random()*c.length),guesses:[],done:false,won:false,score:0}}
 function restore(){if(daily){try{const raw=localStorage.getItem(key());state=raw?JSON.parse(raw):newState()}catch(e){state=newState()}}else state=newState();renderPanel()}
 function save(){if(daily){try{localStorage.setItem(key(),JSON.stringify(state))}catch(e){}}updateStats()}
 function completed(){try{return Object.keys(localStorage).filter(k=>k.startsWith(choiceKey+":")&&JSON.parse(localStorage.getItem(k)).done)}catch(e){return[]}}
 function updateStats(){const ks=completed(),d=date(),points=ks.filter(k=>k.includes(":"+d+":")).reduce((s,k)=>s+Number(JSON.parse(localStorage.getItem(k)).score||0),0);$("played").textContent=ks.length;$("score").textContent=points;const ds=[...new Set(ks.map(k=>k.split(":")[1]))].sort().reverse();let streak=0,cur=new Date(d+"T12:00:00Z");if(ds[0]!==d)cur.setUTCDate(cur.getUTCDate()-1);while(ds.includes(cur.toISOString().slice(0,10))){streak++;cur.setUTCDate(cur.getUTCDate()-1)}$("streak").textContent=streak}
-function renderShell(){$("lang").textContent=lang==="hu"?"EN":"HU";$("eyebrow").textContent=t().eyebrow;$("subtitle").textContent=t().subtitle;$("daily").textContent=t().daily;$("practice").textContent=t().practice;$("playedL").textContent=t().played;$("streakL").textContent=t().streak;$("scoreL").textContent=t().score;$("footnote").textContent=t().foot;$("daily").classList.toggle("on",daily);$("practice").classList.toggle("on",!daily);$("world").value=world;$("modes").replaceChildren();defs.forEach((def,i)=>{const el=document.createElement("button");el.className="mode"+(mode===def[0]?" active":"");el.innerHTML='<span class="emoji">'+def[1]+'</span><b>'+t().modes[i][0]+'</b><p>'+t().modes[i][1]+'</p>';el.onclick=()=>{mode=def[0];restore();renderShell()};$("modes").append(el)});updateStats()}
+function renderShell(){$("lang").textContent=lang==="hu"?"EN":"HU";$("eyebrow").textContent=t().eyebrow;$("subtitle").textContent=t().subtitle;$("daily").textContent=t().daily;$("practice").textContent=t().practice;$("playedL").textContent=t().played;$("streakL").textContent=t().streak;$("scoreL").textContent=t().score;$("footnote").textContent=t().foot;$("daily").classList.toggle("on",daily);$("practice").classList.toggle("on",!daily);$("world").value=world;$("difficulty").value=difficulty;$("modes").replaceChildren();defs.forEach((def,i)=>{const el=document.createElement("button");el.className="mode"+(mode===def[0]?" active":"");el.innerHTML='<span class="emoji">'+def[1]+'</span><b>'+t().modes[i][0]+'</b><p>'+t().modes[i][1]+'</p>';el.onclick=()=>{mode=def[0];restore();renderShell()};$("modes").append(el)});updateStats()}
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function renderPanel(){const p=$("panel"),name=t().modes[defs.findIndex(d=>d[0]===mode)][0];p.replaceChildren();const head=document.createElement("div");head.className="panelhead";head.innerHTML='<div><div class="tag">'+(daily?t().daily:t().practice)+'</div><h2>'+name+'</h2><div class="hint">'+t().intro+'</div></div><span class="pill">'+(world==="all"?"Chinese + European":world)+'</span>';p.append(head);if(mode==="knowledge")renderQuiz(p);else renderGuess(p)}
 function make(tag,cls,html,parent){let n=document.createElement(tag);n.className=cls;if(html!=null)n.innerHTML=html;parent.append(n);return n}
 function renderGuess(p){const entries=collection(),target=entries[state.target],done=state.done,n=state.guesses.length;
 make("hr","divider","",p);
-const clue=make("div","cluebox","<strong>"+t().first+"</strong><div>"+escapeHtml(target.clue[lang])+"</div>",p);
+const textClue=difficulty==="easy"?target.clue[lang]:(difficulty==="veteran"?(n>=2?target.clue[lang]:(lang==="hu"?"A pontos segítséget két hibás tipp után kapod.":"Exact hints unlock after two wrong guesses.")):(n>=3?target.clue[lang]:(lang==="hu"?"LEGEND: Nincs kezdő leírás. A felismeréshez gondolkodnod kell.":"LEGEND: No initial description. Rely on your knowledge.")));const clue=make("div","cluebox","<strong>"+t().first+"</strong><div>"+escapeHtml(textClue)+"</div>",p);
 const tags=make("div","clues",null,clue);
-make("span","clue","🌍 "+(target.world==="all"?"Chinese + European":target.world),tags);
-if(n>=2||done)make("span","clue","🗺️ "+escapeHtml(target.region||""),tags);
-if((n>=4||done)&&target.level!=null)make("span","clue","⭐ "+target.level,tags);
-if((n>=4||done)&&target.detail)make("span","clue","🔍 "+escapeHtml(target.detail[lang]),tags);
+if(difficulty!=="legend"||n>=1||done)make("span","clue","🌍 "+(target.world==="all"?"Chinese + European":target.world),tags);
+if(n>=(difficulty==="easy"?2:difficulty==="veteran"?3:4)||done)make("span","clue","🗺️ "+escapeHtml(target.region||""),tags);
+if((n>=(difficulty==="legend"?5:4)||done)&&target.level!=null)make("span","clue","⭐ "+target.level,tags);
+if((n>=(difficulty==="legend"?5:4)||done)&&target.detail)make("span","clue","🔍 "+escapeHtml(target.detail[lang]),tags);
 const meter=make("div","meter",null,p);for(let i=0;i<6;i++)make("span",i<n?"used":"",null,meter);
 if(n) {make("div","hint",t().attempts+":",p);const attempts=make("div","feedback",null,p);state.guesses.forEach(g=>{const guessed=entries.find(x=>x.name===g);let hint=guessed&&target.level!=null&&guessed.level!=null?(guessed.level<target.level?" ↑ "+t().higher:guessed.level>target.level?" ↓ "+t().lower:" = "+t().same):"";make("div","attempt",escapeHtml(g)+(g===target.name?' <span class="correct">✓</span>':' <span class="wrong">✗</span>')+escapeHtml(hint),attempts)})}
 if(done){renderResult(p,target.name);return}
-const row=make("div","searchrow",null,p);const input=make("input","",null,row);input.id="answer";input.placeholder=t().guess;input.setAttribute("list","suggestions");input.autocomplete="off";input.setAttribute("aria-label",t().guess);const dl=make("datalist","",null,row);dl.id="suggestions";entries.forEach(x=>{let op=document.createElement("option");op.value=x.name;dl.append(op)});
-const submit=make("button","primary",t().send,row);function doGuess(){const found=entries.find(x=>x.name.toLocaleLowerCase()===input.value.trim().toLocaleLowerCase());if(!found||state.guesses.includes(found.name)){input.value="";input.placeholder=t().noMatch;return}state.guesses.push(found.name);state.won=found.name===target.name;state.done=state.won||state.guesses.length>=6;if(state.done)state.score=state.won?[100,80,60,40,30,20][state.guesses.length-1]:0;save();renderPanel()}
+const row=make("div","searchrow",null,p);const input=make("input","",null,row);input.id="answer";input.placeholder=t().guess;if(difficulty==="easy")input.setAttribute("list","suggestions");input.autocomplete="off";input.setAttribute("aria-label",t().guess);const dl=make("datalist","",null,row);dl.id="suggestions";entries.forEach(x=>{let op=document.createElement("option");op.value=x.name;dl.append(op)});
+const submit=make("button","primary",t().send,row);function doGuess(){const guess=input.value.trim();if(!guess)return;const found=entries.find(x=>x.name.toLocaleLowerCase()===guess.toLocaleLowerCase());const submitted=found?.name||guess;if(state.guesses.some(g=>g.toLocaleLowerCase()===submitted.toLocaleLowerCase())){input.value="";return}state.guesses.push(submitted);state.won=submitted.toLocaleLowerCase()===target.name.toLocaleLowerCase();state.done=state.won||state.guesses.length>=6;if(state.done)state.score=state.won?[100,80,60,40,30,20][state.guesses.length-1]:0;save();renderPanel()}
 submit.onclick=doGuess;input.onkeydown=e=>{if(e.key==="Enter")doGuess()};make("div","notice",t().ready,p)}
 function renderQuiz(p){const total=state.questions.length,step=state.answered.length;make("hr","divider","",p);if(state.done){renderResult(p,lang==="hu"?state.answered.filter(a=>a.correct).length+" / "+total+" "+t().answered:state.answered.filter(a=>a.correct).length+" / "+total+" "+t().answered);return}const q=collection()[state.questions[step]];if(!q){p.append(document.createTextNode("No questions available."));return}
 make("div","progress","<b>"+(step+1)+" / "+total+"</b><span>"+state.score+" "+t().points+"</span>",p);
@@ -190,7 +191,7 @@ function fallbackCopy(txt,btn){const ta=document.createElement("textarea");ta.va
 $("lang").onclick=()=>{lang=lang==="hu"?"en":"hu";document.documentElement.lang=lang;renderShell();renderPanel()};
 $("world").onchange=e=>{world=e.target.value;restore();renderShell()};
 $("daily").onclick=()=>{daily=true;restore();renderShell()};
-$("practice").onclick=()=>{daily=false;practiceIndex++;restore();renderShell()};
+$("practice").onclick=()=>{daily=false;practiceIndex++;restore();renderShell()};$("difficulty").onchange=e=>{difficulty=e.target.value;restore();renderShell()};
 restore();renderShell();
 </script>
 <script src="./race.js" defer></script>
