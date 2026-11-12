@@ -43,7 +43,7 @@ details#adminPanel .advanced-inner{padding-top:15px}
 </style></head>
 <body><main class="wrap">
 <div class="header"><div><strong>⚔️ SILKDLE</strong><span class="pill">Screenshot Studio • Admin Beta</span></div><a href="./index.html">← Játékhoz vissza</a></div>
-<section class="hero"><h1>Valódi Silkroad képkatalógus</h1><p>Képeket tölthetsz fel, forrást rögzíthetsz, ellenőrizheted a helyes választ és jóváhagyhatod a publikálást. A fel nem dolgozott képek soha nem kerülnek be automatikusan a játékba.</p></section>
+<section class="hero"><h1>Silkroad Online – képtár</h1><p>Itt már láthatod az internetről összegyűjtött Silkroad-képeket, és egy kattintással játszhatsz velük. Saját képek feltöltése csak opcionális; nem kell admin kulcs a képfelismerés kipróbálásához.</p></section>
 <section id="onlineGallery" class="panel" aria-labelledby="onlineTitle">
 <div class="row"><h2 id="onlineTitle">🖼️ Internetes Silkroad-képek</h2><span class="pill" id="onlineCount">Képek betöltése...</span></div>
 <p><strong>Ezeket a Silkroad-játékfotókat már összegyűjtöttem az internetről.</strong> Itt megnézheted, melyikhez van kép és melyikhez nem. Nem kell őket külön feltöltened.</p>
@@ -54,13 +54,13 @@ details#adminPanel .advanced-inner{padding-top:15px}
 <select id="webWorld" aria-label="Chinese vagy European"><option value="all">Chinese + European</option><option value="Chinese">Chinese</option><option value="European">European</option></select>
 </div>
 <div id="webGalleryCards" aria-live="polite"></div>
-<div class="row" style="margin-top:16px"><a class="pill" href="./index.html">🎮 Képfelismerés játék megnyitása</a></div>
+<div class="row" style="margin-top:16px"><a class="pill" href="./index.html?mode=picture">🎮 Képfelismerés játék megnyitása</a></div>
 </section>
 <details id="adminPanel" class="panel"><summary>🔐 Haladó: szerveres képtár, adatbázis és admin beállítások</summary>
 <div class="advanced-inner"><div class="row" id="stats"><span class="pill">Státusz lekérése...</span></div><p class="small">Az adminjogot a Render környezeti változóban tárolt, legalább 24 karakteres SILKDLE_ADMIN_KEY védi. A kulcsot ez az oldal nem menti el.</p>
 <div class="form"><div class="field"><label for="adminKey">Admin kulcs (csak ebben a böngésző-fülben)</label><input id="adminKey" type="password" autocomplete="off" spellcheck="false" placeholder="SILKDLE_ADMIN_KEY"/></div><div class="field"><label>&nbsp;</label><button id="connect">Admin csatlakozás</button></div></div><p id="message" aria-live="polite"></p></div></details>
 <section class="grid">
-<div class="panel"><h2>Képfeltöltés</h2>
+<div class="panel"><h2>➕ Opcionális: saját képfeltöltés</h2>
 <form id="uploadForm" class="form">
 <div class="field full"><label for="catalogSearch">Katalóguskereső (441 előkészített jelölt)</label><input id="catalogSearch" placeholder="pl. Uruchi, Glaive 9D, Jangan" autocomplete="off" list="catalogSuggestions"/>
 <datalist id="catalogSuggestions"></datalist></div>
