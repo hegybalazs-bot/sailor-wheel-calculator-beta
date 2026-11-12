@@ -37,7 +37,7 @@ function storeScreenshot(data){
  const answer=clean(data.answer),category=clean(data.category),world=clean(data.world);
  if(answer.length<2||answer.length>120||!["unique","mob","weapon","armor","location","npcquest"].includes(category)||!["Chinese","European","all"].includes(world))return Promise.reject(Error("Check the answer, category and Chinese/European world."));
  const id="local_"+(global.crypto?.randomUUID?.()||String(Date.now())+"_"+Math.random().toString(36).slice(2));
- const meta={id,answer,category,world,region:clean(data.region).slice(0,120),aliases:Array.isArray(data.aliases)?data.aliases.filter(x=>typeof x==="string").slice(0,12).map(clean):[],source:clean(data.source).slice(0,500),filename:clean(data.filename).slice(0,160),createdAt:Date.now(),size:data.blob.size};
+ const meta={id,answer,category,world,region:clean(data.region).slice(0,120),aliases:Array.isArray(data.aliases)?data.aliases.filter(x=>typeof x==="string").slice(0,12).map(clean):[],source:clean(data.source).slice(0,500),filename:clean(data.filename).slice(0,160),cropX:Math.min(1,Math.max(0,Number(data.cropX??.5))),cropY:Math.min(1,Math.max(0,Number(data.cropY??.45))),createdAt:Date.now(),size:data.blob.size};
  return count().then(n=>{if(n>=MAX_ITEMS)throw Error("500 images per browser is the beta limit");return transactional(["meta","media"],"readwrite",tx=>{tx.objectStore("meta").put(meta);tx.objectStore("media").put({id,blob:data.blob});return meta})})
 }
 const count=()=>read("meta",s=>s.count());
