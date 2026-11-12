@@ -38,11 +38,11 @@ function storeScreenshot(data){
  if(answer.length<2||answer.length>120||!["unique","mob","weapon","armor","location","npcquest"].includes(category)||!["Chinese","European","all"].includes(world))return Promise.reject(Error("Check the answer, category and Chinese/European world."));
  const id="local_"+(global.crypto?.randomUUID?.()||String(Date.now())+"_"+Math.random().toString(36).slice(2));
  const meta={id,answer,category,world,region:clean(data.region).slice(0,120),aliases:Array.isArray(data.aliases)?data.aliases.filter(x=>typeof x==="string").slice(0,12).map(clean):[],source:clean(data.source).slice(0,500),filename:clean(data.filename).slice(0,160),cropX:Math.min(1,Math.max(0,Number(data.cropX??.5))),cropY:Math.min(1,Math.max(0,Number(data.cropY??.45))),createdAt:Date.now(),size:data.blob.size};
- return count().then(n=>{if(n>=MAX_ITEMS)throw Error("500 images per browser is the beta limit");return transactional(["meta","media"],"readwrite",tx=>{tx.objectStore("meta").put(meta);tx.objectStore("media").put({id,blob:data.blob});return meta})})
+ return Promise.all([count(),data.blob.arrayBuffer()]).then(([n,buffer])=>{if(n>=MAX_ITEMS)throw Error("500 images per browser is the beta limit");return transactional(["meta","media"],"readwrite",tx=>{tx.objectStore("meta").put(meta);tx.objectStore("media").put({id,bytes:buffer,type:data.blob.type});return meta})})
 }
 const count=()=>read("meta",s=>s.count());
 const list=()=>read("meta",s=>s.getAll()).then(rows=>rows.sort((a,b)=>b.createdAt-a.createdAt));
-const getBlob=id=>read("media",s=>s.get(id)).then(record=>record?.blob||null);
+const getBlob=id=>read("media",s=>s.get(id)).then(record=>record?.blob||(record?.bytes?new Blob([record.bytes],{type:record.type||"image/jpeg"}):null));
 const remove=id=>transactional(["meta","media"],"readwrite",tx=>{tx.objectStore("meta").delete(id);tx.objectStore("media").delete(id)});
 const clear=()=>transactional(["meta","media"],"readwrite",tx=>{tx.objectStore("meta").clear();tx.objectStore("media").clear()});
 global.SILKDLE_LOCAL_GALLERY={storeScreenshot,count,list,getBlob,remove,clear,normalize,limit:MAX_ITEMS};
