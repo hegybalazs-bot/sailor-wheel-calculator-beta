@@ -39,7 +39,7 @@ assert.equal(x.response.status,200,JSON.stringify(x.data));
 const cookie=x.response.headers.get("set-cookie")?.split(";")[0];
 x=await endpoint("/race/start","POST",{},cookie);
 assert.equal(x.response.status,200);
-assert.equal(x.data.limitMs,45000);
+assert.equal(x.data.expiresAt-x.data.startedAt,45000);
 x=await endpoint("/race/guess","POST",{guess:"NotRealGuessNameOne"},cookie);
 assert.equal(x.response.status,200);assert.equal(x.data.finished,false);assert.equal(x.data.wrong,1);
 x=await endpoint("/race/guess","POST",{guess:"NotRealGuessNameTwo"},cookie);
