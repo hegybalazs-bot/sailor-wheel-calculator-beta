@@ -18,7 +18,7 @@ let x=await endpoint("/auth/register","POST",{username:nick,email,password:pass}
 const cookie=x.response.headers.get("set-cookie")?.split(";")[0];assert.ok(cookie?.startsWith("silkdle_session="));
 x=await endpoint("/me","GET",undefined,cookie);assert.equal(x.data.user.username,nick);
 x=await endpoint("/auth/register","POST",{username:nick.toUpperCase(),email:"other"+email,password:pass});assert.equal(x.response.status,409);
-x=await endpoint("/race/start","POST",{},cookie);assert.equal(x.response.status,200);assert.equal(x.data.started,true);assert.ok(x.data.puzzle.image);assert.ok(!("answer" in x.data));
+x=await endpoint("/race/start","POST",{},cookie);assert.equal(x.response.status,200);assert.equal(x.data.started,true);assert.ok(x.data.puzzle.image);assert.ok(!("answer" in x.data));assert.equal("choices" in x.data.puzzle,false);assert.equal(x.data.limitMs,undefined);
 let first=x.data;assert.equal(first.wrong,0);
 const expected={s01:"Tiger Girl",s02:"Cerberus",s03:"Glaive",s04:"Harp"}[first.puzzle.id];assert.ok(expected);
 x=await endpoint("/race/guess","POST",{guess:expected},cookie);assert.equal(x.response.status,200);assert.equal(x.data.correct,true);assert.equal(x.data.finished,true);assert.ok(x.data.score>0);
@@ -29,4 +29,23 @@ x=await endpoint("/auth/logout","POST",{},cookie);assert.equal(x.response.status
 x=await endpoint("/auth/login","POST",{login:nick,password:pass});assert.equal(x.response.status,200);const relogin=x.response.headers.get("set-cookie")?.split(";")[0];
 x=await endpoint("/account/delete","POST",{password:pass},relogin);assert.equal(x.response.status,200);
 x=await endpoint("/leaderboard?scope=daily");assert.ok(!x.data.entries.some(e=>e.username===nick));
+});
+
+
+test("hard-mode race: arbitrary wrong guesses consume two strikes and award zero", {skip:!process.env.TEST_DATABASE_URL}, async()=>{
+const nick="expert"+Math.random().toString(36).slice(2,10),pass="ExpertTestPassword55!";
+let x=await endpoint("/auth/register","POST",{username:nick,email:nick+"@example.test",password:pass});
+assert.equal(x.response.status,200,JSON.stringify(x.data));
+const cookie=x.response.headers.get("set-cookie")?.split(";")[0];
+x=await endpoint("/race/start","POST",{},cookie);
+assert.equal(x.response.status,200);
+assert.equal(x.data.limitMs,45000);
+x=await endpoint("/race/guess","POST",{guess:"NotRealGuessNameOne"},cookie);
+assert.equal(x.response.status,200);assert.equal(x.data.finished,false);assert.equal(x.data.wrong,1);
+x=await endpoint("/race/guess","POST",{guess:"NotRealGuessNameTwo"},cookie);
+assert.equal(x.response.status,200);assert.equal(x.data.finished,true);assert.equal(x.data.correct,false);assert.equal(x.data.score,0);
+x=await endpoint("/race/guess","POST",{guess:"Tiger Girl"},cookie);assert.equal(x.response.status,409);
+x=await endpoint("/race/status","GET",undefined,cookie);
+assert.equal(x.data.finished,true);assert.equal(x.data.wrong,2);
+x=await endpoint("/account/delete","POST",{password:pass},cookie);assert.equal(x.response.status,200);
 });
