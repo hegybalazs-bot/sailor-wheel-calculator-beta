@@ -42,6 +42,12 @@ button{border:0;border-radius:11px;background:#4bd09a;color:#0a281c;font-weight:
 <div class="field full"><label for="rightsNote">Forrás és jogok megjegyzése</label><textarea id="rightsNote" placeholder="Ki készítette, mikor, milyen nem kereskedelmi felhasználásra alkalmas?"></textarea></div>
 <div class="field full"><button id="upload" type="submit">Feltöltés ellenőrzésre</button></div>
 </form></div>
+<div class="panel"><h2>📂 Saját screenshotok – helyi próba</h2>
+<p>**Nem szükséges Render-adatbázis.** Válassz fent képet, add meg a helyes megfejtést, és mentsd a böngésződbe. Ez nem kerül fel a nyilvános oldalra, csak ezen a készüléken használható.</p>
+<div class="row"><button type="button" id="localSave">Mentés a saját képtárba</button><button type="button" id="localRefresh" class="secondary">Saját képtár frissítése</button><button type="button" id="localClear" class="secondary">Helyi képtár ürítése</button></div>
+<p class="small" id="localStatus" aria-live="polite">A képek a böngésző IndexedDB-tárhelyén maradnak, más játékos nem láthatja őket.</p>
+<div class="row"><a href="./index.html" class="pill">🧩 Játék → Saját képek</a></div>
+<div id="localList" class="list" aria-live="polite"></div></div>
 <div class="panel"><h2>Ellenőrzés és publikálás</h2>
 <p>Csak tényleges játékbeli kép kerülhet az adatbázisba. A feltöltés után a kép <b>pending</b> állapotban van. Publikálás előtt válassz jogalapot és rögzítsd a forrást.</p>
 <div class="field"><label for="rightsBasis">Felhasználási jogalap</label><select id="rightsBasis"><option value="">Válassz csak ellenőrzés után</option><option value="own_capture_noncommercial">Saját in-game screenshot – nem kereskedelmi fansite</option><option value="official_fansite_terms">Hivatalos oldali kép – ellenőrzött fansite-feltételek</option><option value="written_permission">Írásos felhasználási engedély</option></select></div>
@@ -50,5 +56,6 @@ button{border:0;border-radius:11px;background:#4bd09a;color:#0a281c;font-weight:
 </div>
 </section><div class="footer">Silkdle fan project – nincs automatikus jogellenőrzés; az adminnak ellenőriznie kell az egyes képek jogos felhasználását. A Render ideiglenes PostgreSQL adatbázis nem alkalmas végleges képarchívumnak.</div>
 </main>
+<script src="./offline-gallery.js" defer></script>
 <script src="./gallery-admin.js" defer></script>
 </body></html>
