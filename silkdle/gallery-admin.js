@@ -59,4 +59,4 @@ const reviewBtn=make("button",row.status==="approved"?"Visszavonás":"Jóváhagy
 function exportCatalog(){if(!state.catalog.length){message("Először csatlakozz az adminhoz.","warn");return}
 const data=JSON.stringify({schemaVersion:1,exportedAt:new Date().toISOString(),entries:state.catalog},null,2),blob=new Blob([data],{type:"application/json"}),url=URL.createObjectURL(blob),link=make("a",null,document.body);link.href=url;link.download="silkdle-kepkatalogus.json";link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),500)}
 $("connect").onclick=connect;$("refreshList").onclick=reload;$("exportCatalog").onclick=exportCatalog;
-$("catalogSearch").oninput=mapCatalog;$("catalogSearch").onchange=pickCatalog;$("fileInput").onchange=displayPreview;$("uploadForm").onsubmit=upload;status();
+$("catalogSearch").oninput=mapCatalog;$("catalogSearch").onchange=pickCatalog;$("fileInput").onchange=displayPreview;$("uploadForm").onsubmit=upload;status();api("/api/image/catalog").then(d=>{state.catalog=d.entries;message(d.entries.length+" előkészített tétel böngészhető. A publikáláshoz adatbázis és admin kulcs kell.","warn")}).catch(e=>message(e.message,"error"));
