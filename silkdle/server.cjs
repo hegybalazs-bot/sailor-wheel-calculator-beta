@@ -16,7 +16,7 @@ function hash32(v){return crypto.createHash("sha256").update(v).digest().readUIn
 function gameImage(p){if(p&&p.id.startsWith("img_"))return {...p,kind:p.category,image:"/api/image/file/"+p.id};return p}
 async function dailyPuzzle(day){const all=await gallery.approved();if(all.length>=40){const p=all[hash32("silkdle:"+day)%all.length];return gameImage(p)}return puzzles[hash32(day)%puzzles.length]}
 function safeEq(a,b){let A=Buffer.from(a),B=Buffer.from(b);return A.length===B.length&&crypto.timingSafeEqual(A,B)}
-function normalize(v){return String(v||"").normalize("NFKC").trim().toLocaleLowerCase("en")}
+function normalize(v){return String(v||"").normalize("NFKC").trim().toLocaleLowerCase("en").replace(/\bglavie\b/g,"glaive")}
 function randomId(){return crypto.randomBytes(32).toString("hex")}
 async function hashPassword(password){const salt=crypto.randomBytes(16).toString("hex");const key=await scrypt(password,salt,64);return "scrypt$"+salt+"$"+key.toString("hex")}
 async function checkPassword(password,stored){const parts=String(stored).split("$");if(parts.length!==3||parts[0]!=="scrypt")return false;const actual=Buffer.from(parts[2],"hex"),candidate=await scrypt(password,parts[1],64);return actual.length===candidate.length&&crypto.timingSafeEqual(actual,candidate)}
