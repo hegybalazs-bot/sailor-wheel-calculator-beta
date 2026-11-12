@@ -15,11 +15,11 @@ function dimensions(bytes,mime){
  if(mime==="image/jpeg"){if(bytes.length<80||bytes[0]!==255||bytes[1]!==216||bytes[bytes.length-2]!==255||bytes[bytes.length-1]!==217)throw Error("Invalid JPEG");let i=2;while(i<bytes.length-12){if(bytes[i]!==255){i++;continue}const k=bytes[i+1];if(k===217||k===218)break;if(k===216||k===1){i+=2;continue}const n=bytes.readUInt16BE(i+2);if(n<2)break;if([192,193,194,195,198,199,201,202,203,205,206,207].includes(k))return [bytes.readUInt16BE(i+7),bytes.readUInt16BE(i+5)];i+=n+2}throw Error("Cannot read JPEG dimensions")}
  throw Error("JPEG or PNG only");
 }
-function toPublic(r){return {id:r.id,catalogId:r.catalog_id,answer:r.answer,aliases:r.aliases,category:r.category,world:r.world,region:r.region,status:r.status,rightsBasis:r.rights_basis,rightsNote:r.rights_note,sourceUrl:r.source_url,width:r.width,height:r.height,preview:"/api/image/file/"+r.id}}
+function toPublic(r){return {id:r.id,catalogId:r.catalog_id,answer:r.answer,aliases:r.aliases,category:r.category,world:r.world,region:r.region,status:r.status,rightsBasis:r.rights_basis,rightsNote:r.rights_note,sourceUrl:r.source_url,width:r.width,height:r.height,cropX:Number(r.cropX??.5),cropY:Number(r.cropY??.45),preview:"/api/image/file/"+r.id}}
 module.exports=function(db,adminKey){
- async function init(){if(!db)return;await db.query("create table if not exists silkdle_images (id varchar(40) primary key,catalog_id varchar(100),answer varchar(120) not null,aliases jsonb not null default '[]'::jsonb,category varchar(24) not null,world varchar(16) not null,region varchar(120),mime varchar(24) not null,bytes bytea not null,width integer not null,height integer not null,source_url text,rights_basis varchar(40),rights_note text,status varchar(20) not null default 'pending',reviewed_at timestamptz,created_at timestamptz not null default now())");await db.query("create index if not exists silkdle_images_status_category on silkdle_images(status,category)")}
- async function approved(){if(!db)return [];return (await db.query("select id,answer,aliases,category,world,region from silkdle_images where status='approved' order by id")).rows}
- async function find(id){if(!db)return null;return (await db.query("select id,answer,aliases,category,world,region from silkdle_images where id=$1 and status='approved'",[id])).rows[0]||null}
+ async function init(){if(!db)return;await db.query("create table if not exists silkdle_images (id varchar(40) primary key,catalog_id varchar(100),answer varchar(120) not null,aliases jsonb not null default '[]'::jsonb,category varchar(24) not null,world varchar(16) not null,region varchar(120),mime varchar(24) not null,bytes bytea not null,width integer not null,height integer not null,crop_x numeric not null default 0.5,crop_y numeric not null default 0.45,source_url text,rights_basis varchar(40),rights_note text,status varchar(20) not null default 'pending',reviewed_at timestamptz,created_at timestamptz not null default now())");await db.query("alter table silkdle_images add column if not exists crop_x numeric not null default 0.5");await db.query("alter table silkdle_images add column if not exists crop_y numeric not null default 0.45");await db.query("create index if not exists silkdle_images_status_category on silkdle_images(status,category)")}
+ async function approved(){if(!db)return [];return (await db.query("select id,answer,aliases,category,world,region,crop_x as \"cropX\",crop_y as \"cropY\" from silkdle_images where status='approved' order by id")).rows}
+ async function find(id){if(!db)return null;return (await db.query("select id,answer,aliases,category,world,region,crop_x as \"cropX\",crop_y as \"cropY\" from silkdle_images where id=$1 and status='approved'",[id])).rows[0]||null}
  async function handle(req,res,url){
   const p=url.pathname;
   if(!p.startsWith("/api/image/")&&!p.startsWith("/api/admin/image"))return false;
@@ -29,7 +29,7 @@ module.exports=function(db,adminKey){
   if(!db){fail(res,503,"Database is not connected");return true}
   const admin=validAdmin(req,adminKey);
   if(p==="/api/admin/image/catalog"&&req.method==="GET"){if(!admin)fail(res,403,"Admin key required");else json(res,200,{entries:catalog.entries});return true}
-  if(p==="/api/admin/image/list"&&req.method==="GET"){if(!admin){fail(res,403,"Admin key required");return true}const rows=(await db.query("select id,catalog_id,answer,aliases,category,world,region,source_url,rights_basis,rights_note,status,width,height from silkdle_images order by created_at desc limit 1000")).rows;json(res,200,{images:rows.map(toPublic)});return true}
+  if(p==="/api/admin/image/list"&&req.method==="GET"){if(!admin){fail(res,403,"Admin key required");return true}const rows=(await db.query("select id,catalog_id,answer,aliases,category,world,region,source_url,rights_basis,rights_note,status,width,height,crop_x as \"cropX\",crop_y as \"cropY\" from silkdle_images order by created_at desc limit 1000")).rows;json(res,200,{images:rows.map(toPublic)});return true}
   if(p==="/api/admin/image/import"&&req.method==="POST"){
    if(!admin){fail(res,403,"Admin key required");return true}
    let b;try{b=await body(req)}catch(e){fail(res,413,e.message);return true}
@@ -42,7 +42,7 @@ module.exports=function(db,adminKey){
    if(size[0]<160||size[1]<160||size[0]*size[1]>6_553_600){fail(res,400,"Invalid image size");return true}
    const aliases=Array.isArray(b.aliases)?b.aliases.filter(x=>typeof x==="string"&&x.length<90).slice(0,12):[];
    const id="img_"+crypto.randomBytes(10).toString("hex");
-   await db.query("insert into silkdle_images(id,catalog_id,answer,aliases,category,world,region,mime,bytes,width,height,source_url,rights_note,status) values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,'pending')",[id,catalogId||null,answer,JSON.stringify(aliases),category,world,String(b.region||"").slice(0,120),mime,bytes,size[0],size[1],sourceUrl,rightsNote]);
+   await db.query("insert into silkdle_images(id,catalog_id,answer,aliases,category,world,region,mime,bytes,width,height,source_url,rights_note,crop_x,crop_y,status) values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,'pending')",[id,catalogId||null,answer,JSON.stringify(aliases),category,world,String(b.region||"").slice(0,120),mime,bytes,size[0],size[1],sourceUrl,rightsNote,Math.min(1,Math.max(0,Number(b.cropX??.5))),Math.min(1,Math.max(0,Number(b.cropY??.45)))]);
    json(res,201,{id,status:"pending",width:size[0],height:size[1],note:"Requires separate approval"});return true
   }
   const review=p.match(/^\/api\/admin\/image\/(img_[a-f0-9]{20})\/(approve|revoke)$/);
@@ -65,7 +65,7 @@ module.exports=function(db,adminKey){
    if(sessions.size>10000){for(const [k,v] of sessions)if(v.expires<Date.now())sessions.delete(k)}
    sessions.set(key,{id:selected.id,wrong:0,expires:Date.now()+1200000,finished:false});
    res.setHeader("Set-Cookie","silkdle_practice="+key+"; Path=/; HttpOnly; SameSite=Strict; Max-Age=1200"+(req.headers["x-forwarded-proto"]==="https"?"; Secure":""));
-   json(res,200,{id:selected.id,image:"/api/image/file/"+selected.id,category:selected.category,world:selected.world,wrong:0,opened:.01,maxWrong:6});return true
+   json(res,200,{id:selected.id,image:"/api/image/file/"+selected.id,category:selected.category,world:selected.world,cropX:Number(selected.cropX??.5),cropY:Number(selected.cropY??.45),wrong:0,opened:.01,maxWrong:6});return true
   }
   if(p==="/api/image/practice/guess"&&req.method==="POST"){
    const key=cookie(req,"silkdle_practice"),run=sessions.get(key);if(!run||run.finished||run.expires<Date.now()){fail(res,409,"Start a new puzzle");return true}
