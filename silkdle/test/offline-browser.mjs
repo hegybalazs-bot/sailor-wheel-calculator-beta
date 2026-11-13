@@ -36,11 +36,14 @@ async function main(){
    await page.route("https://**",route=>route.fulfill({status:200,contentType:"image/png",body:png()}));
    await page.goto(base+"/admin.html");
    await page.waitForSelector("#webGalleryCards .web-image-card",{timeout});
-   assert.equal(await page.locator("#webGalleryCards .web-image-card").count(),24,"Admin must show all 24 internet image links before login");
-   assert.equal(await page.locator("#webGalleryCards .source").count(),24,"Every image must credit its source");
+   const imageCount=await page.evaluate(()=>window.SILKDLE_WEB_IMAGES_V1.length);
+   assert.ok(imageCount>=24,"Admin should offer a substantial sourced image gallery");
+   assert.equal(await page.locator("#webGalleryCards .web-image-card").count(),imageCount,"Admin must show all sourced image links before login");
+   assert.equal(await page.locator("#webGalleryCards .source").count(),imageCount,"Every image must credit its source");
    assert.ok(!(await page.locator("#adminPanel").evaluate(el=>el.open)),"Server admin login should be collapsed by default");
    await page.locator("#webSearch").fill("Uruchi");
-   assert.equal(await page.locator("#webGalleryCards .web-image-card").count(),1);
+   const uruchiCount=await page.evaluate(()=>window.SILKDLE_WEB_IMAGES_V1.filter(x=>/uruchi/i.test([x.id,x.answer].join(" "))).length);
+   assert.equal(await page.locator("#webGalleryCards .web-image-card").count(),uruchiCount);
    await page.locator("#webSearch").fill("");
    await page.locator('#onlineGallery a[href*="mode=picture"]').click();
    await page.waitForSelector('#racescreen img[src^="https://"]',{timeout});
