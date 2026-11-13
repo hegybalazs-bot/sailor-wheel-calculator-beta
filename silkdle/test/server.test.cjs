@@ -32,7 +32,14 @@ x=await endpoint("/race/guess","POST",{guess:expected},cookie);assert.equal(x.re
 x=await endpoint("/auth/logout","POST",{},cookie);assert.equal(x.response.status,200);x=await endpoint("/me","GET",undefined,cookie);assert.equal(x.data.user,null);
 x=await endpoint("/profile","GET",undefined,cookie);assert.equal(x.response.status,401);
 x=await endpoint("/auth/login","POST",{login:nick,password:pass});assert.equal(x.response.status,200);const relogin=x.response.headers.get("set-cookie")?.split(";")[0];
-x=await endpoint("/account/delete","POST",{password:pass},relogin);assert.equal(x.response.status,200);
+const newPass="NewSecurePassword!72";
+x=await endpoint("/account/password","POST",{password:"incorrect",newPassword:newPass},relogin);assert.equal(x.response.status,403);
+x=await endpoint("/account/password","POST",{password:pass,newPassword:newPass},relogin);assert.equal(x.response.status,200);
+const rotated=x.response.headers.get("set-cookie")?.split(";")[0];assert.ok(rotated?.startsWith("silkdle_session="));
+x=await endpoint("/me","GET",undefined,relogin);assert.equal(x.data.user,null,"Old session must be revoked");
+x=await endpoint("/me","GET",undefined,rotated);assert.equal(x.data.user.username,nick);
+x=await endpoint("/auth/login","POST",{login:nick,password:pass});assert.equal(x.response.status,401,"Old password must stop working");
+x=await endpoint("/account/delete","POST",{password:newPass},rotated);assert.equal(x.response.status,200);
 x=await endpoint("/leaderboard?scope=daily");assert.ok(!x.data.entries.some(e=>e.username===nick));
 });
 
