@@ -61,6 +61,8 @@ async function main(){
    await page.goto(base+"/");
    await page.locator(".racebar button").filter({hasText:"Saját képek"}).click();
    await page.waitForSelector("#racescreen img[src^='blob:']", {timeout});
+   assert.equal(await page.locator("#racescreen .rhint").count(),1,"Local image hunt must always show a hint");
+   assert.match(await page.locator("#racescreen .rhint").innerText(),/Chinese/);
    await page.locator("#racescreen input[type=text]").fill("Uruchi");
    await page.locator("#racescreen button").filter({hasText:"Válasz beküldése"}).click();
    await page.waitForFunction(()=>document.getElementById("racescreen").textContent.includes("Megvan!"),null,{timeout});
@@ -75,6 +77,14 @@ async function main(){
    const remoteSrc=await page.locator('#racescreen img[src^="https://"]').getAttribute("src");
    const expected=await page.evaluate(url=>window.SILKDLE_WEB_IMAGES_V1.find(x=>x.image===url)?.answer,remoteSrc);
    assert.ok(expected,"source-linked image missing answer metadata");
+   assert.equal(await page.locator("#racescreen .rhint").count(),1,"Community image hunt must always show a hint");
+   assert.equal(await page.locator("#racescreen .rhint").getAttribute("data-hint-stage"),"1");
+   for(let wrong=0;wrong<2;wrong++){
+    await page.locator("#racescreen input[type=text]").fill("definitely wrong guess");
+    await page.locator("#racescreen button").filter({hasText:"Válasz beküldése"}).click();
+   }
+   assert.equal(await page.locator("#racescreen .rhint").getAttribute("data-hint-stage"),"2","Clue should progress after 2 wrong guesses");
+   assert.ok((await page.locator("#racescreen .rhint-line").count())>=3,"Second clue must be shown");
    await page.locator("#racescreen input[type=text]").fill(expected);
    await page.locator("#racescreen button").filter({hasText:"Válasz beküldése"}).click();
    await page.waitForFunction(()=>document.getElementById("racescreen").textContent.includes("Megvan!"),null,{timeout});
