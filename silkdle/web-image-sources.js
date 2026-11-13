@@ -2,6 +2,12 @@
  * Third-party hotlinks can fail or be withdrawn; no redistribution licence is asserted.
  * Non-ranked source-linked fan quiz only. Checked 2026-11-12. */
 window.SILKDLE_WEB_IMAGES_V1 = [
+  {"id":"preview-uruchi-render","answer":"Uruchi","aliases":[],"category":"unique","world":"Chinese","image":"https://sro.asia/site/assets-3d/posters/uruchi-800.webp","source":"https://sro.asia/site/en/","cropX":0.53,"cropY":0.49,"sourceStatus":"externally_linked_unverified_reuse_rights","verifiedPreview":true},
+  {"id":"preview-isyutaru-render","answer":"Isyutaru","aliases":[],"category":"unique","world":"Chinese","image":"https://sro.asia/site/assets-3d/posters/isyutaru-800.webp","source":"https://sro.asia/site/en/","cropX":0.51,"cropY":0.43,"sourceStatus":"externally_linked_unverified_reuse_rights","verifiedPreview":true},
+  {"id":"preview-cerberus-render","answer":"Cerberus","aliases":[],"category":"unique","world":"European","image":"https://sro.asia/site/assets-3d/posters/kerberos-800.webp","source":"https://sro.asia/site/en/","cropX":0.52,"cropY":0.56,"sourceStatus":"externally_linked_unverified_reuse_rights","verifiedPreview":true},
+  {"id":"preview-yarkan-render","answer":"Lord Yarkan","aliases":[],"category":"unique","world":"Chinese","image":"https://sro.asia/site/assets-3d/posters/bonelord-800.webp","source":"https://sro.asia/site/en/","cropX":0.54,"cropY":0.42,"sourceStatus":"externally_linked_unverified_reuse_rights","verifiedPreview":true},
+  {"id":"preview-shaitan-render","answer":"Demon Shaitan","aliases":[],"category":"unique","world":"all","image":"https://sro.asia/site/assets-3d/posters/tahomet-800.webp","source":"https://sro.asia/site/en/","cropX":0.56,"cropY":0.46,"sourceStatus":"externally_linked_unverified_reuse_rights","verifiedPreview":true},
+  {"id":"preview-tiger-woman-game","answer":"Tiger Girl","aliases":["Tiger Woman"],"category":"unique","world":"Chinese","image":"https://www.pvpserverler.org/img/tigergirl.jpg","source":"https://www.pvpserverler.org/blog/silkroad-online-uniqueler-ve-seviyeleri/","cropX":0.5,"cropY":0.52,"sourceStatus":"externally_linked_unverified_reuse_rights","verifiedPreview":true},
   {
     "id": "tiger-girl-1",
     "answer": "Tiger Girl",
