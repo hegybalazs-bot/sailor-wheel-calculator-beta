@@ -18,3 +18,12 @@ Current technical implementation:
 6. **NEW:** The website now has private, IndexedDB-backed Local Screenshot Hunt. It works without a Render database. Users can bring their own screenshot PNG/JPG packs, adjust the crop focal point in Screenshot Studio, save photos locally, and play. Photos are not automatically uploaded or added to the public leaderboard. Keep source screenshot files backed up.
 
 Run checks: `npm install --prefix silkdle` and `node --test silkdle/test/*.test.cjs`. Use `TEST_DATABASE_URL` for temporary PostgreSQL integration tests. All tests on GitHub Actions use disposable Postgres in CI.
+
+## Always-on hints (2026-11-13)
+- Picture Hunt (source-linked), local screenshots, and approved gallery puzzles now show a visible Hint card from the first frame.
+- Hint stage 1: Chinese/European world and category.
+- After two wrong guesses: curated region or fallback word-count hint.
+- After four wrong guesses: initial letter in non-ranked modes. Approved PostgreSQL puzzles release that character only from server after four incorrect responses.
+- Speed Hunt shows a fixed world/category hint to all users; no answer-specific progression during the timed ranked session.
+- HU and EN supported. Tests: `silkdle/test/hints.test.cjs` and browser coverage in `silkdle/test/offline-browser.mjs`.
+- Operational: redeploy the dedicated Render Silkdle web service on the latest commit and verify live screenshot/Hint behavior. Database-backed rankings are not enabled until the private `DATABASE_URL` is set and reviewed.
