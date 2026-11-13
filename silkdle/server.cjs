@@ -14,7 +14,7 @@ const puzzles=[
 function dayKey(d=new Date()){return new Intl.DateTimeFormat("en-CA",{timeZone:DAY_ZONE,year:"numeric",month:"2-digit",day:"2-digit"}).format(d)}
 function hash32(v){return crypto.createHash("sha256").update(v).digest().readUInt32BE(0)}
 function gameImage(p){if(p&&p.id.startsWith("img_"))return {...p,kind:p.category,image:"/api/image/file/"+p.id};return p}
-async function dailyPuzzle(day){const all=await gallery.approved();if(all.length>=40){const p=all[hash32("silkdle:"+day)%all.length];return gameImage(p)}return puzzles[hash32(day)%puzzles.length]}
+async function dailyPuzzle(day){const all=await gallery.approved();if(all.length>=1){const p=all[hash32("silkdle:"+day)%all.length];return gameImage(p)}return puzzles[hash32(day)%puzzles.length]}
 function safeEq(a,b){let A=Buffer.from(a),B=Buffer.from(b);return A.length===B.length&&crypto.timingSafeEqual(A,B)}
 function normalize(v){return String(v||"").normalize("NFKC").trim().toLocaleLowerCase("en").replace(/\bglaive\b/g,"glavie")}
 function randomId(){return crypto.randomBytes(32).toString("hex")}
@@ -42,6 +42,13 @@ if(url.pathname==="/api/auth/register"&&req.method==="POST"){if(!allow(req,"regi
 if(url.pathname==="/api/auth/login"&&req.method==="POST"){if(!allow(req,"login",15,600000))return fail(res,429,"Try again later");const body=await readJson(req),name=String(body.login||"").trim(),password=String(body.password||"");if(name.length>254||!password||password.length>128)return fail(res,401,"Invalid login");const q=await db.query("select * from silkdle_users where lower(username)=lower($1) or email=lower($1) limit 1",[name]);if(!q.rowCount||!(await checkPassword(password,q.rows[0].password_hash)))return fail(res,401,"Invalid login");return login(req,res,q.rows[0])}
 const user=await auth(req);
 if(url.pathname==="/api/me"&&req.method==="GET")return json(res,200,{user:user?{username:user.username}:null});
+if(url.pathname==="/api/profile"&&req.method==="GET"){
+ if(!user)return fail(res,401,"Please sign in to view your player statistics");
+ const summary=(await db.query("select count(*)::int as attempts,count(*) filter (where correct=true)::int as wins,coalesce(sum(score),0)::bigint as points,min(elapsed_ms) filter (where correct=true) as best_ms from silkdle_runs where user_id=$1",[user.id])).rows[0];
+ const results=(await db.query("select day_key,score,elapsed_ms,correct,wrong_guesses from silkdle_runs where user_id=$1 and finished_at is not null order by day_key desc limit 14",[user.id])).rows;
+ return json(res,200,{username:user.username,attempts:summary.attempts,wins:summary.wins,points:Number(summary.points),bestMs:summary.best_ms,results:results.map(r=>({day:r.day_key,score:r.score,elapsedMs:r.elapsed_ms,correct:r.correct,wrong:r.wrong_guesses}))});
+}
+
 if(url.pathname==="/api/auth/logout"&&req.method==="POST"){const raw=cookie(req,"silkdle_session");if(raw&&db)await db.query("delete from silkdle_sessions where token_hash=$1",[crypto.createHash("sha256").update(raw).digest("hex")]);clearCookie(req,res);return json(res,200,{ok:true})}
 if(url.pathname==="/api/leaderboard"&&req.method==="GET"){const scope=url.searchParams.get("scope")==="all"?"all":"daily";let rows;if(scope==="daily"){rows=(await db.query("select u.username,r.score,r.elapsed_ms,r.wrong_guesses from silkdle_runs r join silkdle_users u on u.id=r.user_id where r.day_key=$1 and r.correct=true order by r.score desc,r.elapsed_ms asc,r.started_at asc limit 50",[dayKey()])).rows}else{rows=(await db.query("select u.username,sum(r.score)::integer as score,min(r.elapsed_ms) as elapsed_ms,count(*)::integer as wins from silkdle_runs r join silkdle_users u on u.id=r.user_id where r.correct=true group by u.id,u.username order by score desc,wins desc limit 50")).rows}return json(res,200,{scope,day:dayKey(),entries:rows})}
 if(!user)return fail(res,401,"Please sign in to enter the ranked challenge");
