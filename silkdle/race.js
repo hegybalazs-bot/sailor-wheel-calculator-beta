@@ -379,7 +379,27 @@ function showPlayerStatistics(parent,username){
  }).catch(err=>{if(wrap.isConnected)status.textContent=err.message||t().connection});
 }
 
-async function showAccount(){clear();title(t().accountTitle);info(t().guest);await fetchMe();if(view!=="account")return;if(!dbAvailable){showError({message:t().unavailable});return}if(me){el("h2","rok",t().accountOk+": "+me.username,screen);showPlayerStatistics(screen,me.username);btn(t().logout,screen,async()=>{try{await api("/auth/logout","POST");me=null;switchView("account")}catch(e){showError(e)}});const detail=el("details","rform",null,screen),summary=el("summary","",t().delete,detail),p=el("div","rhelp",t().delete+" – "+t().password,detail),pass=el("input","",null,detail);pass.type="password";pass.autocomplete="current-password";btn(t().delete,detail,async()=>{if(!confirm(t().delete+"?"))return;try{await api("/account/delete","POST",{password:pass.value});me=null;switchView("account")}catch(e){showError(e)}},"rsecondary");return}
+function passwordChangePanel(parent){
+ const details=el("details","rform",null,parent);
+ el("summary","",language()==="hu"?"🔐 Jelszó módosítása":"🔐 Change password",details);
+ const currentLabel=el("label","",language()==="hu"?"Jelenlegi jelszó":"Current password",details);
+ const current=el("input","",null,currentLabel);current.type="password";current.autocomplete="current-password";current.maxLength=128;
+ const nextLabel=el("label","",language()==="hu"?"Új jelszó (legalább 10 karakter)":"New password (at least 10 characters)",details);
+ const next=el("input","",null,nextLabel);next.type="password";next.autocomplete="new-password";next.maxLength=128;next.minLength=10;
+ const message=el("p","rmuted","",details);message.setAttribute("aria-live","polite");
+ const submit=btn(language()==="hu"?"Jelszó frissítése":"Update password",details,async()=>{
+  if(lock)return;
+  if(!current.value||next.value.length<10){message.textContent=language()==="hu"?"Add meg a régi jelszavad és legalább 10 karakteres újat.":"Enter your old password and a new one with at least 10 characters.";return}
+  lock=true;submit.disabled=true;
+  try{
+   await api("/account/password","POST",{password:current.value,newPassword:next.value});
+   current.value="";next.value="";
+   message.textContent=language()==="hu"?"✅ A jelszó megváltozott. A többi eszközön kiléptettünk.":"✅ Password changed. Other sessions were signed out.";
+  }catch(e){message.textContent=e.message||t().connection}
+  finally{lock=false;submit.disabled=false}
+ },"rsecondary");
+}
+async function showAccount(){clear();title(t().accountTitle);info(t().guest);await fetchMe();if(view!=="account")return;if(!dbAvailable){showError({message:t().unavailable});return}if(me){el("h2","rok",t().accountOk+": "+me.username,screen);showPlayerStatistics(screen,me.username);passwordChangePanel(screen);btn(t().logout,screen,async()=>{try{await api("/auth/logout","POST");me=null;switchView("account")}catch(e){showError(e)}});const detail=el("details","rform",null,screen),summary=el("summary","",t().delete,detail),p=el("div","rhelp",t().delete+" – "+t().password,detail),pass=el("input","",null,detail);pass.type="password";pass.autocomplete="current-password";btn(t().delete,detail,async()=>{if(!confirm(t().delete+"?"))return;try{await api("/account/delete","POST",{password:pass.value});me=null;switchView("account")}catch(e){showError(e)}},"rsecondary");return}
 const form=el("div","rform",null,screen);const tabs=el("div","rcontrols",null,form);const fields=el("div","",null,form);const notice=el("p","rerror","",form);el("p","rhelp",t().pwWarn,form);let signup=false;
 function field(label,type,autocomplete){const lab=el("label","",label,fields),input=el("input","",null,lab);input.type=type;input.autocomplete=autocomplete;input.required=true;return input}
 function renderFields(){fields.replaceChildren();const username=field(signup?t().username:t().login,"text",signup?"username":"username"),email=signup?field(t().email,"email","email"):null,password=field(t().password,"password",signup?"new-password":"current-password");
