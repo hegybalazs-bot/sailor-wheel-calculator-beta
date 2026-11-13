@@ -67,7 +67,7 @@ module.exports=function(db,adminKey){
    const maxRecent=Math.max(1,Math.min(10,rows.length-1));
    sessions.set(key,{id:selected.id,wrong:0,expires:Date.now()+1200000,finished:false,history:[...history,selected.id].slice(-maxRecent)});
    res.setHeader("Set-Cookie","silkdle_practice="+key+"; Path=/; HttpOnly; SameSite=Strict; Max-Age=1200"+(req.headers["x-forwarded-proto"]==="https"?"; Secure":""));
-   json(res,200,{id:selected.id,image:"/api/image/file/"+selected.id,category:selected.category,world:selected.world,cropX:Number(selected.cropX??.5),cropY:Number(selected.cropY??.45),wrong:0,opened:.01,maxWrong:6});return true
+   json(res,200,{id:selected.id,image:"/api/image/file/"+selected.id,category:selected.category,world:selected.world,region:selected.region||null,cropX:Number(selected.cropX??.5),cropY:Number(selected.cropY??.45),wrong:0,opened:.01,maxWrong:6});return true
   }
   if(p==="/api/image/practice/guess"&&req.method==="POST"){
    const key=cookie(req,"silkdle_practice"),run=sessions.get(key);if(!run||run.finished||run.expires<Date.now()){fail(res,409,"Start a new puzzle");return true}
