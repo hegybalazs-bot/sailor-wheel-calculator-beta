@@ -27,3 +27,5 @@ Run checks: `npm install --prefix silkdle` and `node --test silkdle/test/*.test.
 - Speed Hunt shows a fixed world/category hint to all users; no answer-specific progression during the timed ranked session.
 - HU and EN supported. Tests: `silkdle/test/hints.test.cjs` and browser coverage in `silkdle/test/offline-browser.mjs`.
 - Operational: redeploy the dedicated Render Silkdle web service on the latest commit and verify live screenshot/Hint behavior. Database-backed rankings are not enabled until the private `DATABASE_URL` is set and reviewed.
+
+- Production activation instructions and missing manual credentials: `silkdle/docs/RENDER_ACTIVATION.md`.
