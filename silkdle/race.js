@@ -335,7 +335,13 @@ const visible=s.finished?100:elapsed>=40000?35:elapsed>=30000?22:elapsed>=20000?
 reveal(mask,Math.min(100,visible+bonus));
 if(ms<=0&&!s.finished){clearInterval(clock);clock=null;time.textContent=t().expired;setTimeout(async()=>{try{const status=await api("/race/status");if(view==="ranked")drawRound(status)}catch{}},400)}}
 tick();
-if(s.finished){clearInterval(clock);clock=null;reveal(mask,100);label.textContent=t().done;el("h2",s.correct?"rok":"rerror",s.correct?t().correct:t().finish,right);el("p","rmuted",t().answer+": "+s.answer,right);el("h2","rok",s.score+" "+t().points,right);btn(t().leaderboard,right,()=>switchView("leaderboard"));return}
+if(s.finished){clearInterval(clock);clock=null;reveal(mask,100);label.textContent=t().done;el("h2",s.correct?"rok":"rerror",s.correct?t().correct:t().finish,right);el("p","rmuted",t().answer+": "+s.answer,right);el("h2","rok",s.score+" "+t().points,right);btn(t().leaderboard,right,()=>switchView("leaderboard"));
+ const share=btn(language()==="hu"?"📋 Eredmény másolása":"📋 Copy result",right,async()=>{
+  const textResult="⚔️ SILKDLE • "+s.day+"\n"+(s.correct?"✅ ":"❌ ")+String(s.score)+" "+(language()==="hu"?"pont":"points")+" • "+(Number(s.elapsedMs)/1000).toFixed(1)+"s • "+s.wrong+"/2 "+(language()==="hu"?"hiba":"mistakes")+"\n"+location.origin+"/?mode=picture";
+  try{await navigator.clipboard.writeText(textResult);share.textContent=language()==="hu"?"✅ Másolva!":"✅ Copied!"}
+  catch{const msg=el("p","rmuted",textResult,right);msg.style.whiteSpace="pre-line";share.disabled=true}
+ },"rsecondary");
+ return}
 const input=typedAnswer(right),message=el("p","rmuted","",right);
 const submit=async()=>{if(lock||!input.value.trim())return;lock=true;try{const result=await api("/race/guess","POST",{guess:input.value.trim()});
 if(result.finished){const updated=await api("/race/status");if(view==="ranked")drawRound(updated)}
