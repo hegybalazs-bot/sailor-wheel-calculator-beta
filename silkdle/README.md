@@ -10,7 +10,16 @@ Silkdle is an unofficial fan-made, mobile-friendly Silkroad Online quiz. It live
 - **Leaderboard**: today's highest ranked score and all-time cumulative points, stored in PostgreSQL.
 - **Accounts**: username, email, password, login/logout, server-side sessions and account deletion.
 
-Scoring: on correct answer before deadline, \`max(100, 1000 - floor(elapsed_ms / 1000) * 12 - 100 * wrong_guesses)\`. On timeout or reaching three wrong guesses, 0 points. A user can play community mode without registering; only ranked mode writes shared leaderboard scores.
+Scoring: on correct answer before deadline, `max(100, round(1500 - (elapsed_ms / 1000) * 30 - 250 * wrong_guesses))`. On timeout or reaching **two** wrong guesses, 0 points. A user can play community mode without registering; only ranked mode writes shared leaderboard scores.
+
+
+## Player stats, hints, and social sharing
+
+- A visible **HU/EN Hint** starts every picture round with the world and category. Unranked puzzles unlock more clues after 2 and 4 wrong guesses. Ranked challenges use identical fixed hints for competitive fairness.
+- Once the PostgreSQL database is connected, signed-in players get a personal dashboard: lifetime points, wins, daily attempts, best time, and 14 most recent completed rounds.
+- Finished Speed Hunt results can be copied as spoiler-free text for guild and Discord sharing.
+- Ranked daily puzzle IDs are persisted in `silkdle_daily_puzzles`; new approved images during the day never change the existing daily puzzle. The server refuses a revoked current-day screenshot rather than silently substituting a different answer.
+- **Important:** no login, global ranking or server-managed approved gallery is live until Render has a working private `DATABASE_URL`. See [activation runbook](docs/RENDER_ACTIVATION.md).
 
 ## Expert difficulty
 
@@ -21,7 +30,7 @@ Scoring: on correct answer before deadline, \`max(100, 1000 - floor(elapsed_ms /
 
 ## Internet-sourced Silkroad Image Hunt (no upload required)
 
-The community **Picture Hunt / Képfelismerés** now starts with a curated pool of **24 externally linked, genuine Silkroad Online game screenshots** when no administrator-approved internal images are configured. The images cover Chinese/European uniques, places, mobs and NPCs, including Tiger Girl, Cerberus, Captain Ivy, Uruchi, Isyutaru, Lord Yarkan, Roc, Haroeris, Anubis and Mangyang. Different screenshots of the same subject remain separate guessing rounds. Players do **not** need to upload their own images to see this mode.
+The community **Picture Hunt / Képfelismerés** now starts with a curated pool of **30 source-linked Silkroad image candidates (availability and rights not independently verified)** when no administrator-approved internal images are configured. The images cover Chinese/European uniques, places, mobs and NPCs, including Tiger Girl, Cerberus, Captain Ivy, Uruchi, Isyutaru, Lord Yarkan, Roc, Haroeris, Anubis and Mangyang. Different screenshots of the same subject remain separate guessing rounds. Players do **not** need to upload their own images to see this mode.
 
 - Image links and each corresponding original article are held in `web-image-sources.js`; the game shows the credit/source link.
 - Third-party image files remain on their original hosts. Silkdle does **not** download, redistribute or commit those image files to GitHub, and does **not** claim redistribution rights to them. They may fail, be blocked or withdrawn. A failed image is skipped in that browser session.
