@@ -1,27 +1,118 @@
-# Silkdle — web MVP
+# Silkdle — Chinese + European Silkroad fan quiz
 
-Standalone mobile-friendly Silkroad Online fan quiz, Chinese and European.
+Silkdle is an unofficial fan-made, mobile-friendly Silkroad Online quiz. It lives in its own \`silkdle/\` directory; the Wheel Calculator homepage is not modified.
 
-## First playable version
-- Six playable modes: Mob Guess, Unique Hunter, Equipment, Mastery, Map Explorer, SRO Knowledge.
-- Daily challenge in Europe/Budapest time and unlimited practice.
-- Chinese / European / Mixed filters, HU / EN UI.
-- 6-guess modes with progressive clues and 5-question classic quiz.
-- Per-device results saved in localStorage; copyable score.
-- Responsive layout; no dependencies, no trackers, no external images.
+## Play modes
 
-## Limitations
-- Beta/demo content, not the full curated and validated 132-question bank.
-- Daily challenges and answer keys currently run client-side and are not cheat-proof.
-- No authentication, server-side admin, global leaderboard or official images yet.
-- This is an unofficial Silkroad Online fan project.
+- **Classic**: Mob Guess, Unique Hunter, Equipment, Mastery, Map Explorer, SRO Knowledge (daily + practice, HU/EN, CH/EU/Mixed).
+- **Image Hunt (community)**: Free, accountless image recognition. A **roughly 1% zoomed-in crop** is shown first, LoLdle Splash-style. The player types a name without a visible choice list; wrong guesses or the Reveal button zoom progressively farther out. The retained 10×10 mask supports later variation. Six wrong attempts end the round. No ranked points.
+- **Speed Hunt (ranked beta)**: one shared puzzle every Budapest-local day; **45 seconds, two wrong guesses**, one attempt per account/day. No answer dropdown. The server measures elapsed time, correctness and points; faster correct answers receive more points. Each wrong guess subtracts 250 points.
+- **Leaderboard**: today's highest ranked score and all-time cumulative points, stored in PostgreSQL.
+- **Accounts**: username, email, password, login/logout, server-side sessions and account deletion.
 
-## Deployment
-A single static file: `silkdle/index.html`. Published as `/silkdle/` from the existing static host that exposes repository root. Code is intentionally isolated from the Wheel Calculator root app.
+Scoring: on correct answer before deadline, \`max(100, 1000 - floor(elapsed_ms / 1000) * 12 - 100 * wrong_guesses)\`. On timeout or reaching three wrong guesses, 0 points. A user can play community mode without registering; only ranked mode writes shared leaderboard scores.
 
-## Next steps
-1. Independent repository and dedicated domain/site.
-2. Licensed image assets.
-3. Server-side question bank, secret answers, persistence, daily puzzle API.
-4. Content editor and moderation workflows.
-5. Import and review the existing 132-question seed, translate to EN.
+## Expert difficulty
+
+- Classic defaults to **Legend**, with **Veteran** and Beginner available as alternatives.
+- Initial clues and autocomplete are suppressed in Legend; further clues unlock only after wrong guesses.
+- A new bank of **34 Veteran/Legend questions** emphasizes verified vSRO 1.188 quest requirements, NPCs, quantities, European mastery classifications and classic unique comparisons. Answer positions are shuffled by puzzle/day.
+- Sources for editorial review: [vSRO quest guide](https://github.com/AlighieriDemiurgs/SROquests), [classic uniques](https://silkroadonline.wiki/guides/uniques) and [class mastery taxonomy](https://silkroadonline.fandom.com/wiki/Skills). Version-dependent answers must retain source/version metadata.
+
+## Internet-sourced Silkroad Image Hunt (no upload required)
+
+The community **Picture Hunt / Képfelismerés** now starts with a curated pool of **24 externally linked, genuine Silkroad Online game screenshots** when no administrator-approved internal images are configured. The images cover Chinese/European uniques, places, mobs and NPCs, including Tiger Girl, Cerberus, Captain Ivy, Uruchi, Isyutaru, Lord Yarkan, Roc, Haroeris, Anubis and Mangyang. Different screenshots of the same subject remain separate guessing rounds. Players do **not** need to upload their own images to see this mode.
+
+- Image links and each corresponding original article are held in `web-image-sources.js`; the game shows the credit/source link.
+- Third-party image files remain on their original hosts. Silkdle does **not** download, redistribute or commit those image files to GitHub, and does **not** claim redistribution rights to them. They may fail, be blocked or withdrawn. A failed image is skipped in that browser session.
+- This is **unranked practice**, not the central daily scoreboard. Shared ranked mode still requires a durable database and administrator-approved image rights.
+- The mode retains a narrow initial crop, gradual reveal, free-text answers, source link and Chinese/European filtering. Once official approved Silkroad images are present in the server database, those have priority over third-party image links.
+- If the original host's permission policy disallows embedding, remove its link immediately; review each source's reuse conditions before a permanent public launch. An old Joymax fansite FAQ is not permission to use arbitrary community screenshots from other websites.
+
+## Local Screenshot Hunt (no server database needed)
+
+A separate **🗂️ Saját képek / My screenshots** mode now uses IndexedDB directly in the player's browser. This bypasses the Render database limitation without claiming that pictures are shared publicly.
+
+1. Open `/admin.html` and choose one or more genuine Silkroad screenshots (PNG/JPG).
+2. Select a catalog candidate or enter an answer and world/category. For batch imports, name files after a catalog answer, e.g. `Uruchi-01.png` or `Tiger-Girl-2.jpg`.
+3. Adjust the **crop focal point** sliders to preview the initial close-up.
+4. Click **Mentés a saját képtárba** to save images locally; no admin key required for offline storage.
+5. Open `/`, select **🗂️ Saját képek**, and play with a gradually zooming real screenshot and free-text answers.
+
+The local pool persists across reloads and supports up to 500 photos per browser profile, subject to available storage. No local result enters the shared leaderboard, and local uploads are never transmitted to the Silkdle backend. **Do not clear browser website data if you want to keep them. Keep your original screenshot files as backups.** To make these pictures publicly playable, the admin must upload them to the server's reviewed image pool after the durable database is connected and permissions are checked.
+
+The same crop focal coordinates are saved in the PostgreSQL screenshot metadata and returned with published image puzzles.
+
+## Screenshot Studio and real-image database
+
+The website now includes a separate **[Screenshot Studio](/admin.html)**. It contains a read-only browser for **441 preclassified candidate slots** (16 uniques, 32 mobs, 150 weapon + degree targets, 216 armor + degree targets, 20 locations and 7 NPCs). **No actual Silkroad screenshots are bundled or claimed for those slots.** They are pending editorial image, answer, and copyright review.
+
+Once a durable PostgreSQL `DATABASE_URL` and secret `SILKDLE_ADMIN_KEY` (minimum 24 characters; use 32+) have been configured in Render, the Studio can:
+
+- filter the staged catalog and prefill metadata,
+- upload individual JPEG/PNG screenshots, or batch-import files named after catalog IDs / answers,
+- resize and remove most image metadata by redrawing uploads to compressed JPEG in the browser,
+- store originals-as-normalized-JPEG in PostgreSQL as `pending`,
+- preview unpublished media with a privileged admin key,
+- approve after permission basis and source note review, or revoke approval,
+- export the preclassified catalog JSON.
+
+Public `/api/image/status` exposes staged and approved counts. Real community Image Hunt will use **approved** pictures as soon as at least one is available. Until then, users see only the clearly marked four original demo illustrations. Ranked Speed Hunt uses an approved collection if **at least 40** reviewed pictures exist (otherwise its original demo collection is used).
+
+**The free Render PostgreSQL database is not connected to the web service in this initial release and expires in 30 days. It must be upgraded, backed up and connected before public account/image rollout.** No API/admin key or connection string belongs in public source control.
+
+See [image guidelines](./docs/IMAGE_GUIDELINES.md), [content rules](./docs/CONTENT_RULES.md), [review checklist](./docs/SCREENSHOT_CHECKLIST.md), and [next steps](./docs/NEXT_ACTION.md).
+
+## Demo pictures and future content
+
+Four **original vector illustrations** are provided solely as gameplay placeholders. They do not claim to be Silkroad screenshots and do not reproduce copyrighted client artwork. Replace them with authorized, vetted, answer-tagged actual SRO screenshots later. Do not silently copy game files into this public repository.
+
+## Local run
+
+Requires Node.js >= 20, optional PostgreSQL for ranked features.
+
+\`\`\`bash
+cd silkdle
+npm install
+npm start
+\`\`\`
+
+Open \`http://localhost:3000\`. With no \`DATABASE_URL\`, casual modes work; signup, login and worldwide rankings return HTTP 503 (no fake leaderboard).
+
+For PostgreSQL, set \`DATABASE_URL\` securely in your terminal or deployment dashboard. On startup, the server creates the three \`silkdle_*\` tables and indexes.
+
+## Deployment (Render)
+
+A standalone Render **web service** runs this branch with:
+- Build command: \`npm install --prefix silkdle --no-audit --no-fund\`
+- Start command: \`node silkdle/server.cjs\`
+- Region: Frankfurt; runtime: Node; HTTPS URL provided by Render.
+
+To connect the pre-provisioned Render database **privately**, open the database's Render Dashboard, copy its **Internal Database URL**, then open this web service's **Environment** settings and set \`DATABASE_URL\`. **Never paste passwords or database URLs into chat, code, commits, GitHub issues or public logs.** Both resources must be in the same Render region.
+
+Do not invite public account registration until database connectivity, email verification, password recovery, abuse prevention, privacy policy and consent handling have been reviewed. Render Free PostgreSQL expires after 30 days and has no backups; upgrade to a persistent database before using real long-term accounts.
+
+## Tests
+
+\`\`\`bash
+npm install --prefix silkdle --no-audit --no-fund
+node --test silkdle/test/server.test.cjs
+\`\`\`
+
+With \`TEST_DATABASE_URL\` set to a disposable local test database, the test suite covers registration, case-insensitive username conflicts, login, rank scoring, leaderboard, logout and account deletion. GitHub CI provisions a temporary PostgreSQL container for integration testing.
+
+## Security model
+
+- Passwords are salted and hashed via scrypt; no plaintext password storage.
+- Sessions use hashed random tokens in PostgreSQL, with HttpOnly SameSite=Strict cookies.
+- SQL uses parameterized queries and a unique constraint for per-user per-day attempts.
+- Server decides game time, matching, score and leaderboard entries.
+- Rate limiting is basic and per process; distributed production rate limiting, email verification and bot detection must be added before a public launch.
+- No claims are made that client-side image puzzles are entirely cheat-proof.
+
+## Scope of next development
+
+1. Connect database and run E2E deployment checks.
+2. Add verified image assets, better image sequence pools and image moderation.
+3. Email verification, password reset and privacy/data-retention controls.
+4. Content administration, per-mode rankings and more daily questions.

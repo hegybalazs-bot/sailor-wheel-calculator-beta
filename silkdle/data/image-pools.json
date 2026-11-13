@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "allowedStatuses": [
+    "approved"
+  ],
+  "worlds": [
+    "Chinese",
+    "European",
+    "all"
+  ],
+  "categories": [
+    "unique",
+    "mob",
+    "weapon",
+    "armor",
+    "location",
+    "npcquest"
+  ],
+  "practice": {
+    "unlimited": true,
+    "categoryFilter": true,
+    "worldFilter": true
+  },
+  "ranked": {
+    "requireApproved": true,
+    "avoidRepeatDays": 20,
+    "minApprovedImages": 40
+  }
+}
