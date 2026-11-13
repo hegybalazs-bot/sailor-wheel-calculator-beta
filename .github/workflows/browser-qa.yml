@@ -1,7 +1,7 @@
 name: Browser QA (Chromium, Firefox, WebKit)
 on:
   push:
-    branches: [main, "feat/**"]
+    branches: [main, "feat/**", "feature/silkdle-image-race-leaderboard"]
   pull_request:
 jobs:
   browser-smoke:
