@@ -8,7 +8,7 @@ Silkdle is an unofficial fan-made, mobile-friendly Silkroad Online quiz. It live
 - **Image Hunt (community)**: Free, accountless image recognition. A **roughly 1% zoomed-in crop** is shown first, LoLdle Splash-style. The player types a name without a visible choice list; wrong guesses or the Reveal button zoom progressively farther out. The retained 10×10 mask supports later variation. Six wrong attempts end the round. No ranked points.
 - **Speed Hunt (ranked beta)**: one shared puzzle every Budapest-local day; **45 seconds, two wrong guesses**, one attempt per account/day. No answer dropdown. The server measures elapsed time, correctness and points; faster correct answers receive more points. Each wrong guess subtracts 250 points.
 - **Leaderboard**: today's highest ranked score and all-time cumulative points, stored in PostgreSQL.
-- **Accounts**: username, email, password, login/logout, server-side sessions and account deletion.
+- **Accounts**: username, email, password, login/logout, server-side sessions, authenticated password change (revokes other sessions) and account deletion.
 
 Scoring: on correct answer before deadline, `max(100, round(1500 - (elapsed_ms / 1000) * 30 - 250 * wrong_guesses))`. On timeout or reaching **two** wrong guesses, 0 points. A user can play community mode without registering; only ranked mode writes shared leaderboard scores.
 
@@ -19,6 +19,7 @@ Scoring: on correct answer before deadline, `max(100, round(1500 - (elapsed_ms /
 - Once the PostgreSQL database is connected, signed-in players get a personal dashboard: lifetime points, wins, daily attempts, best time, and 14 most recent completed rounds.
 - Finished Speed Hunt results can be copied as spoiler-free text for guild and Discord sharing.
 - Ranked daily puzzle IDs are persisted in `silkdle_daily_puzzles`; new approved images during the day never change the existing daily puzzle. The server refuses a revoked current-day screenshot rather than silently substituting a different answer.
+- **Ranked readiness:** public ranked mode requires at least one rights-reviewed approved Silkroad image; the four local SVG demo illustrations are never accepted for ranked production rounds. `SILKDLE_ALLOW_RANKED_DEMO=1` is for isolated CI tests only.
 - **Important:** no login, global ranking or server-managed approved gallery is live until Render has a working private `DATABASE_URL`. See [activation runbook](docs/RENDER_ACTIVATION.md).
 
 ## Expert difficulty
