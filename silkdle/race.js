@@ -86,8 +86,10 @@ function hintEntries(entry,wrong,ranked=false){
   else if(entry.answer)lines.push(["🧩",hu?"A név "+entry.answer.trim().split(/\s+/).length+" szóból áll":"The name has "+entry.answer.trim().split(/\s+/).length+" word(s)"]);
   else lines.push(["🔎",hu?"Figyeld meg a sziluettet és a felszerelését.":"Look closely at the silhouette and equipment."]);
  }
- if(!ranked&&wrong>=4&&entry.answer)
-  lines.push(["🔤",hu?"A név első betűje: "+entry.answer.charAt(0).toUpperCase():"First letter: "+entry.answer.charAt(0).toUpperCase()]);
+ if(!ranked&&wrong>=4&&(entry.answer||entry.firstLetter)){
+  const letter=String(entry.firstLetter||(entry.answer||"").charAt(0)).toUpperCase();
+  lines.push(["🔤",hu?"A név első betűje: "+letter:"First letter: "+letter]);
+ }
  return lines;
 }
 function hintCard(parent,entry,wrong=0,ranked=false){
@@ -303,6 +305,7 @@ function drawRealCommunity(){
  const submit=async()=>{const guess=input.value.trim();if(!guess||lock)return;lock=true;try{
  const outcome=await api("/image/practice/guess","POST",{guess});community.wrong=outcome.wrong;community.opened=outcome.opened;
  community.done=outcome.finished;community.correct=outcome.correct;community.answer=outcome.answer||null;
+ if(outcome.firstLetter)data.firstLetter=outcome.firstLetter;
  if(outcome.finished){drawRealCommunity();return}
  notice.textContent=t().wrong;updateHint(approvedHint,data,outcome.wrong);reveal(mask,Math.round(outcome.opened*100));counter.replaceChildren();el("span","",t().mistakes+": "+outcome.wrong+" / 6",counter);input.value="";input.focus()
  }catch(e){notice.textContent=e.message}finally{lock=false}};
