@@ -75,7 +75,7 @@ module.exports=function(db,adminKey){
    const item=await find(run.id);if(!item){fail(res,410,"Item is no longer published");return true}
    const correct=[item.answer,...(Array.isArray(item.aliases)?item.aliases:[])].some(v=>norm(v)===guess);
    if(!correct)run.wrong++;run.finished=correct||run.wrong>=6;
-   json(res,200,{correct,finished:run.finished,wrong:run.wrong,opened:run.finished?1:[.01,.025,.07,.18,.45,.7,.95][run.wrong],...(run.finished?{answer:item.answer}:{})});return true
+   json(res,200,{correct,finished:run.finished,wrong:run.wrong,opened:run.finished?1:[.01,.025,.07,.18,.45,.7,.95][run.wrong],...(run.finished?{answer:item.answer}:run.wrong>=4?{firstLetter:item.answer.charAt(0)}:{})});return true
   }
   fail(res,404,"Unknown image endpoint");return true;
  }
