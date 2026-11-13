@@ -69,6 +69,23 @@ if(url.pathname==="/api/race/status"&&req.method==="GET")return json(res,200,awa
 if(url.pathname==="/api/race/start"&&req.method==="POST"){const day=dayKey(),p=await dailyPuzzle(day);if(!p)return fail(res,503,"Today’s ranked screenshot is unavailable");await db.query("insert into silkdle_runs(user_id,day_key,puzzle_id) values($1,$2,$3) on conflict(user_id,day_key) do nothing",[user.id,day,p.id]);return json(res,200,await runStatus(user))}
 if(url.pathname==="/api/race/guess"&&req.method==="POST"){if(!allow(req,"guess",45,60000))return fail(res,429,"Too many guesses");const b=await readJson(req);const guess=normalize(b.guess);if(guess.length<1||guess.length>80)return fail(res,400,"Invalid guess");const client=await db.connect();try{await client.query("begin");const rows=await client.query("select * from silkdle_runs where user_id=$1 and day_key=$2 for update",[user.id,dayKey()]);if(!rows.rowCount){await client.query("rollback");return fail(res,409,"No active daily run")}const r=rows.rows[0],p=gameImage(await gallery.find(r.puzzle_id))||puzzles.find(x=>x.id===r.puzzle_id);if(!p)throw Error("Puzzle missing or unpublished");if(r.finished_at){await client.query("rollback");return fail(res,409,"Run already finished")}const ms=Math.max(0,Date.now()-new Date(r.started_at).getTime()),timedOut=ms>=TIME_LIMIT_MS,correct=!timedOut&&[p.answer,...(p.aliases||[])].some(a=>normalize(a)===guess),wrong=r.wrong_guesses+(correct||timedOut?0:1),finished=correct||timedOut||wrong>=MAX_WRONG,score=correct?Math.max(100,Math.round(1500-(ms/1000)*30-(wrong*250))):0;
 await client.query("update silkdle_runs set wrong_guesses=$1,finished_at=case when $2 then now() else finished_at end,correct=$3,score=$4,elapsed_ms=case when $2 then $5::integer else null end where id=$6",[wrong,finished,correct,score,ms,r.id]);await client.query("commit");return json(res,200,{finished,correct,wrong,score,elapsedMs:ms,...(finished?{answer:p.answer}:{})})}catch(e){try{await client.query("rollback")}catch{}throw e}finally{client.release()}}
+if(url.pathname==="/api/account/password"&&req.method==="POST"){
+ if(!allow(req,"password_change",10,3600000))return fail(res,429,"Try again later");
+ const b=await readJson(req),oldPassword=String(b.password||""),newPassword=String(b.newPassword||"");
+ if(newPassword.length<10||newPassword.length>128)return fail(res,400,"New password must be 10–128 characters");
+ const existing=(await db.query("select password_hash from silkdle_users where id=$1",[user.id])).rows[0];
+ if(!existing||!(await checkPassword(oldPassword,existing.password_hash)))return fail(res,403,"Current password is incorrect");
+ if(oldPassword===newPassword)return fail(res,400,"New password must be different");
+ const hashed=await hashPassword(newPassword);
+ const client=await db.connect();
+ try{
+  await client.query("begin");
+  await client.query("update silkdle_users set password_hash=$1 where id=$2",[hashed,user.id]);
+  await client.query("delete from silkdle_sessions where user_id=$1",[user.id]);
+  await client.query("commit");
+ }catch(e){try{await client.query("rollback")}catch{}throw e}finally{client.release()}
+ return login(req,res,user);
+}
 if(url.pathname==="/api/account/delete"&&req.method==="POST"){const b=await readJson(req),row=(await db.query("select password_hash from silkdle_users where id=$1",[user.id])).rows[0];if(!row||!(await checkPassword(String(b.password||""),row.password_hash)))return fail(res,403,"Invalid password");await db.query("delete from silkdle_users where id=$1",[user.id]);clearCookie(req,res);return json(res,200,{ok:true})}
 return fail(res,404,"Not found")}
 const types={".html":"text/html; charset=utf-8",".js":"text/javascript; charset=utf-8",".css":"text/css; charset=utf-8",".svg":"image/svg+xml"};
