@@ -5,7 +5,7 @@ on:
       - 'silkdle/**'
       - '.github/workflows/silkdle-ci.yml'
   push:
-    branches: [main]
+    branches: [main, "feature/silkdle-image-race-leaderboard"]
     paths:
       - 'silkdle/**'
 permissions:
