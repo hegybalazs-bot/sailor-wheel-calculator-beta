@@ -2,7 +2,19 @@
 
 Silkdle is an unofficial fan-made, mobile-friendly Silkroad Online quiz. It lives in its own \`silkdle/\` directory; the Wheel Calculator homepage is not modified.
 
-## Play modes
+## Daily Five — new LoLdle-inspired homepage
+
+The default `/?mode=daily5` route is an original five-mode Silkroad fan experience inspired by daily deduction games:
+
+- **Classic Hunt:** Chinese/European unique and mob name guessing with green/yellow/red World, Type, Area and Level comparison (including level arrows).
+- **Item & Skill:** Chinese and European weapon/mastery roster with World, Type, Role and Specialization comparisons.
+- **Splash Hunt:** daily deterministic selection from a fixed subset of third-party image links, initially close-cropped and revealed after incorrect answers. This is **local, unranked** and depends on source availability. Broken external image means the challenge cannot be fairly scored.
+- **Quest Mystery:** quest questions drawn from the version-scoped Veteran/Legend question bank, with searchable answer candidates and progressive hints.
+- **Emoji Mystery:** curated Chinese/European characters, weapons and places hinted by progressively unlocked emojis.
+
+All five modes have a visible initial hint, stronger clues after two and four wrong guesses, a keyboard-friendly name search, six attempts maximum, daily or unlimited-practice modes, and a mobile-friendly emerald/gold interface. One deterministic selection per Budapest-local calendar day is stored in the user's **own browser** with per-mode completion, points, full-five-day streak and spoiler-free Discord sharing. The local score is not an authenticated global leaderboard and is not protected against local manipulation. No account or database is needed for Daily Five. Previously available Classic Library, Picture Hunt, My screenshots, Speed Hunt, Rankings and Account routes remain in the navigation.
+
+## Other play modes
 
 - **Classic**: Mob Guess, Unique Hunter, Equipment, Mastery, Map Explorer, SRO Knowledge (daily + practice, HU/EN, CH/EU/Mixed).
 - **Image Hunt (community)**: Free, accountless image recognition. A **roughly 1% zoomed-in crop** is shown first, LoLdle Splash-style. The player types a name without a visible choice list; wrong guesses or the Reveal button zoom progressively farther out. The retained 10×10 mask supports later variation. Six wrong attempts end the round. No ranked points.
@@ -67,7 +79,7 @@ Once a durable PostgreSQL `DATABASE_URL` and secret `SILKDLE_ADMIN_KEY` (minimum
 - approve after permission basis and source note review, or revoke approval,
 - export the preclassified catalog JSON.
 
-Public `/api/image/status` exposes staged and approved counts. Real community Image Hunt will use **approved** pictures as soon as at least one is available. Until then, users see only the clearly marked four original demo illustrations. Ranked Speed Hunt uses an approved collection if **at least 40** reviewed pictures exist (otherwise its original demo collection is used).
+Public `/api/image/status` exposes staged and approved counts. Real community Image Hunt gives priority to **approved** pictures once at least one is available; otherwise it offers source-linked external practice when available, with clearly labeled fantasy-demo drawings as the last fallback. Production Ranked Speed Hunt requires at least **one approved genuine screenshot**; it never uses demo illustrations for public ranked scores. The synthetic demo flag `SILKDLE_ALLOW_RANKED_DEMO=1` is restricted to isolated tests.
 
 **The free Render PostgreSQL database is not connected to the web service in this initial release and expires in 30 days. It must be upgraded, backed up and connected before public account/image rollout.** No API/admin key or connection string belongs in public source control.
 
@@ -89,7 +101,7 @@ npm start
 
 Open \`http://localhost:3000\`. With no \`DATABASE_URL\`, casual modes work; signup, login and worldwide rankings return HTTP 503 (no fake leaderboard).
 
-For PostgreSQL, set \`DATABASE_URL\` securely in your terminal or deployment dashboard. On startup, the server creates the three \`silkdle_*\` tables and indexes.
+For PostgreSQL, set \`DATABASE_URL\` securely in your terminal or deployment dashboard. On startup, the server creates its Silkdle user, session, run, daily-puzzle and image-gallery tables and indexes.
 
 ## Deployment (Render)
 
