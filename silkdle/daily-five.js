@@ -38,7 +38,7 @@ const catalog=kind=>{
  }
  return [];
 };
-const target=(kind,practice,round)=>{const entries=catalog(kind);return entries.length?entries[hash(day()+"/"+kind+"/"+(practice?round:"daily"))%entries.length]:null};
+const target=(kind,practice,round,offset=0)=>{const entries=catalog(kind);return entries.length?entries[(hash(day()+"/"+kind+"/"+(practice?round:"daily"))+Math.max(0,offset))%entries.length]:null};
 const key=(kind,d=day())=>PREFIX+d+":"+kind;
 const get=kind=>{try{const x=JSON.parse(localStorage.getItem(key(kind))||"null");return x&&Array.isArray(x.guesses)?x:null}catch{return null}};
 const put=(kind,x)=>{try{localStorage.setItem(key(kind),JSON.stringify(x))}catch{}};
@@ -140,8 +140,8 @@ function history(panel,kind,tgt,s){
  }
 }
 function puzzle(panel,kind){
- const tgt=target(kind,practice,round);if(!tgt){el("p","d5-message","No puzzle data available",panel);return}
  const s=state();
+ const tgt=target(kind,practice,round,kind==="splash"?(s.imageOffset||0):0);if(!tgt){el("p","d5-message","No puzzle data available",panel);return}
  const head=el("div","d5-puzzlehead",null,panel);el("span","d5-icon",ICONS[MODES.indexOf(kind)],head);
  const text=el("div","",null,head);el("h3","",t()[kind][0],text);el("p","",t()[kind][1],text);
  let canGuess=true;
@@ -156,7 +156,7 @@ function puzzle(panel,kind){
   const scale=[10,6,4,2.6,1.5,1][Math.min(5,s.guesses.length)];
   img.style.transform="scale("+(s.done?1:scale)+")";
   img.style.transformOrigin=Math.round((tgt.cropX??.5)*100)+"% "+Math.round((tgt.cropY??.5)*100)+"%";
-  const err=el("p","d5-message","",panel);img.onerror=()=>{canGuess=false;err.textContent=t().imageFail;panel.querySelectorAll(".d5-inputrow input,.d5-inputrow button").forEach(x=>x.disabled=true)};
+  const err=el("div","d5-message","",panel);img.onerror=()=>{if(!panel.isConnected)return;canGuess=false;err.textContent=t().imageFail;panel.querySelectorAll(".d5-inputrow input,.d5-inputrow button").forEach(x=>x.disabled=true);if((s.imageOffset||0)<catalog("splash").length-1)btn(locale()==="hu"?"🔄 Másik kép próbálása":"🔄 Try another image",err,()=>{s.imageOffset=(s.imageOffset||0)+1;save(s);render()},"d5-button subtle")};
   if(tgt.source){const source=el("a","d5-source",t().source,panel);source.href=tgt.source;source.target="_blank";source.rel="noopener noreferrer"}
  }
  const hintBox=el("div","d5-hint",null,panel);el("strong","",t().hint,hintBox);
@@ -175,7 +175,7 @@ function puzzle(panel,kind){
  }else guessList(panel,kind,tgt,s,canGuess);
 }
 function shareText(){
- const s=summary(),rows=MODES.map((k,i)=>{const r=get(k);return ICONS[i]+" "+(r?.done?(r.won?"🟩":"🟥"):"⬛")+" "+(r?.done?r.guesses.length+"/6":"—")});
+ const s=summary(),rows=MODES.map((k,i)=>{const r=get(k);const cells=r?.done?(r.won?"🟥".repeat(Math.max(0,r.guesses.length-1))+"🟩":"🟥".repeat(r.guesses.length)):"⬛";return ICONS[i]+" "+cells+" "+(r?.done?r.guesses.length+"/6":"—")});
  return "⚔️ SILKDLE • "+day()+"\n"+rows.join("\n")+"\n🏆 "+s.points+"/500 • "+s.done+"/5\n"+location.origin+"/?mode=daily5";
 }
 function render(){
