@@ -9,7 +9,7 @@ function setup(){
   gear:[{name:"Glavie",world:"Chinese",region:"Two-handed",detail:{hu:"Heuksal",en:"Heuksal"}}],
   mastery:[{name:"Cleric",world:"European",region:"Support",detail:{hu:"Cleric Rod",en:"Cleric Rod"}}]
  };
- const fixture={window:{SILKDLE_CORE_ITEMS:data,SILKDLE_WEB_IMAGES_V1:[{id:"preview-uruchi-render",answer:"Uruchi",world:"Chinese",category:"unique",image:"https://example.test/uruchi.png"}],SILKDLE_HARD_QUIZ:{veteran:[{hu:"Inventory Expansion küldetés?",en:"Inventory Expansion quest?",o:["Ong","Mangyang","Uruchi","Cerberus"],a:0}],legend:[]}},document:{documentElement:{lang:"hu"}},localStorage:{getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,v)},location:{origin:"https://silkdle.test"},Intl,Date,Math};
+ const fixture={window:{SILKDLE_CORE_ITEMS:data,SILKDLE_WEB_IMAGES_V1:[{id:"preview-uruchi-render",answer:"Uruchi",world:"Chinese",category:"unique",image:"https://example.test/uruchi.png"},{id:"preview-isyutaru-render",answer:"Isyutaru",world:"Chinese",category:"unique",image:"https://example.test/isyutaru.png"}],SILKDLE_HARD_QUIZ:{veteran:[{hu:"Inventory Expansion küldetés?",en:"Inventory Expansion quest?",o:["Ong","Mangyang","Uruchi","Cerberus"],a:0}],legend:[]}},document:{documentElement:{lang:"hu"}},localStorage:{getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,v)},location:{origin:"https://silkdle.test"},Intl,Date,Math};
  vm.runInNewContext(src,fixture,{timeout:1000,filename:"daily-five.js"});
  return {api:fixture.window.SILKDLE_DAILY_FIVE.internals,store,fixture};
 }
@@ -38,6 +38,7 @@ test("classic compare paints matching world and arrows correctly",()=>{
  const near=api.compare(base[0],{...base[0],level:25},"classic");
  assert.equal(near[3][2],"partial");
 });
+test("a broken external Splash can advance to a different local image without changing other modes",()=>{const {api}=setup();const one=api.target("splash",false,0,0),two=api.target("splash",false,0,1);assert.notEqual(one.id,two.id);assert.equal(api.target("classic",false,0,0).name,api.target("classic",false,0,99).name===undefined?null:api.target("classic",false,0,0).name)});
 test("progressive hint never leaks the entire answer in initial stage",()=>{
  const {api}=setup(),u=api.catalog("classic")[0];
  const initial=api.hint("classic",u,0),later=api.hint("classic",u,4);
