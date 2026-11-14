@@ -59,6 +59,22 @@ async function main(){
    assert.match(await page.locator("#localStatus").innerText(),/1 sikeres/);
    assert.equal(await page.locator("#localList .item").count(),1);
    await page.goto(base+"/");
+   await page.waitForSelector(".d5-cards .d5-card",{timeout});
+   assert.equal(await page.locator(".d5-card").count(),5,"Five daily modes should be on the landing page");
+   assert.equal(await page.locator("#dailyfive-game .d5-hint").count(),1,"Classic always displays a hint");
+   const miss=await page.evaluate(()=>{
+    const api=window.SILKDLE_DAILY_FIVE.internals,answer=api.target("classic",false,0).name;
+    return api.catalog("classic").find(x=>x.name!==answer).name;
+   });
+   await page.locator("#dailyfive-game .d5-inputrow input").fill(miss);
+   await page.locator("#dailyfive-game .d5-inputrow .d5-button").click();
+   assert.equal(await page.locator("#dailyfive-game .d5-cells .d5-cell").count(),4,"One wrong guess must show world,type,region,level comparison");
+   await page.reload();
+   assert.equal(await page.locator("#dailyfive-game .d5-cells .d5-cell").count(),4,"Daily progress should survive refresh");
+   for(const [idx,selector] of [[1,".d5-hint"],[2,".d5-crop img"],[3,".d5-question"],[4,".d5-emojis"]]){
+    await page.locator(".d5-cards .d5-card").nth(idx).click();
+    await page.waitForSelector("#dailyfive-game "+selector,{timeout});
+   }
    await page.locator(".racebar button").filter({hasText:"Saját képek"}).click();
    await page.waitForSelector("#racescreen img[src^='blob:']", {timeout});
    assert.equal(await page.locator("#racescreen .rhint").count(),1,"Local image hunt must always show a hint");
