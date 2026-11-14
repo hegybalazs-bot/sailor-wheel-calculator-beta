@@ -108,7 +108,7 @@ function guessList(parent,kind,tgt,s,enabled){
  const matches=()=>{const val=normal(input.value);return val.length<2?[]:options.filter(x=>(normal(x.name).includes(val)||(x.aliases||[]).some(a=>normal(a).includes(val)))&&!s.guesses.some(y=>normal(y)===normal(x.name))).slice(0,8)};
  const update=()=>{
   suggestions.replaceChildren();const found=matches();input.setAttribute("aria-expanded",String(found.length>0));
-  found.forEach((x,i)=>{const b=btn(x.name,suggestions,()=>{input.value=x.name;submit()},"d5-suggestion"+(selected===i?" active":""));b.setAttribute("role","option")});
+  found.forEach((x,i)=>{const badge=kind==="classic"?(x.type==="Unique"?"👑 ":"🐾 "):kind==="item"?(x.type==="Weapon"?"🗡️ ":"✨ "):kind==="emoji"?"🧩 ":kind==="quest"?"📜 ":"🖼️ ";const b=btn(badge+x.name,suggestions,()=>{input.value=x.name;submit()},"d5-suggestion"+(selected===i?" active":""));b.setAttribute("role","option")});
  };
  function submit(){
   if(!enabled){msg.textContent=t().imageFail;return}
@@ -126,6 +126,8 @@ function history(panel,kind,tgt,s){
  const tries=el("div","d5-tries",null,panel);for(let i=0;i<6;i++)el("i",i<s.guesses.length?"used":"",null,tries);
  if(!s.guesses.length)return;
  if(kind==="classic"||kind==="item"){
+  const legend=el("div","d5-legend",null,panel);
+  for(const [state,label] of [["exact",locale()==="hu"?"Pontos":"Exact"],["partial",locale()==="hu"?"Közeli / részleges":"Near / partial"],["miss",locale()==="hu"?"Eltérő":"Different"]]){const item=el("span","",null,legend);el("i","d5-dot "+state,null,item);item.append(document.createTextNode(label))}
   const rows=el("div","d5-history",null,panel);
   for(const name of s.guesses){
    const r=el("div","d5-historyrow",null,rows);el("strong","",name,r);
@@ -151,7 +153,7 @@ function puzzle(panel,kind){
  if(kind==="splash"){
   const crop=el("div","d5-crop",null,panel),img=el("img","",null,crop);
   img.src=tgt.image;img.alt=locale()==="hu"?"Silkroad-kép részlete":"Silkroad image crop";img.referrerPolicy="no-referrer";
-  const scale=[6,4,2.6,1.9,1.35,1][Math.min(5,s.guesses.length)];
+  const scale=[10,6,4,2.6,1.5,1][Math.min(5,s.guesses.length)];
   img.style.transform="scale("+(s.done?1:scale)+")";
   img.style.transformOrigin=Math.round((tgt.cropX??.5)*100)+"% "+Math.round((tgt.cropY??.5)*100)+"%";
   const err=el("p","d5-message","",panel);img.onerror=()=>{canGuess=false;err.textContent=t().imageFail;panel.querySelectorAll(".d5-inputrow input,.d5-inputrow button").forEach(x=>x.disabled=true)};
@@ -183,6 +185,7 @@ function render(){
  const total=summary(),stats=el("div","d5-stats",null,page);
  for(const [v,label,id] of [[total.done+"/5",t().done,""],[total.points+"/500",t().points,""],[total.streak+" 🔥",t().streak,""],[timer(),t().reset,"d5-clock"]]){const item=el("div","d5-stat",null,stats);const number=el("strong","",v,item);if(id)number.id=id;el("small","",label,item)}
  const progress=el("div","d5-progress",null,page);progress.setAttribute("role","progressbar");progress.setAttribute("aria-valuenow",String(total.done));progress.setAttribute("aria-valuemax","5");el("div","",null,progress).style.width=(total.done*20)+"%";
+ if(total.streak>=3){const rank=total.streak>=30?"Silkroad Legend":total.streak>=7?"Unique Hunter":"Daily Adventurer";el("p","d5-achievement","🏅 "+rank+" • "+total.streak+" "+(locale()==="hu"?"napos sorozat":"day streak"),page)}
  const controls=el("div","d5-controls",null,page);
  btn(t().daily,controls,()=>{practice=false;render()},practice?"d5-button subtle":"d5-button");
  btn(t().practice,controls,()=>{practice=true;render()},practice?"d5-button":"d5-button subtle");
