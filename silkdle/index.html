@@ -4,8 +4,9 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <meta name="theme-color" content="#081015"/>
-<meta name="description" content="Silkdle – ingyenes Silkroad Online Chinese és European napi kvízjáték.">
-<title>Silkdle • The Silkroad Quiz</title>
+<meta name="description" content="Silkdle – öt napi Silkroad Online feladvány: Classic, Item & Skill, Splash, Quest és Emoji. Chinese + European kvízjáték.">
+<title>Silkdle • Five Daily Silkroad Challenges</title>
+<link rel="stylesheet" href="./daily-five.css">
 <style>
 :root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:#e8f4ed;background:#071014;--panel:#101e22;--edge:#2b4445;--muted:#8fa8a5;--green:#58d3a1;--gold:#d4aa63;--red:#ff8a90}
 *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 80% 0%,#174036 0%,transparent 45%),radial-gradient(ellipse at 0% 70%,#172a35,transparent 45%),#071014}
@@ -77,7 +78,7 @@ h2{font-size:1.65rem;letter-spacing:-.5px;margin:7px 0}.hint{color:#b1c5be;line-
 <section class="modegrid" id="modes"></section>
 <section class="panel" id="panel" aria-live="polite"></section>
 </main>
-<footer class="wrap foot">Silkdle – független rajongói projekt, nem hivatalos Silkroad Online termék. <span id="footnote">Béta: mintakérdések, helyi mentés. Képes feladványok és globális ranglista későbbi verzióban.</span></footer>
+<footer class="wrap foot">Silkdle – független rajongói projekt, nem hivatalos Silkroad Online termék. <span id="footnote">Napi ötös mód • helyben mentett haladás • a globális ranglista külön szolgáltatás.</span></footer>
 <script src="./hard-quiz.js"></script>
 <script>
 "use strict";
@@ -139,6 +140,7 @@ const items={
   {name:"Roc Mountain",world:"all",region:"Region",clue:{hu:"Magas szintű szörnyek és Demon Shaitan térsége",en:"High-level enemies and Demon Shaitan"},detail:{hu:"Hegyi régió",en:"Mountain area"}}
  ]
 };
+window.SILKDLE_CORE_ITEMS=items;
 const quiz=[
  {w:"Chinese",hu:"Melyik kínai mastery fegyvere a Bow?",en:"Which Chinese mastery uses the Bow?",o:["Bicheon","Heuksal","Pacheon","Force"],a:2},
  {w:"Chinese",hu:"Hányas szintű a Tiger Girl unique a klasszikus Silkroadban?",en:"What level is Tiger Girl in classic Silkroad?",o:["20","24","30","40"],a:0},
@@ -294,6 +296,7 @@ restore();renderShell();
 </script>
 <script src="./web-image-sources.js" defer></script>
 <script src="./offline-gallery.js" defer></script>
+<script src="./daily-five.js" defer></script>
 <script src="./race.js" defer></script>
 </body>
 </html>
